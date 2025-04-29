@@ -58,6 +58,7 @@ text = "Resources Script Path:"
 
 [node name="Text Box" type="LineEdit" parent="Tabs/Configure/Resources Path"]
 layout_mode = 2
+text = "res://Examples/PKResources.gd"
 placeholder_text = "Enter path to Script..."
 max_length = 80
 expand_to_text_length = true
@@ -88,6 +89,7 @@ text = "(Max Char: 10)"
 autowrap_mode = 2
 
 [node name="Warning Tag" type="HBoxContainer" parent="Tabs/Configure"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 10
@@ -140,17 +142,23 @@ layout_mode = 2
 bbcode_enabled = true
 text = "You will need to write your expressions in the Node's \"Editor Description\" property. To define an expression line (a line that will be parsed by PowerKey), start the line with the \"Activation Phrase\" (defined in the Configure tab, by default: \"@\"), then directly after the Activation Phrase, insert an Expression Type.
 
-Depending on the Expression Type, you may or may not have to specify a property name to apply the translation to. To specify a property to translate, insert a colon after the Expression Type followed by the property name.
+[font_size=30]A (Assign) Expression Type:[/font_size]
+This expression type is very limiting & can only be used to assign a value from the Resources Script to a Node's property. You cannot access a property from any Variant other than a Dictionary or Object & you cannot call functions/methods. You cannot run code of any kind with this, but in return, PowerKey skips over any invalid expression & will only print errors instead of stopping the whole project & crashing it.
+[b]Correct Usage:[/b]
+[ul] @A:text some_string
+ @A:text my_strings.this_one
+ @A:label_settings some_label_settings_resource
+[/ul][b]Incorrect Usage:[/b]
+[ul] @A:text my_strings[0]
+ @A:text get_random_string()
+ @A some_value[/ul]
 
-Finally, insert a space to separate the Expression Parameters & the Translation Key. To specify the Translation Key, simply access the variable in your Resources Script (defined in the Configure tab), prefixed with \"PK.\".
-
-[b]Example:[/b] @A:text PK.some_random_string
-In this example, we define the Activation Phrase (\"@\"), then we define the Expression Type (in this case, we use the Assign type: \"A\"), then we define the property we want to assign our translation to (\"text\"), and finally we access the variable defined in our Resources Script.
-This example expression will assign \"PK.some_random_string\" to the node's \"text\" property, so for example if the node were a Label node, it would update the text on the Label.
-
-[font_size=30]Expression Types:[/font_size]
-[ul] [b]A (Assign): [/b]Takes one parameter. Applies the translation to the provided property name of the Node.
- [b]E (Eval):[/b] Takes NO parameters. Runs a GDScript line on the Node."
+[font_size=30]E (Eval) Expression Type:[/font_size]
+This expression type just lets you do whatever you wan't, AT YOUR OWN RISK. Your project WILL crash if you use invalid code or have missing variables. That said, this expression type does give you unlimited freedom to run any GDScript code. With this you can call functions, set values on the Node, & do complex logic if you wanted to. [b]However[/b], to access variables from the Resources Script, you will need to prefix any variable names with \"PK.\".
+[b]Correct Usage:[/b]
+[ul] @E print('hello world')
+ @E self.text = PK.some_string
+ @E var a := self.some_variable; print(a)"
 metadata/_tab_index = 1
 
 [node name="Getting Started" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
@@ -169,5 +177,6 @@ Read through the \"Expressions\" guide page to understand how expressions work a
 metadata/_tab_index = 2
 
 [connection signal="tab_changed" from="Top Bar/Tab Bar" to="." method="_on_tab_bar_tab_changed"]
+[connection signal="pressed" from="Top Bar/Button Github" to="." method="_on_button_github_pressed"]
 [connection signal="text_submitted" from="Tabs/Configure/Resources Path/Text Box" to="." method="_on_resources_script_path_text_submitted"]
 [connection signal="text_submitted" from="Tabs/Configure/Activation Phrase/Text Box" to="." method="_on_activation_phrase_text_submitted"]
