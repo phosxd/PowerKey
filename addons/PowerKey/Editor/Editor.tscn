@@ -1,0 +1,173 @@
+[gd_scene load_steps=5 format=3 uid="uid://dq2ev084rdi4r"]
+
+[ext_resource type="Script" uid="uid://dukqioilv2187" path="res://addons/PowerKey/Editor/Editor.gd" id="1_1jgx6"]
+[ext_resource type="Texture2D" uid="uid://cj6hwjccreqr7" path="res://addons/PowerKey/github.svg" id="1_sgcgi"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_1jgx6"]
+font_size = 32
+shadow_size = 3
+shadow_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_fjtuu"]
+font_color = Color(1, 0, 0, 1)
+
+[node name="Editor" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_1jgx6")
+
+[node name="Top Bar" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Tab Bar" type="TabBar" parent="Top Bar"]
+layout_mode = 2
+current_tab = 0
+clip_tabs = false
+scrolling_enabled = false
+tab_count = 2
+tab_0/title = "Configure"
+tab_1/title = "Guide"
+
+[node name="Button Github" type="Button" parent="Top Bar"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_constants/icon_max_width = 23
+icon = ExtResource("1_sgcgi")
+
+[node name="Tabs" type="TabContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+tabs_visible = false
+
+[node name="Configure" type="VBoxContainer" parent="Tabs"]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="Resources Path" type="HBoxContainer" parent="Tabs/Configure"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Tabs/Configure/Resources Path"]
+layout_mode = 2
+text = "Resources Script Path:"
+
+[node name="Text Box" type="LineEdit" parent="Tabs/Configure/Resources Path"]
+layout_mode = 2
+placeholder_text = "Enter path to Script..."
+max_length = 80
+expand_to_text_length = true
+
+[node name="Max Char" type="Label" parent="Tabs/Configure/Resources Path"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "(Max Char: 80)"
+autowrap_mode = 2
+
+[node name="Activation Phrase" type="HBoxContainer" parent="Tabs/Configure"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Tabs/Configure/Activation Phrase"]
+layout_mode = 2
+text = "Activation Phrase:"
+
+[node name="Text Box" type="LineEdit" parent="Tabs/Configure/Activation Phrase"]
+layout_mode = 2
+text = "@"
+max_length = 10
+expand_to_text_length = true
+
+[node name="Max Char" type="Label" parent="Tabs/Configure/Activation Phrase"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "(Max Char: 10)"
+autowrap_mode = 2
+
+[node name="Warning Tag" type="HBoxContainer" parent="Tabs/Configure"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 10
+
+[node name="Icon" type="CenterContainer" parent="Tabs/Configure/Warning Tag"]
+layout_mode = 2
+
+[node name="Background" type="ColorRect" parent="Tabs/Configure/Warning Tag/Icon"]
+custom_minimum_size = Vector2(30, 35)
+layout_mode = 2
+color = Color(0.6881, 0.170417, 0.158828, 1)
+
+[node name="Subject" type="Label" parent="Tabs/Configure/Warning Tag/Icon"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "!"
+label_settings = SubResource("LabelSettings_1jgx6")
+
+[node name="Label 1" type="Label" parent="Tabs/Configure/Warning Tag"]
+layout_mode = 2
+text = "Resources Script Path not found."
+label_settings = SubResource("LabelSettings_fjtuu")
+
+[node name="Guide" type="VBoxContainer" parent="Tabs"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="Tabs" type="TabContainer" parent="Tabs/Guide"]
+layout_mode = 2
+size_flags_vertical = 3
+tab_alignment = 1
+current_tab = 0
+
+[node name="About" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "PowerKey is a more intuitive solution to translating text & properties. With this, you can define variables in a Script to be read by PowerKey & assigned to a Node's property accordingly during runtime.
+
+If you have any questions not answered by the Guide, you are free to ask in my [color=royal_blue][url=https://dsc.gg/sohp]Discord Server[/url][/color]. If you wan't to contribute or report any issues, do that in the [color=beige][url=https://github.com/phosxd/PowerKey]Github Repo[/url][/color].
+
+[font_size=30]Why does this exist?[/font_size]
+While developing various projects I found it tedious to attach a new script if I wanted to dynamically change a Node's property or text. This plugin makes it easy by letting you use a single script to apply translations & small-eval-statements to unlimited Node's."
+metadata/_tab_index = 0
+
+[node name="Expressions" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
+visible = false
+layout_mode = 2
+bbcode_enabled = true
+text = "You will need to write your expressions in the Node's \"Editor Description\" property. To define an expression line (a line that will be parsed by PowerKey), start the line with the \"Activation Phrase\" (defined in the Configure tab, by default: \"@\"), then directly after the Activation Phrase, insert an Expression Type.
+
+Depending on the Expression Type, you may or may not have to specify a property name to apply the translation to. To specify a property to translate, insert a colon after the Expression Type followed by the property name.
+
+Finally, insert a space to separate the Expression Parameters & the Translation Key. To specify the Translation Key, simply access the variable in your Resources Script (defined in the Configure tab), prefixed with \"PK.\".
+
+[b]Example:[/b] @A:text PK.some_random_string
+In this example, we define the Activation Phrase (\"@\"), then we define the Expression Type (in this case, we use the Assign type: \"A\"), then we define the property we want to assign our translation to (\"text\"), and finally we access the variable defined in our Resources Script.
+This example expression will assign \"PK.some_random_string\" to the node's \"text\" property, so for example if the node were a Label node, it would update the text on the Label.
+
+[font_size=30]Expression Types:[/font_size]
+[ul] [b]A (Assign): [/b]Takes one parameter. Applies the translation to the provided property name of the Node.
+ [b]E (Eval):[/b] Takes NO parameters. Runs a GDScript line on the Node."
+metadata/_tab_index = 1
+
+[node name="Getting Started" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
+visible = false
+layout_mode = 2
+bbcode_enabled = true
+text = "[font_size=30]Assigning a Script:[/font_size]
+To use PowerKey, you will need to create a GDScript file to hold all your variables.
+[ol] Create a new GDScript file or generate a new one in the \"Configure\" tab.
+ In your Script, preload any & all resources you plan to use.
+ Copy your Script file's path then paste it into the \"Resource Script Path\" text box.
+ All done! Now you can access all variables defined in that script.[/ol]
+
+[font_size=30]Writing an Expression:[/font_size]
+Read through the \"Expressions\" guide page to understand how expressions work and how to implement them. If you still don't understand how everything works, please take a look at some examples located in the PowerKey addon directory."
+metadata/_tab_index = 2
+
+[connection signal="tab_changed" from="Top Bar/Tab Bar" to="." method="_on_tab_bar_tab_changed"]
+[connection signal="text_submitted" from="Tabs/Configure/Resources Path/Text Box" to="." method="_on_resources_script_path_text_submitted"]
+[connection signal="text_submitted" from="Tabs/Configure/Activation Phrase/Text Box" to="." method="_on_activation_phrase_text_submitted"]
