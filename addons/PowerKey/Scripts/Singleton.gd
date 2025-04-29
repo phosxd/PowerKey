@@ -16,14 +16,45 @@ const Errors := {
 }
 @onready var PKConfig := PK_Config.new()
 @onready var Config := PKConfig.load_config()
-@onready var Resources = load(Config.resources_script_path) if FileAccess.file_exists(Config.resources_script_path) else {}
+@onready var Resources_script = load(Config.resources_script_path) if FileAccess.file_exists(Config.resources_script_path) else null
+var Resources
 
 
 func _ready() -> void:
-	hook_onto_nodes() # Hook onto all nodes currently in the tree.
-	get_tree().node_added.connect(hook_node) # Hook every new node.
+	# Add script to a Node, to call "_ready". & set Resources to new node.
+	if Resources_script is Script:
+		var new_node := Node.new()
+		new_node.set_script(Resources_script)
+		new_node.call('_ready')
+		Resources = new_node
+	# If no script, set Resources to empty Dictionary.
+	else:
+		Resources = {}
+	# Setup hook.
+	_hook_onto_nodes() # Hook onto all nodes currently in the tree.
+	get_tree().node_added.connect(evaluate_node_tree) # Hook every new node.
 
 
+
+
+
+# Useful functions.
+# -----------------
+func evaluate_node_tree(node:Node) -> void: ## Recursively evaluates all Nodes under the given Node.
+	_recursive(node, func(_node:Node) -> void:
+		evaluate_node(_node)
+	)
+
+func evaluate_node(node:Node) -> void: ## Evaluates PKExpressions present on the Node.
+	var editor_desc := node.editor_description
+	var lines := editor_desc.split('\n')
+	for line in lines:
+		if not line.begins_with(Config.activation_phrase): continue
+		# Parse & process PKExpression.
+		var text := line.trim_prefix(Config.activation_phrase)
+		var parsed = _parse_pkexp(text)
+		if parsed: _process_pkexp(node, line, parsed)
+		else: printerr(Errors.pkexp_failed % [line,node.name])
 
 
 
@@ -31,7 +62,7 @@ func _ready() -> void:
 
 # PKExpression functions.
 # -----------------------
-func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expression details. Returns null if invalid expression.
+func _parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expression details. Returns null if invalid expression.
 	var invalid := false
 	var expression_type:String
 	var property_name:String
@@ -110,7 +141,7 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 
 
 
-func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void: ## Executes a parsed PowerKey expression on the Node.
+func _process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void: ## Executes a parsed PowerKey expression on the Node.
 	var split_content = parsed.content.split('.')
 	# Assign expression.
 	if parsed.type == ExpTypes.assign:
@@ -147,23 +178,10 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 
 # Hook methods.
 # -------------
-func hook_onto_nodes() -> void: ## Hook to all nodes in the tree.
-	recursive(get_tree().root, func(node:Node) -> void:
-		hook_node(node)
-	)
+func _hook_onto_nodes() -> void: ## Hook to all nodes in the project.
+	evaluate_node_tree(get_tree().root)
 
-func hook_node(node:Node) -> void: ## Hook a node.
-	var editor_desc := node.editor_description
-	var lines := editor_desc.split('\n')
-	for line in lines:
-		if not line.begins_with(Config.activation_phrase): continue
-		# Parse & process PKExpression.
-		var text := line.trim_prefix(Config.activation_phrase)
-		var parsed = parse_pkexp(text)
-		if parsed: process_pkexp(node, line, parsed)
-		else: printerr(Errors.pkexp_failed % [line,node.name])
-
-func recursive(node:Node, callback:Callable) -> void:
+func _recursive(node:Node, callback:Callable) -> void:
 	for child in node.get_children():
 		callback.call(child)
-		recursive(child,callback)
+		_recursive(child,callback)

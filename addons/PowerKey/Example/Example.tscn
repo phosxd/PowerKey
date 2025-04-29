@@ -8,9 +8,11 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Title A" type="Label" parent="."]
-editor_description = "@A:text titles.a"
+editor_description = "@A:text titles.a
+@A:label_settings title_label_settings"
 layout_mode = 2
 
 [node name="Title B" type="Label" parent="."]
-editor_description = "@A:text titles.b"
+editor_description = "@A:text titles.b
+@A:label_settings title_label_settings"
 layout_mode = 2
