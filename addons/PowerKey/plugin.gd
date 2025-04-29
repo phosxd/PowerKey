@@ -32,4 +32,4 @@ func _get_plugin_name():
 	return 'PowerKey'
 
 func _get_plugin_icon() -> Texture2D:
-	return Texture2D.new()
+	return Icon
