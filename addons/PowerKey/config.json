@@ -1,1 +1,4 @@
-{ "resources_script_path": "res://Examples/PKResources.gd", "activation_phrase": "@" }
+{
+	"resources_script_path": "res://addons/PowerKey/Example/PKResources.gd",
+	"activation_phrase": "@"
+}

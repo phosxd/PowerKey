@@ -42,6 +42,8 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 	
 	for char in text:
 		if stage == 'expression_type':
+			# Add to buffer.
+			buffer += char
 			# Set expression type.
 			if not expression_type:
 				for type in ExpTypes.values():
@@ -51,23 +53,20 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 						buffer = ''
 						expecting_flag = 0
 						break
-			# Add to buffer.
-			buffer += char
 		
 		elif stage == 'look_for_property_name':
+			# Add to buffer.
+			buffer += char
 			# Progress to property_name stage.
 			if buffer == Property_name_requester_token:
 				stage = 'property_name'
-				buffer = char
+				buffer = ''
 				expecting_flag = 0
 			# Progress to translation_key stage.
 			elif char == ' ':
 				stage = 'content'
 				buffer = ''
 				expecting_flag = 0
-			# Add to buffer.
-			else:
-				buffer += char
 		
 		elif stage == 'property_name':
 			# Progress to translation_key stage.
@@ -77,11 +76,11 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 				buffer = ''
 				expecting_flag = 0
 			# Throw error if invalid start of property name.
-			elif expecting_flag == 0 && buffer.length() > 1:
+			elif expecting_flag == 0 && char.to_lower() not in Valid_property_name_starting_characters:
 				invalid = true
 				break
 			# Throw error if invalid character.
-			elif char not in Valid_property_name_starting_characters:
+			elif char.to_lower() not in Valid_property_name_characters:
 				invalid = true
 				break
 			# Look for start of property name.
@@ -157,9 +156,12 @@ func hook_node(node:Node) -> void: ## Hook a node.
 	var editor_desc := node.editor_description
 	var lines := editor_desc.split('\n')
 	for line in lines:
+		if not line.begins_with(Config.activation_phrase): continue
+		# Parse & process PKExpression.
 		var text := line.trim_prefix(Config.activation_phrase)
 		var parsed = parse_pkexp(text)
 		if parsed: process_pkexp(node, line, parsed)
+		else: printerr(Errors.pkexp_failed % [line,node.name])
 
 func recursive(node:Node, callback:Callable) -> void:
 	for child in node.get_children():
