@@ -33,9 +33,13 @@ tab_count = 2
 tab_0/title = "Configure"
 tab_1/title = "Guide"
 
-[node name="Button Github" type="Button" parent="Top Bar"]
+[node name="Version" type="Label" parent="Top Bar"]
 layout_mode = 2
 size_flags_horizontal = 10
+text = "v1.1.0"
+
+[node name="Button Github" type="Button" parent="Top Bar"]
+layout_mode = 2
 theme_override_constants/icon_max_width = 23
 icon = ExtResource("1_sgcgi")
 
@@ -67,25 +71,6 @@ expand_to_text_length = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "(Max Char: 80)"
-autowrap_mode = 2
-
-[node name="Activation Phrase" type="HBoxContainer" parent="Tabs/Configure"]
-layout_mode = 2
-
-[node name="Title" type="Label" parent="Tabs/Configure/Activation Phrase"]
-layout_mode = 2
-text = "Activation Phrase:"
-
-[node name="Text Box" type="LineEdit" parent="Tabs/Configure/Activation Phrase"]
-layout_mode = 2
-text = "@"
-max_length = 10
-expand_to_text_length = true
-
-[node name="Max Char" type="Label" parent="Tabs/Configure/Activation Phrase"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "(Max Char: 10)"
 autowrap_mode = 2
 
 [node name="Warning Tag" type="HBoxContainer" parent="Tabs/Configure"]
@@ -155,25 +140,27 @@ metadata/_tab_index = 1
 visible = false
 layout_mode = 2
 bbcode_enabled = true
-text = "You will need to write your expressions in the Node's \"Editor Description\" property. To define an expression line (a line that will be parsed by PowerKey), start the line with the \"Activation Phrase\" (defined in the Configure tab, by default: \"@\"), then directly after the Activation Phrase, insert an Expression Type.
+text = "When you activated PowerKey in your project, it added a custom \"PKExpressions\" dropdown in the Node Inspector. Navigate to the \"PKExpressions\" dropdown located under the \"Node\" category. Now expanding the dropdown will show a text field where you can enter all your expressions. A PKExpression line should always start with the Expression Type.
+
+I am working to add UI in the Node Inspector to make everything simpler & completely remove the need for a parser. You will be able to just click a button to add a new expression, select its type, then change it's parameters accordingly.
 
 [font_size=30]A (Assign) Expression Type:[/font_size]
 This expression type is very limiting & can only be used to assign a value from the Resources Script to a Node's property. You cannot access a property from any Variant other than a Dictionary or Object & you cannot call functions/methods. You cannot run code of any kind with this, but in return, PowerKey skips over any invalid expression & will only print errors instead of stopping the whole project & crashing it.
 [b]Correct Usage:[/b]
-[ul] @A:text some_string
- @A:text my_strings.this_one
- @A:label_settings some_label_settings_resource
+[ul] A:text some_string
+ A:text my_strings.this_one
+ A:label_settings some_label_settings_resource
 [/ul][b]Incorrect Usage:[/b]
-[ul] @A:text my_strings[0]
- @A:text get_random_string()
- @A some_value[/ul]
+[ul] A:text my_strings[0]
+ A:text get_random_string()
+ A some_value[/ul]
 
 [font_size=30]E (Eval) Expression Type:[/font_size]
-This expression type just lets you do whatever you wan't, AT YOUR OWN RISK. Your project WILL crash if you use invalid code or have missing variables. That said, this expression type does give you unlimited freedom to run any GDScript code. With this you can call functions, set values on the Node, & do complex logic if you wanted to. [b]However[/b], to access variables from the Resources Script, you will need to prefix any variable names with \"PK.\".
+This expression type just lets you do whatever you wan't, AT YOUR OWN RISK. Your project WILL crash if you use invalid code or have missing variables. That said, this expression type does give you unlimited freedom to run any GDScript code. With this you can call functions, set values on the Node, & do complex logic if you wanted to. [b]However[/b], to access variables from the Resources Script, you will need to prefix any variable names with \"PK.\". To access the Node, instead of using \"self\", use \"S\".
 [b]Correct Usage:[/b]
-[ul] @E print('hello world')
- @E self.text = PK.some_string
- @E var a := self.some_variable; print(a)"
+[ul] E print('hello world')
+ E S.text = PK.some_string
+ E var a := self.some_variable; print(a)"
 metadata/_tab_index = 2
 
 [node name="Advanced" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
@@ -191,4 +178,3 @@ metadata/_tab_index = 3
 [connection signal="tab_changed" from="Top Bar/Tab Bar" to="." method="_on_tab_bar_tab_changed"]
 [connection signal="pressed" from="Top Bar/Button Github" to="." method="_on_button_github_pressed"]
 [connection signal="text_submitted" from="Tabs/Configure/Resources Path/Text Box" to="." method="_on_resources_script_path_text_submitted"]
-[connection signal="text_submitted" from="Tabs/Configure/Activation Phrase/Text Box" to="." method="_on_activation_phrase_text_submitted"]

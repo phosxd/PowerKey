@@ -1,23 +1,38 @@
 @tool
 extends EditorPlugin
 const Icon := preload('res://addons/PowerKey/icon.svg')
+const EditorInspectorPlugin_ := preload('res://addons/PowerKey/Scripts/EditorInspectorPlugin.gd')
+var EditorInspectorPlugin_instance:EditorInspectorPlugin
 const PowerKey_editor_tscn := preload('res://addons/PowerKey/Editor/Editor.tscn')
-var PowerKey_editor_instance: Control
+var PowerKey_editor_instance:Control
 
 
 func _enter_tree() -> void:
-	# Add PowerKey to Godot editor.
+	# Add InspectorPlugin.
+	EditorInspectorPlugin_instance = EditorInspectorPlugin_.new()
+	add_inspector_plugin(EditorInspectorPlugin_instance)
+	
+	# Enable singleton that will run when running the project.
+	add_autoload_singleton('PowerKey', 'res://addons/PowerKey/Scripts/Singleton.gd')
+	
+	# Add PowerKey Editor menu to Godot editor.
 	PowerKey_editor_instance = PowerKey_editor_tscn.instantiate()
 	EditorInterface.get_editor_main_screen().add_child(PowerKey_editor_instance)
 	_make_visible(false)
-	# Enable singleton that will run when running the project.
-	add_autoload_singleton('PowerKey', 'res://addons/PowerKey/Scripts/Singleton.gd')
+
 
 func _exit_tree() -> void:
-	if PowerKey_editor_instance:
-		PowerKey_editor_instance.queue_free()
+	# Remove InspectorPlugin
+	remove_inspector_plugin(EditorInspectorPlugin_instance)
+	
 	# Remove singleton, when addon removed.
 	remove_autoload_singleton('PowerKey')
+	
+	# Remove PowerKey Editor menu.
+	if PowerKey_editor_instance:
+		PowerKey_editor_instance.queue_free()
+
+
 
 
 

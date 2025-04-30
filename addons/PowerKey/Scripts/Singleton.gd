@@ -46,10 +46,10 @@ func evaluate_node_tree(node:Node) -> void: ## Recursively evaluates all Nodes u
 	)
 
 func evaluate_node(node:Node) -> void: ## Evaluates PKExpressions present on the Node.
-	var editor_desc := node.editor_description
-	var lines := editor_desc.split('\n')
+	var pkexpressions = node.get_meta('PKExpressions', false)
+	if not pkexpressions: return
+	var lines:PackedStringArray = pkexpressions.split('\n')
 	for line in lines:
-		if not line.begins_with(Config.activation_phrase): continue
 		# Parse & process PKExpression.
 		var text := line.trim_prefix(Config.activation_phrase)
 		var parsed = _parse_pkexp(text)

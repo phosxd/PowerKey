@@ -7,11 +7,9 @@ const errors := {
 }
 const default_config_data := """{
 	\"resources_script_path\": \"\",
-	\"activation_phrase\": \"@\",
 }"""
 const required_config_pairs := {
 	'resources_script_path': '',
-	'activation_phrase': '',
 }
 
 

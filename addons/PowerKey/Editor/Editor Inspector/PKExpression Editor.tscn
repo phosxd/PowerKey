@@ -1,0 +1,74 @@
+[gd_scene load_steps=6 format=3 uid="uid://cklwwr4htvoa0"]
+
+[ext_resource type="Script" uid="uid://cl53u7hsjfh00" path="res://addons/PowerKey/Editor/Editor Inspector/PKExpression Editor.gd" id="1_hvuxj"]
+[ext_resource type="Texture2D" uid="uid://1um78pocay0q" path="res://addons/PowerKey/Editor/Editor Inspector/collapsed.svg" id="2_m5lue"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hvuxj"]
+bg_color = Color(0.329412, 0.305882, 0.427451, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_hvuxj"]
+font_size = 12
+font_color = Color(0.800491, 0.800491, 0.800491, 1)
+outline_size = 2
+outline_color = Color(0.8, 0.8, 0.8, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hvuxj"]
+
+[node name="PKExpression Editor" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hvuxj")
+
+[node name="Dropdown Button Panel" type="PanelContainer" parent="."]
+layout_mode = 2
+tooltip_text = "PowerKey Expressions"
+theme_override_styles/panel = SubResource("StyleBoxFlat_hvuxj")
+
+[node name="Visuals" type="HBoxContainer" parent="Dropdown Button Panel"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Icon" type="TextureRect" parent="Dropdown Button Panel/Visuals"]
+layout_mode = 2
+texture = ExtResource("2_m5lue")
+stretch_mode = 3
+
+[node name="Label" type="Label" parent="Dropdown Button Panel/Visuals"]
+layout_mode = 2
+text = "PKExpressions"
+label_settings = SubResource("LabelSettings_hvuxj")
+
+[node name="Button" type="Button" parent="Dropdown Button Panel"]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_hvuxj")
+flat = true
+alignment = 0
+
+[node name="Content" type="HBoxContainer" parent="."]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Indent" type="VSeparator" parent="Content"]
+self_modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(12, 0)
+layout_mode = 2
+
+[node name="Items" type="VBoxContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TextEdit" type="TextEdit" parent="Content/Items"]
+clip_contents = false
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "View the PowerKey guide for more information. Separate each expression with a new line."
+placeholder_text = "Enter PKExpressions here..."
+scroll_smooth = true
+
+[connection signal="pressed" from="Dropdown Button Panel/Button" to="." method="_on_dropdown_button_pressed"]
+[connection signal="text_changed" from="Content/Items/TextEdit" to="." method="_on_text_edit_text_changed"]
