@@ -12,7 +12,7 @@ config_version=5
 
 config/name="PowerKey"
 config/features=PackedStringArray("4.4", "GL Compatibility")
-config/icon="uid://b78p0lr4jvhko"
+config/icon="uid://cbk5fbrx1vy8w"
 
 [autoload]
 

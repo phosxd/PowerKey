@@ -16,3 +16,7 @@ layout_mode = 2
 editor_description = "@A:text titles.b
 @A:label_settings title_label_settings"
 layout_mode = 2
+
+[node name="Label C" type="Label" parent="."]
+editor_description = "@E S.text = 'Random Generated Number: %s' % randi_range(10000,99999)"
+layout_mode = 2
