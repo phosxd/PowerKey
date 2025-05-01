@@ -7,7 +7,7 @@
 bg_color = Color(0.329412, 0.305882, 0.427451, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_hvuxj"]
-font_size = 12
+font_size = 13
 font_color = Color(0.800491, 0.800491, 0.800491, 1)
 outline_size = 2
 outline_color = Color(0.8, 0.8, 0.8, 1)
@@ -61,7 +61,8 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="TextEdit" type="TextEdit" parent="Content/Items"]
+[node name="Text Editor" type="TextEdit" parent="Content/Items"]
+unique_name_in_owner = true
 clip_contents = false
 custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
@@ -69,6 +70,19 @@ size_flags_horizontal = 3
 tooltip_text = "View the PowerKey guide for more information. Separate each expression with a new line."
 placeholder_text = "Enter PKExpressions here..."
 scroll_smooth = true
+caret_blink = true
+caret_multiple = false
+draw_tabs = true
 
-[connection signal="pressed" from="Dropdown Button Panel/Button" to="." method="_on_dropdown_button_pressed"]
-[connection signal="text_changed" from="Content/Items/TextEdit" to="." method="_on_text_edit_text_changed"]
+[node name="Validation" type="PanelContainer" parent="Content/Items"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Content/Items/Validation"]
+layout_mode = 2
+text = "Looks good! No parsing errors found."
+autowrap_mode = 2
+metadata/PKExpressions = "A:text me
+E this"
+
+[connection signal="button_down" from="Dropdown Button Panel/Button" to="." method="_on_dropdown_button_down"]
+[connection signal="text_changed" from="Content/Items/Text Editor" to="." method="_on_text_editor_text_changed"]

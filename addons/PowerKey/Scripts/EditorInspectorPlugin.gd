@@ -1,6 +1,7 @@
 extends EditorInspectorPlugin
 const PKExpression_Editor := preload('res://addons/PowerKey/Editor/Editor Inspector/PKExpression Editor.tscn')
 
+
 func _can_handle(object:Object) -> bool:
 	return true if object is Node else false # Return true if is a Node.
 
@@ -12,8 +13,13 @@ func _parse_category(object:Object, category:String) -> void:
 		if pk_expressions:
 			PKExpEditor_instance.init(pk_expressions)
 		# On PKExp Editor sends update signal, update the Node.
-		PKExpEditor_instance.on_update.connect(func(raw_lines:String) -> void:
-			object.set_meta('PKExpressions', raw_lines)
+		PKExpEditor_instance.on_update.connect(func(pk_expressions:String) -> void:
+			# If not empty, set meta.
+			if pk_expressions.length() > 0:
+				object.set_meta('PKExpressions', pk_expressions)
+			# If empty, remove meta.
+			else:
+				object.remove_meta('PKExpressions')
 		)
 		# Add PKExpression Editor to the inspector for this Node.
 		self.add_custom_control(PKExpEditor_instance)
