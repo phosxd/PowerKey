@@ -106,7 +106,7 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 
 
 
-func _process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void: ## Executes a parsed PowerKey expression on the Node.
+func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void: ## Executes a parsed PowerKey expression on the Node.
 	var split_content = parsed.content.split('.')
 	# Assign expression.
 	if parsed.type == ExpTypes.assign:

@@ -52,8 +52,7 @@ func evaluate_node(node:Node) -> void: ## Evaluates PKExpressions present on the
 	var lines:PackedStringArray = pkexpressions.split('\n')
 	for line in lines:
 		# Parse & process PKExpression.
-		var text := line.trim_prefix(Config.activation_phrase)
-		var parsed = Parser.parse_pkexp(text)
+		var parsed = Parser.parse_pkexp(line)
 		if parsed: Parser.process_pkexp(node, line, parsed)
 		else: printerr(Errors.pkexp_failed % [line,node.name])
 
