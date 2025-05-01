@@ -24,7 +24,6 @@ script = ExtResource("1_hvuxj")
 
 [node name="Dropdown Button Panel" type="PanelContainer" parent="."]
 layout_mode = 2
-tooltip_text = "PowerKey Expressions"
 theme_override_styles/panel = SubResource("StyleBoxFlat_hvuxj")
 
 [node name="Visuals" type="HBoxContainer" parent="Dropdown Button Panel"]
@@ -43,6 +42,7 @@ label_settings = SubResource("LabelSettings_hvuxj")
 
 [node name="Button" type="Button" parent="Dropdown Button Panel"]
 layout_mode = 2
+tooltip_text = "PKExpressions"
 theme_override_styles/focus = SubResource("StyleBoxEmpty_hvuxj")
 flat = true
 alignment = 0
@@ -67,7 +67,7 @@ clip_contents = false
 custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "View the PowerKey guide for more information. Separate each expression with a new line."
+tooltip_text = "PowerKey Expressions. Separate each expression with a new line."
 placeholder_text = "Enter PKExpressions here..."
 scroll_smooth = true
 caret_blink = true

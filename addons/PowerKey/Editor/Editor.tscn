@@ -73,6 +73,18 @@ size_flags_horizontal = 3
 text = "(Max Char: 80)"
 autowrap_mode = 2
 
+[node name="Automatic Refreshing" type="HBoxContainer" parent="Tabs/Configure"]
+visible = false
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Tabs/Configure/Automatic Refreshing"]
+layout_mode = 2
+text = "Automatic Refreshing:"
+
+[node name="Toggle" type="CheckButton" parent="Tabs/Configure/Automatic Refreshing"]
+layout_mode = 2
+button_pressed = true
+
 [node name="Warning Tag" type="HBoxContainer" parent="Tabs/Configure"]
 visible = false
 layout_mode = 2
