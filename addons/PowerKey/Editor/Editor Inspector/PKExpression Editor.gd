@@ -46,8 +46,14 @@ func _on_dropdown_button_down() -> void:
 
 
 func _on_text_editor_text_changed() -> void:
+	# Update current PKExpressions.
 	PKExpressions = %'Text Editor'.text
 	on_update.emit(PKExpressions)
+	
+	# Ensure dropdown is expanded when typing.
+	if not expanded:
+		_on_dropdown_button_down()
+	
 	# Reset line color for first line.
 	%'Text Editor'.set_line_background_color(0, Color(0,0,0,0))
 	# Validate expressions, if not empty.

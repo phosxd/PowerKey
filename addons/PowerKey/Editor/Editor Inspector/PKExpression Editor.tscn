@@ -81,8 +81,6 @@ layout_mode = 2
 layout_mode = 2
 text = "Looks good! No parsing errors found."
 autowrap_mode = 2
-metadata/PKExpressions = "A:text me
-E this"
 
 [connection signal="button_down" from="Dropdown Button Panel/Button" to="." method="_on_dropdown_button_down"]
 [connection signal="text_changed" from="Content/Items/Text Editor" to="." method="_on_text_editor_text_changed"]
