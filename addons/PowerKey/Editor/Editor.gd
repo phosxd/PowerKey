@@ -46,3 +46,6 @@ func _on_resources_script_path_text_submitted(new_text:String) -> void:
 
 func _on_button_github_pressed() -> void:
 	OS.shell_open('https://github.com/phosxd/PowerKey')
+
+func _on_debug_option_1_toggled(toggled_on:bool) -> void:
+	Config.update_config('debug_print_any_pkexpression_processed', toggled_on)

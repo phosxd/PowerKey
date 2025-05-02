@@ -1,7 +1,7 @@
 class_name PK_Parser extends Node
 const ExpTypes := {
 	'assign': 'A',
-	'eval': 'E',
+	'exec': 'E',
 }
 const Property_name_requester_token := ':'
 const Valid_property_name_characters := 'abcdefghijklmnopqrstuvwxyz0123456789_.'
@@ -107,6 +107,9 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 
 
 func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void: ## Executes a parsed PowerKey expression on the Node.
+	# Debug printing.
+	if Config.debug_print_any_pkexpression_processed:
+		print_rich('[b][color=gold]PowerKey Debug:[/color][/b] Now processing expression "[color=tomato]%s[/color]" on Node "[color=orange]%s[/color]" ("[color=dim_gray]%s[/color]").' % [raw_expression, node.name, node.get_instance_id()])
 	var split_content = parsed.content.split('.')
 	# Assign expression.
 	if parsed.type == ExpTypes.assign:
@@ -131,7 +134,7 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 	
 	
 	# Eval expression.
-	elif parsed.type == ExpTypes.eval:
+	elif parsed.type == ExpTypes.exec:
 		var func_name := 'PK_function_%s' % randi_range(10000,99999) # Define unpredictable function name.
 		var gd_code := "func %s(_S, _PK) -> void:\n	var S = _S\n	var PK = _PK\n%s" % [func_name, parsed.content.indent('	')] # Define code for the script.
 		var new_script := GDScript.new()

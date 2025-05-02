@@ -1,8 +1,4 @@
 extends Node
-const Property_name_requester_token := ':'
-const Valid_property_name_characters := 'abcdefghijklmnopqrstuvwxyz0123456789_.'
-const Valid_property_name_starting_characters := 'abcdefghijklmnopqrstuvwxyz_'
-const Supported_pkexp_value_property_types := ['Dictionary','Object']
 const Errors := {
 	'pkexp_failed': 'PowerKey: PKExp failed to process expression "%s" for Node "%s".',
 	'pkexp_property_not_found': 'PowerKey: PKExp failed to find property "%s" for Node "%s" in Resources Script ("%s").',

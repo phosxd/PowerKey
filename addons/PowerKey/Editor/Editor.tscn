@@ -1,7 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://dq2ev084rdi4r"]
+[gd_scene load_steps=6 format=3 uid="uid://dq2ev084rdi4r"]
 
 [ext_resource type="Script" uid="uid://dukqioilv2187" path="res://addons/PowerKey/Editor/Editor.gd" id="1_1jgx6"]
 [ext_resource type="Texture2D" uid="uid://cj6hwjccreqr7" path="res://addons/PowerKey/github.svg" id="1_sgcgi"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_07ncw"]
+font_size = 26
+outline_size = 1
 
 [sub_resource type="LabelSettings" id="LabelSettings_1jgx6"]
 font_size = 32
@@ -53,6 +57,9 @@ tabs_visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
+[node name="Top Sep" type="HSeparator" parent="Tabs/Configure"]
+layout_mode = 2
+
 [node name="Resources Path" type="HBoxContainer" parent="Tabs/Configure"]
 layout_mode = 2
 
@@ -85,11 +92,35 @@ text = "Automatic Refreshing:"
 layout_mode = 2
 button_pressed = true
 
+[node name="Debug" type="VBoxContainer" parent="Tabs/Configure"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Tabs/Configure/Debug"]
+layout_mode = 2
+text = "Debug:"
+label_settings = SubResource("LabelSettings_07ncw")
+
+[node name="Separator" type="HSeparator" parent="Tabs/Configure/Debug"]
+layout_mode = 2
+
+[node name="Print Any Processed" type="HBoxContainer" parent="Tabs/Configure/Debug"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Tabs/Configure/Debug/Print Any Processed"]
+layout_mode = 2
+text = "Print any PKExpression processed:"
+
+[node name="Toggle" type="CheckButton" parent="Tabs/Configure/Debug/Print Any Processed"]
+layout_mode = 2
+
+[node name="Warning Tag Sep" type="HSeparator" parent="Tabs/Configure"]
+layout_mode = 2
+size_flags_vertical = 10
+
 [node name="Warning Tag" type="HBoxContainer" parent="Tabs/Configure"]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 4
-size_flags_vertical = 10
 
 [node name="Icon" type="CenterContainer" parent="Tabs/Configure/Warning Tag"]
 layout_mode = 2
@@ -165,7 +196,7 @@ This expression type is very limiting & can only be used to assign a value from 
  A:text get_random_string()
  A some_value[/ul]
 
-[font_size=30]E (Eval) Expression Type:[/font_size]
+[font_size=30]E (Execute) Expression Type:[/font_size]
 This expression type just lets you do whatever you wan't, AT YOUR OWN RISK. Your project WILL crash if you use invalid code or have missing variables. That said, this expression type does give you unlimited freedom to run any GDScript code. With this you can call functions, set values on the Node, & do complex logic if you wanted to. [b]However[/b], to access variables from the Resources Script, you will need to prefix any variable names with \"PK.\". To access the Node, instead of using \"self\", use \"S\".
 [b]Correct Usage:[/b]
 [ul] E print('hello world')
@@ -188,3 +219,4 @@ metadata/_tab_index = 3
 [connection signal="tab_changed" from="Top Bar/Tab Bar" to="." method="_on_tab_bar_tab_changed"]
 [connection signal="pressed" from="Top Bar/Button Github" to="." method="_on_button_github_pressed"]
 [connection signal="text_submitted" from="Tabs/Configure/Resources Path/Text Box" to="." method="_on_resources_script_path_text_submitted"]
+[connection signal="toggled" from="Tabs/Configure/Debug/Print Any Processed/Toggle" to="." method="_on_debug_option_1_toggled"]

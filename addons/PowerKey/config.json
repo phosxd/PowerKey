@@ -1,3 +1,1 @@
-{
-	"resources_script_path": "res://addons/PowerKey/Example/PKResources.gd",
-}
+{ "resources_script_path": "res://addons/PowerKey/Example/PKResources.gd", "debug_print_any_pkexpression_processed": false }

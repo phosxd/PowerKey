@@ -7,9 +7,11 @@ const errors := {
 }
 const default_config_data := """{
 	\"resources_script_path\": \"\",
+	\"debug_print_any_pkexpression_processed\": false,
 }"""
 const required_config_pairs := {
 	'resources_script_path': '',
+	'debug_print_any_pkexpression_processed': false
 }
 
 
@@ -42,7 +44,7 @@ func load_config() -> Dictionary: ## Loads the config file. Returns default conf
 	return config_data_json
 
 
-func update_config(key:String, value:String) -> void: ## Update the config file.
+func update_config(key:String, value) -> void: ## Update the config file.
 	var config_data := load_config()
 	config_data[key] = value
 	var file := FileAccess.open(config_file_path, FileAccess.WRITE)
