@@ -1,4 +1,24 @@
-# PowerKey
-Flexible translation engine. With support for dynamic text & property translations. Can also evaluate GDScript on Nodes without needing an entire Script file.
-# Usage:
-There is a full integrated guide section in the add-on. That should give you all the information you need. If you need help, join my [Discord](https://dsc.gg/sohp) for assistance.
+A simple Godot-4.4 plug-in that implements easy-to-use dynamic translation. Also offers GDScript execution on Nodes, without needing to attach a Script.
+
+# What are the advantages?
+## Easier to implement:
+There is no built-in CSV editor in Godot. Currently, you need to use a separate software to generate your translation files.
+With PowerKey, all you need is a GDScript.
+## Script-based values:
+Because values are stored within a GDScript, they can be manipulated & change based on any factors (including system language).
+The built-in translation system in Godot only lets values change based on system language & the values are constant.
+## GDScript execution without a Script:
+Say for example, you wanted to randomize some text or texture, or any property on a Node. You would need to create a whole new Script file for your scene if you did not already have one.
+Instead of doing that, you could simply add a line of text to the PKExpressions field in the Inspector for the Node that needs it.
+This CAN be used for randomized translation but it is very much not limited to just translation. You can do anything with it that a Script can do, **however**, it is not meant to serve as a replacement for Scripts! Use only for simple tasks.
+# How do I use it?
+## Define a Resources script:
+PowerKey reads all variables from a single script. Create a new GDScript file, *make sure it extends Node*. Now copy the file path & paste it into the "Resources Script Path" field within the PowerKey configuration menu.
+In order for PowerKey to use variables in the script, they must be defined in the script's globals! You can define variables with null values & give them new values in the "_ready" function if needed.
+## Write a PKExpression:
+Select any Node, then in the Inspector dock, scroll down to the "PKExpressions" dropdown located under the "Node" category. Open it up & manage the Node's PKExpressions from there.
+View the integrated Guide to learn how PKExpressions work. 
+There is a full integrated guide section in the add-on. It should give you all the information you need. If you need help, join my [Discord](https://dsc.gg/sohp) for assistance.
+# When NOT to use PowerKey:
+For basic localization, the systems already in place for Godot should suffice.
+PowerKey is meant to serve as a more user-friendly & more powerful approach. But sometimes more power isn't what you need.
