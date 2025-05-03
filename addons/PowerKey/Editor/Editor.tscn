@@ -40,7 +40,7 @@ tab_1/title = "Guide"
 [node name="Version" type="Label" parent="Top Bar"]
 layout_mode = 2
 size_flags_horizontal = 10
-text = "v1.2.1"
+text = "v1.3.0"
 
 [node name="Button Github" type="Button" parent="Top Bar"]
 layout_mode = 2
@@ -196,6 +196,10 @@ This expression type is very limiting & can only be used to assign a value from 
  A:text get_random_string()
  A some_value[/ul]
 
+[font_size=30]L (Link) Expression Type:[/font_size]
+[color=gold]Experimental:[/color] This type is subject to change or removal.
+Much like the Assign expression type, this type applies a value to a Node property. The syntax & rules are nearly identical. The only difference being that with this type any changes made to the variable in the Resources Script are immediately reflected onto the Node property as if they were one in the same. [b]However[/b], this expression is not one-off & runs every frame which may cause performance issues when more than a thousand are running. This should only be used in careful consideration of the impacts it may cause.
+
 [font_size=30]E (Execute) Expression Type:[/font_size]
 This expression type just lets you do whatever you wan't, AT YOUR OWN RISK. Your project WILL crash if you use invalid code or have missing variables. That said, this expression type does give you unlimited freedom to run any GDScript code. With this you can call functions, set values on the Node, & do complex logic if you wanted to. [b]However[/b], to access variables from the Resources Script, you will need to prefix any variable names with \"PK.\". To access the Node, instead of using \"self\", use \"S\".
 [b]Correct Usage:[/b]
@@ -203,18 +207,6 @@ This expression type just lets you do whatever you wan't, AT YOUR OWN RISK. Your
  E S.text = PK.some_string
  E var a := self.some_variable; print(a)"
 metadata/_tab_index = 2
-
-[node name="Advanced" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
-visible = false
-layout_mode = 2
-bbcode_enabled = true
-text = "[font_size=30]Re-Evaluating a Node:[/font_size]
-Every Node in your project is automatically evaluated, however this only happens once per node. To re-evaluate a Node you will need to call the \"evaluate_node\" method in the \"PowerKey\" singleton.
-
-It's not recommended to re-evaluate multiple Nodes every frame as it may cost performance. It is better to only re-evaluate when a variable in your Resources Script changes. However if you need to constantly update a Node, maybe it is best to use a dedicated script for that instead of using PowerKey.
-
-[font_size=30]"
-metadata/_tab_index = 3
 
 [connection signal="tab_changed" from="Top Bar/Tab Bar" to="." method="_on_tab_bar_tab_changed"]
 [connection signal="pressed" from="Top Bar/Button Github" to="." method="_on_button_github_pressed"]

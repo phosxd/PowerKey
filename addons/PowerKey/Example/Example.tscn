@@ -10,8 +10,8 @@ metadata/PKExpressions = "E for child in S.get_children(): print(child.name)"
 
 [node name="Explanation" type="Label" parent="."]
 layout_mode = 2
-text = "In this example. We set each label's text & label settings using PowerKey. The scene root also has a PKExpression that prints the name's of all it's children."
 autowrap_mode = 2
+metadata/PKExpressions = "A:text explanation"
 
 [node name="Label A" type="Label" parent="."]
 layout_mode = 2
@@ -25,4 +25,11 @@ A:label_settings title_label_settings"
 
 [node name="Label C" type="Label" parent="."]
 layout_mode = 2
-metadata/PKExpressions = "E S.text = 'Random Generated Number: %s' % randi_range(10000,99999)"
+metadata/PKExpressions = "E S.text = 'Random Number: %s' % randi_range(10000,99999)
+A:label_settings title_label_settings"
+
+[node name="Label D" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
+metadata/PKExpressions = "L:text current_fps"

@@ -19,7 +19,7 @@ func init(pk_expressions:String) -> void:
 	# Set PKExpressions.
 	%'Text Editor'.text = pk_expressions
 	PKExpressions = pk_expressions
-	_on_text_editor_text_changed()
+	_on_text_editor_text_changed(false)
 
 
 
@@ -45,13 +45,13 @@ func _on_dropdown_button_down() -> void:
 
 
 
-func _on_text_editor_text_changed() -> void:
+func _on_text_editor_text_changed(user_typing=true) -> void:
 	# Update current PKExpressions.
 	PKExpressions = %'Text Editor'.text
 	on_update.emit(PKExpressions)
 	
 	# Ensure dropdown is expanded when typing.
-	if not expanded:
+	if not expanded && user_typing:
 		_on_dropdown_button_down()
 	
 	# Reset line color for first line.

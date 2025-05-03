@@ -6,9 +6,9 @@ const Errors := {
 	'pkexp_accessing_unsupported_type': 'PowerKey: Expression "%s" for Node "%s" tried requesting property from an unsupported Type "%s", expected one of the following: %s.',
 	
 }
-@onready var Parser := PK_Parser.new()
-@onready var PKConfig := PK_Config.new()
-@onready var Config := PKConfig.load_config()
+var Parser := PK_Parser.new()
+var PKConfig := PK_Config.new()
+var Config := PKConfig.load_config()
 @onready var Resources_script = load(Config.resources_script_path) if FileAccess.file_exists(Config.resources_script_path) else null
 var Resources
 
@@ -31,6 +31,13 @@ func _ready() -> void:
 	_hook_onto_nodes() # Hook onto all nodes currently in the tree.
 	get_tree().node_added.connect(evaluate_node_tree) # Hook every new node.
 
+
+
+
+
+func _process(delta:float) -> void:
+	if Resources is Node:
+		Resources.call('_process', delta)
 
 
 

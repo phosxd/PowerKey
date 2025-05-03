@@ -1,9 +1,10 @@
 class_name PK_Parser extends Node
 const ExpTypes := {
 	'assign': 'A',
+	'link': 'L',
 	'exec': 'E',
 }
-const ExpTypes_require_property_name := ['assign']
+const ExpTypes_require_property_name := ['assign','link']
 const Property_name_requester_token := ':' # Should NEVER be more than one character.
 const Valid_property_name_characters := 'abcdefghijklmnopqrstuvwxyz0123456789_.'
 const Valid_property_name_starting_characters := 'abcdefghijklmnopqrstuvwxyz_'
@@ -111,31 +112,47 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 
 
 
+
 func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void: ## Executes a parsed PowerKey expression on the Node.
 	# Debug printing.
 	if Config.debug_print_any_pkexpression_processed:
 		print_rich('[b][color=gold]PowerKey Debug:[/color][/b] Now processing expression "[color=tomato]%s[/color]" on Node "[color=orange]%s[/color]" ("[color=dim_gray]%s[/color]").' % [raw_expression, node.name, node.get_instance_id()])
 	var split_content = parsed.content.split('.')
+	
 	# Assign expression.
 	if parsed.type == ExpTypes.assign:
 		if parsed.property_name.length() > 0:
-			var value = Resources.get(split_content[0]) # Get variable from Resources.
-			var count := 0
-			for i in split_content:
-				if count > 0:
-					# If acessing property of a Dictionary, proceed.
-					if value is Dictionary:
-						value = value.get(i)
-					# If accessing property of an Object, proceed.
-					elif value is Object:
-						value = value.get(i)
-					# If other type, return & throw error.
-					else:
-						printerr(Errors.pkexp_accessing_unsupported_type % [raw_expression,node.name,type_string(typeof(value)),', '.join(Supported_pkexp_value_property_types)])
-						return
-				count += 1
+			var value = _find_value(split_content, node, raw_expression)
 			# Set value, regardless of whether or not the Node property or Resources property exists.
 			node.set(parsed.property_name, value)
+	
+	
+	# Link expression. EXPERIMENTAL.
+	elif parsed.type == ExpTypes.link:
+		if parsed.property_name.length() > 0:
+			var processor := Node.new()
+			var processor_script := GDScript.new()
+			processor_script.source_code = """
+extends Node
+var last_value
+var processor_func:Callable
+func set_processor_func(new:Callable) -> void:
+	processor_func = new
+func _process(_delta:float) -> void:
+	last_value = processor_func.call(last_value)
+"""
+			processor_script.reload()
+			processor.set_script(processor_script)
+			node.add_child(processor)
+			# Set function to process every tick on the node.
+			processor.set_processor_func(func(last_value):
+				var value = _find_value(split_content, node, raw_expression)
+				# Set value if different.
+				if value != last_value:
+					# Set value, regardless of whether or not the Node property or Resources property exists.
+					node.set(parsed.property_name, value)
+				return value
+			)
 	
 	
 	# Eval expression.
@@ -151,3 +168,27 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 		host.set_script(new_script)
 		# Run the code.
 		host.call(func_name, node, Resources)
+
+
+
+
+
+
+# Utility functions.
+func _find_value(split_content:Array[String], node:Node, raw_expression:String): ## Finds the value of a variable in Resources Script. Returns Variant. If failed, reutrns null.
+	var value = Resources.get(split_content[0]) # Get variable from Resources.
+	var count := 0
+	for i in split_content:
+		if count > 0:
+			# If acessing property of a Dictionary, proceed.
+			if value is Dictionary:
+				value = value.get(i)
+			# If accessing property of an Object, proceed.
+			elif value is Object:
+				value = value.get(i)
+			# If other type, return & throw error.
+			else:
+				printerr(Errors.pkexp_accessing_unsupported_type % [raw_expression,node.name,type_string(typeof(value)),', '.join(Supported_pkexp_value_property_types)])
+				return
+		count += 1
+	return value
