@@ -3,9 +3,11 @@ const ExpTypes := {
 	'assign': 'A',
 	'exec': 'E',
 }
-const Property_name_requester_token := ':'
+const ExpTypes_require_property_name := ['assign']
+const Property_name_requester_token := ':' # Should NEVER be more than one character.
 const Valid_property_name_characters := 'abcdefghijklmnopqrstuvwxyz0123456789_.'
 const Valid_property_name_starting_characters := 'abcdefghijklmnopqrstuvwxyz_'
+const Valid_assign_content_characters := 'abcdefghijklmnopqrstuvwxyz0123456789_.'
 const Supported_pkexp_value_property_types := ['Dictionary','Object']
 const Errors := {
 	'pkexp_failed': 'PowerKey: PKExp failed to process expression "%s" for Node "%s".',
@@ -38,31 +40,27 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 	
 	for char in text:
 		if stage == 'expression_type':
-			# Add to buffer.
-			buffer += char
 			# Set expression type.
-			if not expression_type:
-				for type in ExpTypes.values():
-					if buffer == type:
-						expression_type = type
-						stage = 'look_for_property_name'
-						buffer = ''
-						expecting_flag = 0
-						break
-		
-		elif stage == 'look_for_property_name':
-			# Add to buffer.
-			buffer += char
-			# Progress to property_name stage.
-			if buffer == Property_name_requester_token:
+			if char == Property_name_requester_token:
 				stage = 'property_name'
 				buffer = ''
 				expecting_flag = 0
-			# Progress to translation_key stage.
+				# Throw error if not a valid expression type.
+				if expression_type not in ExpTypes.values():
+					invalid = true
+					break
+			# Progress to content stage if not specifying "property_name".
 			elif char == ' ':
 				stage = 'content'
 				buffer = ''
 				expecting_flag = 0
+				# Throw error if not a valid expression type.
+				if expression_type not in ExpTypes.values():
+					invalid = true
+					break
+			# Add to expression_type.
+			else:
+				expression_type += char
 		
 		elif stage == 'property_name':
 			# Progress to translation_key stage.
@@ -88,6 +86,13 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 				buffer += char
 		
 		elif stage == 'content':
+			# If expression type == assign.
+			if expression_type == ExpTypes.assign:
+				# Throw error if invalid character for an "assign" expression.
+				if char not in Valid_assign_content_characters:
+					invalid = true
+					break
+			# Add to content.
 			content += char
 	
 	
