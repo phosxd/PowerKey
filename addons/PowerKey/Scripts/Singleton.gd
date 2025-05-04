@@ -29,7 +29,6 @@ func _ready() -> void:
 	
 	# Setup hook.
 	_hook_onto_nodes() # Hook onto all nodes currently in the tree.
-	get_tree().node_added.connect(evaluate_node_tree) # Hook every new node.
 
 
 
@@ -49,7 +48,7 @@ func evaluate_node_tree(node:Node) -> void: ## Recursively evaluates all Nodes u
 		evaluate_node(_node)
 	)
 
-func evaluate_node(node:Node) -> void: ## Evaluates PKExpressions present on the Node.
+func evaluate_node(node:Node) -> void: ## Evaluates PKExpressions present on the Node.s
 	var pkexpressions = node.get_meta('PKExpressions', false)
 	if not pkexpressions: return
 	var lines:PackedStringArray = pkexpressions.split('\n')
@@ -65,7 +64,16 @@ func evaluate_node(node:Node) -> void: ## Evaluates PKExpressions present on the
 # Hook methods.
 # -------------
 func _hook_onto_nodes() -> void: ## Hook to all nodes in the project.
-	evaluate_node_tree(get_tree().root)
+	_recursive(get_tree().root, func(node:Node):
+		_hook_node(node)
+	)
+
+func _hook_node(node:Node) -> void: ## Evaluates the node & hooks any new child nodes that get instantiated.
+	# If not already hooked.
+	if not node.child_entered_tree.is_connected(_hook_node):
+		node.child_entered_tree.connect(_hook_node)
+		# Evaluate PKExpressions on node.
+		evaluate_node(node)
 
 func _recursive(node:Node, callback:Callable) -> void:
 	for child in node.get_children():

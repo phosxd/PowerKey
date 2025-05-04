@@ -9,4 +9,4 @@ func _ready() -> void:
 	title_label_settings.font_color = Color(1,0.5,0)
 
 func _process(delta:float) -> void:
-	current_fps = 'Real-time Frames Per Second: %s' % Engine.get_frames_per_second()
+	current_fps = 'Main-Thread Frames Per Second: %s' % Engine.get_frames_per_second()

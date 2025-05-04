@@ -1,0 +1,47 @@
+[gd_scene load_steps=2 format=3 uid="uid://bmwv7xnilsmi3"]
+
+[ext_resource type="Script" uid="uid://qxyftsve6caj" path="res://addons/PowerKey/Example/Stress Test.gd" id="1_6hlxh"]
+
+[node name="Stress Test" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_6hlxh")
+
+[node name="FPS" type="Label" parent="."]
+layout_mode = 2
+metadata/PKExpressions = "L:text current_fps"
+
+[node name="Expression Count" type="Label" parent="."]
+layout_mode = 2
+
+[node name="Add Expressions" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Button Assign" type="Button" parent="Add Expressions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "+1000 Assign Expressions"
+
+[node name="Button Link" type="Button" parent="Add Expressions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "+1000 Link Expressions"
+
+[node name="Button Exececute" type="Button" parent="Add Expressions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "+1000 Execute Expressions"
+
+[node name="Button Clear" type="Button" parent="."]
+layout_mode = 2
+text = "Clear All Expressions"
+
+[node name="Host" type="Node" parent="."]
+
+[connection signal="pressed" from="Add Expressions/Button Assign" to="." method="_on_button_add_pressed" binds= ["assign"]]
+[connection signal="pressed" from="Add Expressions/Button Link" to="." method="_on_button_add_pressed" binds= ["link"]]
+[connection signal="pressed" from="Add Expressions/Button Exececute" to="." method="_on_button_add_pressed" binds= ["execute"]]
+[connection signal="pressed" from="Button Clear" to="." method="_on_button_clear_pressed"]

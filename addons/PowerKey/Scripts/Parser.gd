@@ -158,7 +158,7 @@ func _process(_delta:float) -> void:
 	# Eval expression.
 	elif parsed.type == ExpTypes.exec:
 		var func_name := 'PK_function_%s' % randi_range(10000,99999) # Define unpredictable function name.
-		var gd_code := "func %s(_S, _PK) -> void:\n	var S = _S\n	var PK = _PK\n%s" % [func_name, parsed.content.indent('	')] # Define code for the script.
+		var gd_code := "func %s(S, PK) -> void:\n%s" % [func_name, parsed.content.indent('	')] # Define code for the script.
 		var new_script := GDScript.new()
 		# Apply source code to script.
 		new_script.source_code = gd_code
