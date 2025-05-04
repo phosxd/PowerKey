@@ -5,18 +5,27 @@ const ExpTypes := {
 	'exec': 'E',
 }
 const ExpTypes_require_property_name := ['assign','link']
+const Comment_token := '#' ## Used to denote a commented line.
 const Property_name_requester_token := ':' # Should NEVER be more than one character.
 const Valid_property_name_characters := 'abcdefghijklmnopqrstuvwxyz0123456789_.'
 const Valid_property_name_starting_characters := 'abcdefghijklmnopqrstuvwxyz_'
 const Valid_assign_content_characters := 'abcdefghijklmnopqrstuvwxyz0123456789_.'
 const Supported_pkexp_value_property_types := ['Dictionary','Object']
 const Errors := {
-	'pkexp_failed': 'PowerKey: PKExp failed to process expression "%s" for Node "%s".',
-	'pkexp_property_not_found': 'PowerKey: PKExp failed to find property "%s" for Node "%s" in Resources Script ("%s").',
-	'pkexp_property_not_found_in_node': 'PowerKey: PKExp failed to find property "%s" in Node "%s".',
-	'pkexp_accessing_unsupported_type': 'PowerKey: Expression "%s" for Node "%s" tried requesting property from an unsupported Type "%s", expected one of the following: %s.',
-	
+	'pkexp_parse_failed': 'PowerKey: PKExpression failed to process expression "%s" for Node "%s" with reason "%s".',
+	'pkexp_property_not_found': 'PowerKey: PKExpression failed to find property "%s" for Node "%s" in Resources Script ("%s").',
+	'pkexp_property_not_found_in_node': 'PowerKey: PKExpression failed to find property "%s" in Node "%s".',
+	'pkexp_accessing_unsupported_type': 'PowerKey: PKExpression "%s" for Node "%s" tried requesting property from an unsupported Type "%s", expected one of the following: %s.',
 }
+const Parse_Errors := [
+	'Invalid expression type',
+	'Invalid starting character in property name.',
+	'Invalid character in property name.',
+	'Assign expression Content should be only contain ASCII characters',
+	'No expression type defined',
+	'No content defined',
+]
+
 var Config
 var Resources
 
@@ -31,13 +40,18 @@ func init(config:Dictionary, resources) -> void:
 # PKExpression functions.
 # -----------------------
 func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expression details. Returns null if invalid expression.
-	var invalid := false
+	var error := 0
 	var expression_type:String
 	var property_name:String
 	var content:String
 	var stage := 'expression_type' ## The parsing stage.
 	var buffer := ''
 	var expecting_flag := 0
+	
+	# If comment line, throw silent error.
+	if text.begins_with(Comment_token):
+		error = 999
+		return {'error':error}
 	
 	for char in text:
 		if stage == 'expression_type':
@@ -48,7 +62,7 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 				expecting_flag = 0
 				# Throw error if not a valid expression type.
 				if expression_type not in ExpTypes.values():
-					invalid = true
+					error = 1
 					break
 			# Progress to content stage if not specifying "property_name".
 			elif char == ' ':
@@ -57,7 +71,7 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 				expecting_flag = 0
 				# Throw error if not a valid expression type.
 				if expression_type not in ExpTypes.values():
-					invalid = true
+					error = 1
 					break
 			# Add to expression_type.
 			else:
@@ -72,11 +86,11 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 				expecting_flag = 0
 			# Throw error if invalid start of property name.
 			elif expecting_flag == 0 && char.to_lower() not in Valid_property_name_starting_characters:
-				invalid = true
+				error = 2
 				break
 			# Throw error if invalid character.
 			elif char.to_lower() not in Valid_property_name_characters:
-				invalid = true
+				error = 3
 				break
 			# Look for start of property name.
 			if expecting_flag == 0 && char.to_lower() in Valid_property_name_starting_characters:
@@ -91,19 +105,21 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 			if expression_type == ExpTypes.assign:
 				# Throw error if invalid character for an "assign" expression.
 				if char not in Valid_assign_content_characters:
-					invalid = true
+					error = 4
 					break
 			# Add to content.
 			content += char
-	
-	
-	# If invalid expression, return null.
-	if invalid: return null
-	if expression_type.length() == 0: return null
-	if content.length() == 0: return null
-	
+
+
+	if error != 0: pass
+	elif expression_type.length() == 0:
+		error = 5
+	elif content.length() == 0:
+		error = 6
+
 	# Return results.
 	var result := {
+		'error': error,
 		'type': expression_type,
 		'property_name': property_name,
 		'content': content,

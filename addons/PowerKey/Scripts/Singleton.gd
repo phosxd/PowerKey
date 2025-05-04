@@ -1,11 +1,4 @@
 extends Node
-const Errors := {
-	'pkexp_failed': 'PowerKey: PKExp failed to process expression "%s" for Node "%s".',
-	'pkexp_property_not_found': 'PowerKey: PKExp failed to find property "%s" for Node "%s" in Resources Script ("%s").',
-	'pkexp_property_not_found_in_node': 'PowerKey: PKExp failed to find property "%s" in Node "%s".',
-	'pkexp_accessing_unsupported_type': 'PowerKey: Expression "%s" for Node "%s" tried requesting property from an unsupported Type "%s", expected one of the following: %s.',
-	
-}
 var Parser := PK_Parser.new()
 var PKConfig := PK_Config.new()
 var Config := PKConfig.load_config()
@@ -53,10 +46,17 @@ func evaluate_node(node:Node) -> void: ## Evaluates PKExpressions present on the
 	if not pkexpressions: return
 	var lines:PackedStringArray = pkexpressions.split('\n')
 	for line in lines:
-		# Parse & process PKExpression.
+		# Parse line.
 		var parsed = Parser.parse_pkexp(line)
-		if parsed: Parser.process_pkexp(node, line, parsed)
-		else: printerr(Errors.pkexp_failed % [line,node.name])
+		# If silent error, skip line.
+		if parsed.error == 999:
+			continue
+		# If error, print error.
+		elif parsed.error != 0:
+			printerr(Parser.Errors.pkexp_parse_failed % [line, node.name, Parser.Parse_Errors[parsed.error-1]])
+		# If no errors, process expression.
+		else:
+			Parser.process_pkexp(node, line, parsed)
 
 
 
