@@ -40,7 +40,7 @@ tab_1/title = "Guide"
 [node name="Version" type="Label" parent="Top Bar"]
 layout_mode = 2
 size_flags_horizontal = 10
-text = "v1.3.0"
+text = "v1.4.0"
 
 [node name="Button Github" type="Button" parent="Top Bar"]
 layout_mode = 2
@@ -79,18 +79,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "(Max Char: 80)"
 autowrap_mode = 2
-
-[node name="Automatic Refreshing" type="HBoxContainer" parent="Tabs/Configure"]
-visible = false
-layout_mode = 2
-
-[node name="Title" type="Label" parent="Tabs/Configure/Automatic Refreshing"]
-layout_mode = 2
-text = "Automatic Refreshing:"
-
-[node name="Toggle" type="CheckButton" parent="Tabs/Configure/Automatic Refreshing"]
-layout_mode = 2
-button_pressed = true
 
 [node name="Debug" type="VBoxContainer" parent="Tabs/Configure"]
 layout_mode = 2
@@ -183,7 +171,7 @@ metadata/_tab_index = 1
 visible = false
 layout_mode = 2
 bbcode_enabled = true
-text = "When you activated PowerKey in your project, it added a custom \"PKExpressions\" dropdown in the Node Inspector. Navigate to the \"PKExpressions\" dropdown located under the \"Node\" category. Now expanding the dropdown will show a text field where you can enter all your expressions. A PKExpression line should always start with the Expression Type.
+text = "When you activated PowerKey in your project, it added a custom \"PKExpressions\" dropdown in the Inspector. Navigate to the \"PKExpressions\" dropdown located under the \"Node\" category. Now expanding the dropdown will show a text field where you can enter all your expressions. A PKExpression line should always start with the Expression Type.
 
 [font_size=30]A (Assign) Expression Type:[/font_size]
 This expression type is very limiting & can only be used to assign a value from the Resources Script to a Node's property. You cannot access a property from any Variant other than a Dictionary or Object & you cannot call functions/methods. You cannot run code of any kind with this, but in return, PowerKey skips over any invalid expression & will only print errors instead of stopping the whole project & crashing it.

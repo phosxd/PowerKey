@@ -22,7 +22,7 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
-	# Remove InspectorPlugin
+	# Remove InspectorPlugin.
 	remove_inspector_plugin(EditorInspectorPlugin_instance)
 	
 	# Remove singleton, when addon removed.

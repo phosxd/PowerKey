@@ -2,7 +2,7 @@ class_name PK_Parser extends Node
 const ExpTypes := {
 	'assign': 'A',
 	'link': 'L',
-	'exec': 'E',
+	'execute': 'E',
 }
 const ExpTypes_require_property_name := ['assign','link']
 const Comment_token := '#' ## Used to denote a commented line.
@@ -173,8 +173,8 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 	
 	
 	# Eval expression.
-	elif parsed.type == ExpTypes.exec:
-		var func_name := 'PK_function_%s' % randi_range(10000,99999) # Define unpredictable function name.
+	elif parsed.type == ExpTypes.execute:
+		var func_name := 'PK_function_%s' % randi_range(10000,99999) # Define unpredictable function name, so it can't be called from the expression.
 		var gd_code := "func %s(S, PK) -> void:\n%s" % [func_name, parsed.content.indent('	')] # Define code for the script.
 		var new_script := GDScript.new()
 		# Apply source code to script.
