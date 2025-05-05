@@ -25,6 +25,15 @@ const Parse_Errors := [
 	'No expression type defined',
 	'No content defined',
 ]
+const Link_expression_processor_code := """
+extends Node
+var last_value
+var processor_func:Callable
+func set_processor_func(new:Callable) -> void:
+	processor_func = new
+func _process(_delta:float) -> void:
+	last_value = processor_func.call(last_value)
+"""
 
 var Config
 var Resources
@@ -148,15 +157,7 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 		if parsed.property_name.length() > 0:
 			var processor := Node.new()
 			var processor_script := GDScript.new()
-			processor_script.source_code = """
-extends Node
-var last_value
-var processor_func:Callable
-func set_processor_func(new:Callable) -> void:
-	processor_func = new
-func _process(_delta:float) -> void:
-	last_value = processor_func.call(last_value)
-"""
+			processor_script.source_code = Link_expression_processor_code
 			processor_script.reload()
 			processor.set_script(processor_script)
 			node.add_child(processor)
