@@ -12,9 +12,9 @@ const Valid_property_name_starting_characters := 'abcdefghijklmnopqrstuvwxyz_'
 const Valid_assign_content_characters := 'abcdefghijklmnopqrstuvwxyz0123456789_.'
 const Supported_pkexp_value_property_types := ['Dictionary','Object']
 const Errors := {
-	'pkexp_parse_failed': 'PowerKey: PKExpression failed to process expression "%s" for Node "%s" with reason "%s".',
-	'pkexp_property_not_found': 'PowerKey: PKExpression failed to find property "%s" for Node "%s" in Resources Script ("%s").',
-	'pkexp_property_not_found_in_node': 'PowerKey: PKExpression failed to find property "%s" in Node "%s".',
+	'pkexp_parse_failed': 'PowerKey: Failed to process PKExpression "%s" for Node "%s" with reason "%s".',
+	'pkexp_property_not_found': 'PowerKey: Failed to find property "%s" for Node "%s" in Resources Script ("%s").',
+	'pkexp_property_not_found_in_node': 'PowerKey: Failed to find property "%s" in Node "%s".',
 	'pkexp_accessing_unsupported_type': 'PowerKey: PKExpression "%s" for Node "%s" tried requesting property from an unsupported Type "%s", expected one of the following: %s.',
 }
 const Parse_Errors := [
@@ -56,12 +56,13 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 	var stage := 'expression_type' ## The parsing stage.
 	var buffer := ''
 	var expecting_flag := 0
-	
+
 	# If comment line, throw silent error.
 	if text.begins_with(Comment_token):
 		error = 999
 		return {'error':error}
-	
+
+
 	for char in text:
 		if stage == 'expression_type':
 			# Set expression type.
@@ -85,7 +86,7 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 			# Add to expression_type.
 			else:
 				expression_type += char
-		
+
 		elif stage == 'property_name':
 			# Progress to translation_key stage.
 			if char == ' ':
@@ -108,7 +109,7 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 			# Add to property name.
 			elif expecting_flag == 1 && char.to_lower() in Valid_property_name_characters:
 				buffer += char
-		
+
 		elif stage == 'content':
 			# If expression type == assign.
 			if expression_type == ExpTypes.assign:
@@ -143,15 +144,15 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 	if Config.debug_print_any_pkexpression_processed:
 		print_rich('[b][color=gold]PowerKey Debug:[/color][/b] Now processing expression "[color=tomato]%s[/color]" on Node "[color=orange]%s[/color]" ("[color=dim_gray]%s[/color]").' % [raw_expression, node.name, node.get_instance_id()])
 	var split_content = parsed.content.split('.')
-	
+
 	# Assign expression.
 	if parsed.type == ExpTypes.assign:
 		if parsed.property_name.length() > 0:
 			var value = _find_value(split_content, node, raw_expression)
 			# Set value, regardless of whether or not the Node property or Resources property exists.
 			node.set(parsed.property_name, value)
-	
-	
+
+
 	# Link expression. EXPERIMENTAL.
 	elif parsed.type == ExpTypes.link:
 		if parsed.property_name.length() > 0:
@@ -170,8 +171,8 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 					node.set(parsed.property_name, value)
 				return value
 			)
-	
-	
+
+
 	# Eval expression.
 	elif parsed.type == ExpTypes.execute:
 		var func_name := 'PK_function_%s' % randi_range(10000,99999) # Define unpredictable function name, so it can't be called from the expression.
