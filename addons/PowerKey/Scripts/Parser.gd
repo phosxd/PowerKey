@@ -113,7 +113,7 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 			# If expression type == assign.
 			if expression_type == ExpTypes.assign:
 				# Throw error if invalid character for an "assign" expression.
-				if char not in Valid_assign_content_characters:
+				if char.to_lower() not in Valid_assign_content_characters:
 					error = 4
 					break
 			# Add to content.

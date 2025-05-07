@@ -11,7 +11,7 @@ func _ready() -> void:
 	if Resources_script is Script:
 		var new_node := Node.new()
 		new_node.set_script(Resources_script)
-		new_node.call('_ready')
+		if new_node.has_method('_ready'): new_node.call('_ready')
 		Resources = new_node
 	# If no script, set Resources to empty Dictionary.
 	else:
@@ -29,6 +29,7 @@ func _ready() -> void:
 
 func _process(delta:float) -> void:
 	if Resources is Node:
+		if not Resources.has_method('_process'): return
 		Resources.call('_process', delta)
 
 
