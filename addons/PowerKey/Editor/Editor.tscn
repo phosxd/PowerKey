@@ -67,18 +67,17 @@ layout_mode = 2
 layout_mode = 2
 text = "Resources Script Path:"
 
-[node name="Text Box" type="LineEdit" parent="Tabs/Configure/Resources Path"]
-layout_mode = 2
-text = "res://addons/PowerKey/Example/PKResources.gd"
-placeholder_text = "Enter path to Script..."
-max_length = 80
-expand_to_text_length = true
-
-[node name="Max Char" type="Label" parent="Tabs/Configure/Resources Path"]
+[node name="Text Box" type="TextEdit" parent="Tabs/Configure/Resources Path"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "(Max Char: 80)"
-autowrap_mode = 2
+text = "res://addons/PowerKey/Example/PKResources.gd"
+placeholder_text = "Enter path to Script..."
+scroll_fit_content_height = true
+caret_blink = true
+caret_multiple = false
+draw_control_chars = true
+draw_tabs = true
+draw_spaces = true
 
 [node name="Debug" type="VBoxContainer" parent="Tabs/Configure"]
 layout_mode = 2
@@ -198,5 +197,5 @@ metadata/_tab_index = 2
 
 [connection signal="tab_changed" from="Top Bar/Tab Bar" to="." method="_on_tab_bar_tab_changed"]
 [connection signal="pressed" from="Top Bar/Button Github" to="." method="_on_button_github_pressed"]
-[connection signal="text_submitted" from="Tabs/Configure/Resources Path/Text Box" to="." method="_on_resources_script_path_text_submitted"]
+[connection signal="text_changed" from="Tabs/Configure/Resources Path/Text Box" to="." method="_on_resources_script_path_text_changed"]
 [connection signal="toggled" from="Tabs/Configure/Debug/Print Any Processed/Toggle" to="." method="_on_debug_option_1_toggled"]

@@ -40,9 +40,15 @@ func check_resources_script_path() -> void:
 func _on_tab_bar_tab_changed(tab:int) -> void:
 	$Tabs.current_tab = tab
 
-func _on_resources_script_path_text_submitted(new_text:String) -> void:
-	Config.update_config('resources_script_path', new_text)
+func _on_resources_script_path_text_changed() -> void:
+	var text:String = $'Tabs/Configure/Resources Path/Text Box'.text
+	# Remove new lines if added.
+	text = text.replace('\n','')
+	# Update config, then verify path.
+	Config.update_config('resources_script_path', text)
 	check_resources_script_path()
+	# Update Text Box text if different.
+	if text != $'Tabs/Configure/Resources Path/Text Box'.text: $'Tabs/Configure/Resources Path/Text Box'.text = text
 
 func _on_button_github_pressed() -> void:
 	OS.shell_open('https://github.com/phosxd/PowerKey')
