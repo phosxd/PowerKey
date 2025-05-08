@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bmwv7xnilsmi3"]
+[gd_scene load_steps=3 format=3 uid="uid://bmwv7xnilsmi3"]
 
 [ext_resource type="Script" uid="uid://qxyftsve6caj" path="res://addons/PowerKey/Example/Stress Test.gd" id="1_6hlxh"]
+[ext_resource type="PackedScene" uid="uid://cklwwr4htvoa0" path="res://addons/PowerKey/Editor/Editor Inspector/PKExpression Editor.tscn" id="2_j1gsl"]
 
 [node name="Stress Test" type="VBoxContainer"]
 anchors_preset = 15
@@ -10,38 +11,116 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_6hlxh")
 
-[node name="FPS" type="Label" parent="."]
+[node name="System Performance" type="PanelContainer" parent="."]
 layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="System Performance"]
+layout_mode = 2
+
+[node name="Current FPS" type="Label" parent="System Performance/HBox"]
+layout_mode = 2
+text = "Current FPS"
 metadata/PKExpressions = "L:text current_fps"
 
-[node name="Expression Count" type="Label" parent="."]
+[node name="Sep 1" type="VSeparator" parent="System Performance/HBox"]
 layout_mode = 2
 
-[node name="Add Expressions" type="HBoxContainer" parent="."]
+[node name="Min FPS" type="Label" parent="System Performance/HBox"]
+layout_mode = 2
+text = "Min FPS"
+metadata/PKExpressions = "L:text min_fps"
+
+[node name="Sep 2" type="VSeparator" parent="System Performance/HBox"]
 layout_mode = 2
 
-[node name="Button Assign" type="Button" parent="Add Expressions"]
+[node name="Max FPS" type="Label" parent="System Performance/HBox"]
+layout_mode = 2
+text = "Max FPS"
+metadata/PKExpressions = "L:text max_fps"
+
+[node name="Sep 1" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="PKExpressions" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="PKExpression Editor" parent="PKExpressions" instance=ExtResource("2_j1gsl")]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "+1000 Assign Expressions"
 
-[node name="Button Link" type="Button" parent="Add Expressions"]
+[node name="Dropdown Button Panel" parent="PKExpressions/PKExpression Editor" index="0"]
+visible = false
+
+[node name="Content" parent="PKExpressions/PKExpression Editor" index="1"]
+visible = true
+
+[node name="HFlow" type="HFlowContainer" parent="PKExpressions"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "+1000 Link Expressions"
+size_flags_stretch_ratio = 0.5
 
-[node name="Button Exececute" type="Button" parent="Add Expressions"]
+[node name="Button Clear" type="Button" parent="PKExpressions/HFlow"]
+self_modulate = Color(1, 0.345098, 0.278431, 1)
+layout_mode = 2
+text = "Clear"
+
+[node name="Button Add 1" type="Button" parent="PKExpressions/HFlow"]
+layout_mode = 2
+text = "+1"
+
+[node name="Button Add 100" type="Button" parent="PKExpressions/HFlow"]
+layout_mode = 2
+text = "+100"
+
+[node name="Button Add 1k" type="Button" parent="PKExpressions/HFlow"]
+layout_mode = 2
+text = "+1,000"
+
+[node name="Button Add 10k" type="Button" parent="PKExpressions/HFlow"]
+layout_mode = 2
+text = "+10,000"
+
+[node name="PKExpression Count" type="Label" parent="PKExpressions/HFlow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Expression Count"
+
+[node name="Sep 2" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="Test Scenes" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Button Add Example" type="Button" parent="Test Scenes"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "+1000 Execute Expressions"
+text = "Instantiate new \"Example\" Scene"
 
-[node name="Button Clear" type="Button" parent="."]
+[node name="Button Clear" type="Button" parent="Test Scenes"]
+self_modulate = Color(1, 0.346577, 0.280009, 1)
 layout_mode = 2
-text = "Clear All Expressions"
+size_flags_horizontal = 3
+text = "Clear Scenes"
+
+[node name="Scene Host" type="ScrollContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+follow_focus = true
+
+[node name="VBox" type="VBoxContainer" parent="Scene Host"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="Host" type="Node" parent="."]
 
-[connection signal="pressed" from="Add Expressions/Button Assign" to="." method="_on_button_add_pressed" binds= ["assign"]]
-[connection signal="pressed" from="Add Expressions/Button Link" to="." method="_on_button_add_pressed" binds= ["link"]]
-[connection signal="pressed" from="Add Expressions/Button Exececute" to="." method="_on_button_add_pressed" binds= ["execute"]]
-[connection signal="pressed" from="Button Clear" to="." method="_on_button_clear_pressed"]
+[connection signal="on_update" from="PKExpressions/PKExpression Editor" to="." method="_on_pkexpression_editor_update"]
+[connection signal="pressed" from="PKExpressions/HFlow/Button Clear" to="." method="_on_button_clear_expressions_pressed"]
+[connection signal="pressed" from="PKExpressions/HFlow/Button Add 1" to="." method="_on_button_add_expression_pressed" binds= [1]]
+[connection signal="pressed" from="PKExpressions/HFlow/Button Add 100" to="." method="_on_button_add_expression_pressed" binds= [100]]
+[connection signal="pressed" from="PKExpressions/HFlow/Button Add 1k" to="." method="_on_button_add_expression_pressed" binds= [1000]]
+[connection signal="pressed" from="PKExpressions/HFlow/Button Add 10k" to="." method="_on_button_add_expression_pressed" binds= [10000]]
+[connection signal="pressed" from="Test Scenes/Button Add Example" to="." method="_on_button_add_scene_pressed"]
+[connection signal="pressed" from="Test Scenes/Button Clear" to="." method="_on_button_clear_scenes_pressed"]
+
+[editable path="PKExpressions/PKExpression Editor"]

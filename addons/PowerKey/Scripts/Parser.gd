@@ -34,11 +34,14 @@ func set_processor_func(new:Callable) -> void:
 func _process(_delta:float) -> void:
 	last_value = processor_func.call(last_value)
 """
+var Link_expression_processor_script := GDScript.new()
 
 var Config
 var Resources
 
 func init(config:Dictionary, resources) -> void:
+	Link_expression_processor_script.source_code = Link_expression_processor_code
+	Link_expression_processor_script.reload()
 	Config = config
 	Resources = resources
 
@@ -157,10 +160,7 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 	elif parsed.type == ExpTypes.link:
 		if parsed.property_name.length() > 0:
 			var processor := Node.new()
-			var processor_script := GDScript.new()
-			processor_script.source_code = Link_expression_processor_code
-			processor_script.reload()
-			processor.set_script(processor_script)
+			processor.set_script(Link_expression_processor_script)
 			node.add_child(processor)
 			# Set function to process every tick on the node.
 			processor.set_processor_func(func(last_value):
@@ -176,16 +176,18 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 	# Eval expression.
 	elif parsed.type == ExpTypes.execute:
 		var func_name := 'PK_function_%s' % randi_range(10000,99999) # Define unpredictable function name, so it can't be called from the expression.
-		var gd_code := "func %s(S, PK) -> void:\n%s" % [func_name, parsed.content.indent('	')] # Define code for the script.
+		var gd_code := 'func %s(S, PK) -> void:\n%s' % [func_name, parsed.content.indent('	')] # Define code for the script.
 		var new_script := GDScript.new()
 		# Apply source code to script.
 		new_script.source_code = gd_code
 		new_script.reload()
+		
 		# Create RefCounted object to host the script.
 		var host := RefCounted.new()
 		host.set_script(new_script)
 		# Run the code.
 		host.call(func_name, node, Resources)
+		# Clear up objects from RAM.
 
 
 
