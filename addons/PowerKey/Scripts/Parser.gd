@@ -35,6 +35,7 @@ func _process(_delta:float) -> void:
 	last_value = processor_func.call(last_value)
 """
 var Link_expression_processor_script := GDScript.new()
+var Execute_script := GDScript.new()
 
 var Config
 var Resources
@@ -177,17 +178,15 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 	elif parsed.type == ExpTypes.execute:
 		var func_name := 'PK_function_%s' % randi_range(10000,99999) # Define unpredictable function name, so it can't be called from the expression.
 		var gd_code := 'func %s(S, PK) -> void:\n%s' % [func_name, parsed.content.indent('	')] # Define code for the script.
-		var new_script := GDScript.new()
 		# Apply source code to script.
-		new_script.source_code = gd_code
-		new_script.reload()
-		
+		Execute_script.source_code = gd_code
+		Execute_script.reload()
 		# Create RefCounted object to host the script.
 		var host := RefCounted.new()
-		host.set_script(new_script)
+		host.set_script(Execute_script)
 		# Run the code.
 		host.call(func_name, node, Resources)
-		# Clear up objects from RAM.
+		# NOTE: There is still a small memory leak present here, I dont know how to fix it but I am working on it.
 
 
 
