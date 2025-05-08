@@ -177,16 +177,11 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 	# Eval expression.
 	elif parsed.type == ExpTypes.execute:
 		var func_name := 'PK_function_%s' % randi_range(10000,99999) # Define unpredictable function name, so it can't be called from the expression.
-		var gd_code := 'func %s(S, PK) -> void:\n%s' % [func_name, parsed.content.indent('	')] # Define code for the script.
+		var gd_code := 'static func %s(S, PK) -> void:\n%s' % [func_name, parsed.content.indent('	')] # Define code for the script.
 		# Apply source code to script.
 		Execute_script.source_code = gd_code
 		Execute_script.reload()
-		# Create RefCounted object to host the script.
-		var host := RefCounted.new()
-		host.set_script(Execute_script)
-		# Run the code.
-		host.call(func_name, node, Resources)
-		# NOTE: There is still a small memory leak present here, I dont know how to fix it but I am working on it.
+		Execute_script.call(func_name, node, Resources)
 
 
 
