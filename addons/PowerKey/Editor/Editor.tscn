@@ -79,6 +79,17 @@ draw_control_chars = true
 draw_tabs = true
 draw_spaces = true
 
+[node name="Max Cached PKExpressions" type="HBoxContainer" parent="Tabs/Configure"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Tabs/Configure/Max Cached PKExpressions"]
+layout_mode = 2
+text = "Max Cached PKExpressions:"
+
+[node name="SpinBox" type="SpinBox" parent="Tabs/Configure/Max Cached PKExpressions"]
+layout_mode = 2
+value = 3.0
+
 [node name="Debug" type="VBoxContainer" parent="Tabs/Configure"]
 layout_mode = 2
 
@@ -198,4 +209,5 @@ metadata/_tab_index = 2
 [connection signal="tab_changed" from="Top Bar/Tab Bar" to="." method="_on_tab_bar_tab_changed"]
 [connection signal="pressed" from="Top Bar/Button Github" to="." method="_on_button_github_pressed"]
 [connection signal="text_changed" from="Tabs/Configure/Resources Path/Text Box" to="." method="_on_resources_script_path_text_changed"]
+[connection signal="value_changed" from="Tabs/Configure/Max Cached PKExpressions/SpinBox" to="." method="_on_max_cached_pkexpressions_value_changed"]
 [connection signal="toggled" from="Tabs/Configure/Debug/Print Any Processed/Toggle" to="." method="_on_debug_option_1_toggled"]

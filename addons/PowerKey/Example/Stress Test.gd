@@ -8,7 +8,7 @@ func _ready() -> void:
 
 
 func _update_expression_count() -> void:
-	%'PKExpression Count'.text = 'Expression Count: %s' % $Host.get_child_count()
+	%'PKExpression Count'.text = 'PKExp & Node Count: %s' % $Host.get_child_count()
 
 
 

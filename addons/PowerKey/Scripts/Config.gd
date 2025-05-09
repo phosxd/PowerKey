@@ -5,48 +5,50 @@ const errors := {
 	'failed_open_file': 'PowerKey: Unable to open file at "%s".',
 	'default_config': 'PowerKey: Unable to read config file. Using default config.'
 }
-const default_config_data := """{
-	\"resources_script_path\": \"\",
-	\"debug_print_any_pkexpression_processed\": false,
-}"""
-const required_config_pairs := {
+const default_config := {
 	'resources_script_path': '',
+	'max_cached_pkexpressions': 3,
 	'debug_print_any_pkexpression_processed': false
 }
 
 
 
 func load_config() -> Dictionary: ## Loads the config file. Returns default config data if config file not found.
-	var config_data:String
+	var config_json:Dictionary
 	var file := FileAccess.open(config_file_path, FileAccess.READ) # Open config file.
 	# If file doesn't exist or could not read from file, use default data.
 	if not file:
-		config_data = default_config_data
+		config_json =  default_config
 		printerr(errors.default_config)
 	# If file found, read as text & close file.
 	else:
-		config_data = file.get_as_text()
+		config_json = JSON.parse_string(file.get_as_text())
 		file.close()
-	# Parse the text as json.
-	var config_data_json := JSON.parse_string(config_data)
-	# If parsing failed, use default config data.
-	if not config_data_json:
-		config_data_json = JSON.parse_string(default_config_data)
-		printerr(errors.default_config)
-	# Check parsed data for required key/value-type pairs.
-	for key in required_config_pairs.keys():
-		if key in config_data_json.keys():
-			if typeof(required_config_pairs[key]) == typeof(config_data_json[key]): continue
-		config_data_json = JSON.parse_string(default_config_data)
-		printerr(errors.default_config)
-		break
-			
-	return config_data_json
 
+	# If parsing JSON failed, use default config.
+	if not config_json:
+		config_json = default_config
+		printerr(errors.default_config)
+
+	# Check config_json for any missing values.
+	for key in default_config.keys():
+		if key in config_json.keys():
+			if typeof(default_config[key]) == typeof(config_json[key]): continue
+		config_json.set(key, default_config[key])
+	
+	# Update config file.
+	set_config(config_json)
+	# Return.
+	return config_json
+
+
+
+func set_config(config_data:Dictionary) -> void: ## Writes to the config file.
+	var file := FileAccess.open(config_file_path, FileAccess.WRITE)
+	file.store_string(str(config_data))
+	file.close()
 
 func update_config(key:String, value) -> void: ## Update the config file.
 	var config_data := load_config()
 	config_data[key] = value
-	var file := FileAccess.open(config_file_path, FileAccess.WRITE)
-	file.store_string(str(config_data))
-	file.close()
+	set_config(config_data)

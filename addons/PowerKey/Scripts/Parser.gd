@@ -39,6 +39,7 @@ var Execute_script := GDScript.new()
 
 var Config
 var Resources
+var cached_pkexpressions:Array[Array] = []
 
 func init(config:Dictionary, resources) -> void:
 	Link_expression_processor_script.source_code = Link_expression_processor_code
@@ -53,6 +54,13 @@ func init(config:Dictionary, resources) -> void:
 # PKExpression functions.
 # -----------------------
 func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expression details. Returns null if invalid expression.
+	# Check cache, return cached result is available.
+	var cached:Dictionary
+	for i in cached_pkexpressions:
+		if i[0] != text: continue
+		cached = i[1]
+	if cached: return cached
+
 	var error := 0
 	var expression_type:String
 	var property_name:String
@@ -130,13 +138,19 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 	elif buffer.size() == 0:
 		error = 6
 
-	# Return results.
+	var content := ''.join(buffer)
+
 	var result := {
 		'error': error,
 		'type': expression_type,
 		'property_name': property_name,
-		'content': ''.join(buffer),
+		'content': content,
 	}
+	# Cache expression for reuse.
+	cached_pkexpressions.append([text,result])
+	if cached_pkexpressions.size() > Config.max_cached_pkexpressions:
+		cached_pkexpressions.remove_at(0)
+	# Return.
 	return result
 
 
@@ -150,8 +164,7 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 	# Assign expression.
 	if parsed.type == ExpTypes.assign:
 		if parsed.property_name == '': return # Return if no property name.
-		var split_content = parsed.content.split('.')
-		var value = _find_value(split_content, node, raw_expression)
+		var value = _find_value(parsed.content.split('.'), node, raw_expression)
 		# Set value, regardless of whether or not the Node property or Resources property exists.
 		node.set(parsed.property_name, value)
 
@@ -159,13 +172,12 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 	# Link expression. EXPERIMENTAL.
 	elif parsed.type == ExpTypes.link:
 		if parsed.property_name == '': return # Return if no property name.
-		var split_content = parsed.content.split('.')
 		var processor := Node.new()
 		processor.set_script(Link_expression_processor_script)
 		node.add_child(processor)
 		# Set function to process every tick on the node.
 		processor.set_processor_func(func(last_value):
-			var value = _find_value(split_content, node, raw_expression)
+			var value = _find_value(parsed.content.split('.'), node, raw_expression)
 			# Set value if different.
 			if value != last_value:
 				# Set value, regardless of whether or not the Node property or Resources property exists.
@@ -175,7 +187,7 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 		return
 
 
-	# Eval expression.
+	# Execute expression.
 	elif parsed.type == ExpTypes.execute:
 		var func_name := '_PK_function'
 		var gd_code := 'static func %s(S, PK) -> void:\n%s' % [func_name, parsed.content.indent('	')] # Define code for the script.

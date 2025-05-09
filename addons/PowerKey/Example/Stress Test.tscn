@@ -83,7 +83,7 @@ text = "+10,000"
 [node name="PKExpression Count" type="Label" parent="PKExpressions/HFlow"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Expression Count"
+text = "PKExp & Node Count: 0"
 
 [node name="Sep 2" type="HSeparator" parent="."]
 layout_mode = 2
