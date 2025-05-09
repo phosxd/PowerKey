@@ -25,16 +25,6 @@ const Parse_Errors := [
 	'No expression type defined',
 	'No content defined',
 ]
-const Link_expression_processor_code := """
-extends Node
-var last_value
-var processor_func:Callable
-func set_processor_func(new:Callable) -> void:
-	processor_func = new
-func _process(_delta:float) -> void:
-	last_value = processor_func.call(last_value)
-"""
-var Link_expression_processor_script := GDScript.new()
 var Execute_script := GDScript.new()
 var Execute_script_code_template := 'static func %s(S, PK) -> void:\n	S=S; PK=PK;\n%s'
 
@@ -43,8 +33,6 @@ var Resources
 var cached_pkexpressions:Array[Array] = []
 
 func init(config:Dictionary, resources) -> void:
-	Link_expression_processor_script.source_code = Link_expression_processor_code
-	Link_expression_processor_script.reload()
 	Config = config
 	Resources = resources
 
@@ -162,43 +150,44 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 	if Config.debug_print_any_pkexpression_processed:
 		print_rich('[b][color=gold]PowerKey Debug:[/color][/b] Now processing expression "[color=tomato]%s[/color]" on Node "[color=orange]%s[/color]" ("[color=dim_gray]%s[/color]").' % [raw_expression, node.name, node.get_instance_id()])
 
-	# Assign expression.
-	if parsed.type == ExpTypes.assign:
-		if parsed.property_name == '': return # Return if no property name.
-		var value = _find_value(parsed.content.split('.'), node, raw_expression)
-		# Set value, regardless of whether or not the Node property or Resources property exists.
-		node.set(parsed.property_name, value)
-
-
-	# Link expression. EXPERIMENTAL.
-	elif parsed.type == ExpTypes.link:
-		if parsed.property_name == '': return # Return if no property name.
-		var processor := Node.new()
-		processor.set_script(Link_expression_processor_script)
-		node.add_child(processor)
-		# Set function to process every tick on the node.
-		processor.set_processor_func(func(last_value):
+	match parsed.type:
+		# Assign expression.
+		ExpTypes.assign:
+			if parsed.property_name == '': return # Return if no property name.
 			var value = _find_value(parsed.content.split('.'), node, raw_expression)
-			# Set value if different.
-			if value != last_value:
-				# Set value, regardless of whether or not the Node property or Resources property exists.
-				node.set(parsed.property_name, value)
-			return value
-		)
-		return
+			# Set value, regardless of whether or not the Node property or Resources property exists.
+			node.set(parsed.property_name, value)
 
+		# Link expression.
+		ExpTypes.link:
+			if parsed.property_name == '': return # Return if no property name.
+			var split_content:PackedStringArray = parsed.content.split('.')
+			# Create new timer.
+			var update_timer := Timer.new()
+			node.add_child(update_timer)
+			update_timer.wait_time = 0.0000001 # Set time to effectively zero.
+			update_timer.start()
+			# Connect function to process every tick.
+			var last_value
+			update_timer.timeout.connect(func():
+				var value = _find_value(split_content, node, raw_expression)
+				# Set value if different.
+				if value != last_value:
+					# Set value, regardless of whether or not the Node property or Resources property exists.
+					node.set(parsed.property_name, value)
+					last_value = value
+			)
 
-	# Execute expression.
-	elif parsed.type == ExpTypes.execute:
-		var func_name := '_PK_function'
-		# Define code.
-		var gd_code := Execute_script_code_template % [func_name, parsed.content.indent('	')]
-		# Apply source code to script.
-		if Execute_script.source_code != gd_code:
-			Execute_script.source_code = gd_code
-			Execute_script.reload()
-		Execute_script.call(func_name, node, Resources)
-		return
+		# Execute expression.
+		ExpTypes.execute:
+			var func_name := '_PK_function'
+			# Define code.
+			var gd_code := Execute_script_code_template % [func_name, parsed.content.indent('	')]
+			# Apply source code to script.
+			if Execute_script.source_code != gd_code:
+				Execute_script.source_code = gd_code
+				Execute_script.reload()
+			Execute_script.call(func_name, node, Resources)
 
 
 
@@ -206,20 +195,23 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 
 
 # Utility functions.
-func _find_value(split_content:Array[String], node:Node, raw_expression:String): ## Finds the value of a variable in Resources Script. Returns Variant. If failed, reutrns null.
-	var value = Resources.get(split_content[0]) # Get variable from Resources.
-	var count := 0
-	for i in split_content:
-		if count > 0:
-			# If acessing property of a Dictionary, proceed.
-			if value is Dictionary:
-				value = value.get(i)
-			# If accessing property of an Object, proceed.
-			elif value is Object:
-				value = value.get(i)
+func _find_value_error_helper_1(stopped_value, node:Node, raw_expression:String) -> void:
+	printerr(Errors.pkexp_accessing_unsupported_type % [raw_expression, node.name, type_string(typeof(stopped_value)),', '.join(Supported_pkexp_value_property_types)])
+
+func _find_value(split_content:PackedStringArray, node:Node, raw_expression:String): ## Finds the value of a variable in Resources Script. Returns Variant. If failed, reutrns null.
+	var value = Resources.get(split_content[0]) # Get top-level value from Resources.
+	for i in range(1,split_content.size()):
+		# Return early if value is null.
+		if value == null:
+			_find_value_error_helper_1(value, node, raw_expression)
+			return
+		# Get next value based on current value type.
+		match typeof(value):
+			# If acessing property of a Dictionary or Object, proceed.
+			TYPE_DICTIONARY, TYPE_OBJECT:
+				value = value.get(split_content[i])
 			# If other type, return & throw error.
-			else:
-				printerr(Errors.pkexp_accessing_unsupported_type % [raw_expression,node.name,type_string(typeof(value)),', '.join(Supported_pkexp_value_property_types)])
+			_:
+				_find_value_error_helper_1(value, node, raw_expression)
 				return
-		count += 1
 	return value

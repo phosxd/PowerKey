@@ -80,6 +80,10 @@ text = "+1,000"
 layout_mode = 2
 text = "+10,000"
 
+[node name="Button Add 100k" type="Button" parent="PKExpressions/HFlow"]
+layout_mode = 2
+text = "+100,000"
+
 [node name="PKExpression Count" type="Label" parent="PKExpressions/HFlow"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -120,6 +124,7 @@ size_flags_vertical = 3
 [connection signal="pressed" from="PKExpressions/HFlow/Button Add 100" to="." method="_on_button_add_expression_pressed" binds= [100]]
 [connection signal="pressed" from="PKExpressions/HFlow/Button Add 1k" to="." method="_on_button_add_expression_pressed" binds= [1000]]
 [connection signal="pressed" from="PKExpressions/HFlow/Button Add 10k" to="." method="_on_button_add_expression_pressed" binds= [10000]]
+[connection signal="pressed" from="PKExpressions/HFlow/Button Add 100k" to="." method="_on_button_add_expression_pressed" binds= [100000]]
 [connection signal="pressed" from="Test Scenes/Button Add Example" to="." method="_on_button_add_scene_pressed"]
 [connection signal="pressed" from="Test Scenes/Button Clear" to="." method="_on_button_clear_scenes_pressed"]
 

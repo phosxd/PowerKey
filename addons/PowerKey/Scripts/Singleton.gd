@@ -35,20 +35,19 @@ func _process(delta:float) -> void:
 
 
 
-# Useful functions.
-# -----------------
+# Evaluator functions.
+# --------------------
 func evaluate_node_tree(node:Node) -> void: ## Recursively evaluates all Nodes under the given Node.
 	_recursive(node, func(_node:Node) -> void:
 		evaluate_node(_node)
 	)
 
-func evaluate_node(node:Node) -> void: ## Evaluates PKExpressions present on the Node.s
+func evaluate_node(node:Node) -> void: ## Evaluates PKExpressions present on the Node.
 	var pkexpressions = node.get_meta('PKExpressions', false)
 	if not pkexpressions: return
 	var lines:PackedStringArray = pkexpressions.split('\n')
 	for line in lines:
-		# Parse line.
-		var parsed = Parser.parse_pkexp(line)
+		var parsed = Parser.parse_pkexp(line) # Parse line.
 		# If silent error, skip line.
 		if parsed.error == 999:
 			continue
