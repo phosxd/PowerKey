@@ -22,3 +22,15 @@ There is a full integrated guide section in the add-on. It should give you all t
 # When NOT to use PowerKey:
 For basic localization, the systems already in place for Godot should suffice.
 PowerKey is meant to serve as a more user-friendly & more powerful approach. But sometimes more power isn't what you need.
+# TO-DO:
+## Node type excluder:
+**Milestone:** ===1.5.0===
+"Excluded Nodes" field in the Configuration menu in which you can define Node types to be ignored when hooking & evaluating Nodes. Excluded Nodes will not have the PKExpressions dropdown & will not run PKExpressions.
+## Broad translations:
+**Milestone:** ===1.5.0===
+"Translations" field in the Configuration menu in which you can add/modifiy translations.
+Each translation has 3 properties:
+1. Property: the property on the Node to translate.
+2. Key: the key to look for in the Node's property before translation.
+3. Value: the property in the Resources Script to assign to the Node's property, if the key matches the Node's property (beofre translation).
+This works more like the translation system built-into Godot, but still provides all the advantages of PowerKey.

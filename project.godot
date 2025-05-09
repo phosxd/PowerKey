@@ -29,10 +29,6 @@ folder_colors={
 "res://addons/PowerKey/Scripts/": "red"
 }
 
-[internationalization]
-
-locale/translation_remaps={}
-
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
