@@ -56,9 +56,8 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 	var error := 0
 	var expression_type:String
 	var property_name:String
-	var content:String
 	var stage := 'expression_type' ## The parsing stage.
-	var buffer := ''
+	var buffer := PackedStringArray([])
 	var expecting_flag := 0
 
 	# If comment line, throw silent error.
@@ -72,7 +71,7 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 			# Set expression type.
 			if char == Property_name_requester_token:
 				stage = 'property_name'
-				buffer = ''
+				buffer.clear()
 				expecting_flag = 0
 				# Throw error if not a valid expression type.
 				if expression_type not in ExpTypes.values():
@@ -81,7 +80,7 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 			# Progress to content stage if not specifying "property_name".
 			elif char == ' ':
 				stage = 'content'
-				buffer = ''
+				buffer.clear()
 				expecting_flag = 0
 				# Throw error if not a valid expression type.
 				if expression_type not in ExpTypes.values():
@@ -94,9 +93,9 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 		elif stage == 'property_name':
 			# Progress to translation_key stage.
 			if char == ' ':
-				property_name = buffer
+				property_name = ''.join(buffer)
 				stage = 'content'
-				buffer = ''
+				buffer.clear()
 				expecting_flag = 0
 			# Throw error if invalid start of property name.
 			elif expecting_flag == 0 && char.to_lower() not in Valid_property_name_starting_characters:
@@ -108,11 +107,11 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 				break
 			# Look for start of property name.
 			if expecting_flag == 0 && char.to_lower() in Valid_property_name_starting_characters:
-				buffer += char
+				buffer.append(char)
 				expecting_flag = 1
 			# Add to property name.
 			elif expecting_flag == 1 && char.to_lower() in Valid_property_name_characters:
-				buffer += char
+				buffer.append(char)
 
 		elif stage == 'content':
 			# If expression type == assign.
@@ -122,13 +121,13 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 					error = 4
 					break
 			# Add to content.
-			content += char
+			buffer.append(char)
 
 
 	if error != 0: pass
-	elif expression_type.length() == 0:
+	elif expression_type == '':
 		error = 5
-	elif content.length() == 0:
+	elif buffer.size() == 0:
 		error = 6
 
 	# Return results.
@@ -136,7 +135,7 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 		'error': error,
 		'type': expression_type,
 		'property_name': property_name,
-		'content': content,
+		'content': ''.join(buffer),
 	}
 	return result
 
@@ -147,41 +146,45 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 	# Debug printing.
 	if Config.debug_print_any_pkexpression_processed:
 		print_rich('[b][color=gold]PowerKey Debug:[/color][/b] Now processing expression "[color=tomato]%s[/color]" on Node "[color=orange]%s[/color]" ("[color=dim_gray]%s[/color]").' % [raw_expression, node.name, node.get_instance_id()])
-	var split_content = parsed.content.split('.')
 
 	# Assign expression.
 	if parsed.type == ExpTypes.assign:
-		if parsed.property_name.length() > 0:
-			var value = _find_value(split_content, node, raw_expression)
-			# Set value, regardless of whether or not the Node property or Resources property exists.
-			node.set(parsed.property_name, value)
+		if parsed.property_name == '': return # Return if no property name.
+		var split_content = parsed.content.split('.')
+		var value = _find_value(split_content, node, raw_expression)
+		# Set value, regardless of whether or not the Node property or Resources property exists.
+		node.set(parsed.property_name, value)
 
 
 	# Link expression. EXPERIMENTAL.
 	elif parsed.type == ExpTypes.link:
-		if parsed.property_name.length() > 0:
-			var processor := Node.new()
-			processor.set_script(Link_expression_processor_script)
-			node.add_child(processor)
-			# Set function to process every tick on the node.
-			processor.set_processor_func(func(last_value):
-				var value = _find_value(split_content, node, raw_expression)
-				# Set value if different.
-				if value != last_value:
-					# Set value, regardless of whether or not the Node property or Resources property exists.
-					node.set(parsed.property_name, value)
-				return value
-			)
+		if parsed.property_name == '': return # Return if no property name.
+		var split_content = parsed.content.split('.')
+		var processor := Node.new()
+		processor.set_script(Link_expression_processor_script)
+		node.add_child(processor)
+		# Set function to process every tick on the node.
+		processor.set_processor_func(func(last_value):
+			var value = _find_value(split_content, node, raw_expression)
+			# Set value if different.
+			if value != last_value:
+				# Set value, regardless of whether or not the Node property or Resources property exists.
+				node.set(parsed.property_name, value)
+			return value
+		)
+		return
 
 
 	# Eval expression.
 	elif parsed.type == ExpTypes.execute:
-		var func_name := 'PK_function_%s' % randi_range(10000,99999) # Define unpredictable function name, so it can't be called from the expression.
+		var func_name := '_PK_function'
 		var gd_code := 'static func %s(S, PK) -> void:\n%s' % [func_name, parsed.content.indent('	')] # Define code for the script.
 		# Apply source code to script.
-		Execute_script.source_code = gd_code
-		Execute_script.reload()
+		if Execute_script.source_code != gd_code:
+			Execute_script.source_code = gd_code
+			Execute_script.reload()
 		Execute_script.call(func_name, node, Resources)
+		return
 
 
 

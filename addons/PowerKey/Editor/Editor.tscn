@@ -40,7 +40,7 @@ tab_1/title = "Guide"
 [node name="Version" type="Label" parent="Top Bar"]
 layout_mode = 2
 size_flags_horizontal = 10
-text = "v1.4.0"
+text = "v1.4.1"
 
 [node name="Button Github" type="Button" parent="Top Bar"]
 layout_mode = 2
