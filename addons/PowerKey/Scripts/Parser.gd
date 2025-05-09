@@ -25,6 +25,7 @@ const Parse_Errors := [
 	'No expression type defined',
 	'No content defined',
 ]
+const Link_timer_name := '_pk_link_timer'
 var Execute_script := GDScript.new()
 var Execute_script_code_template := 'static func %s(S, PK) -> void:\n	S=S; PK=PK;\n%s'
 
@@ -161,14 +162,22 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 		# Link expression.
 		ExpTypes.link:
 			if parsed.property_name == '': return # Return if no property name.
-			var split_content:PackedStringArray = parsed.content.split('.')
 			# Create new timer.
-			var update_timer := Timer.new()
-			node.add_child(update_timer)
-			update_timer.wait_time = 0.0000001 # Set time to effectively zero.
-			update_timer.start()
+			var update_timer:Timer
+			# Get timer already on Node, if it exists, use this instead.
+			if node.has_node(Link_timer_name):
+				var current_timer = node.get_node(Link_timer_name)
+				update_timer = current_timer
+			# If no timer already exists, create new one.
+			else:
+				update_timer = Timer.new()
+				update_timer.name = Link_timer_name
+				node.add_child(update_timer)
+				update_timer.wait_time = 0.0000001 # Set time to effectively zero.
+				update_timer.start()
 			# Connect function to process every tick.
 			var last_value
+			var split_content:PackedStringArray = parsed.content.split('.')
 			update_timer.timeout.connect(func():
 				var value = _find_value(split_content, node, raw_expression)
 				# Set value if different.
