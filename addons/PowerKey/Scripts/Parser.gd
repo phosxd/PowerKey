@@ -36,6 +36,7 @@ func _process(_delta:float) -> void:
 """
 var Link_expression_processor_script := GDScript.new()
 var Execute_script := GDScript.new()
+var Execute_script_code_template := 'static func %s(S, PK) -> void:\n	S=S; PK=PK;\n%s'
 
 var Config
 var Resources
@@ -190,7 +191,8 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 	# Execute expression.
 	elif parsed.type == ExpTypes.execute:
 		var func_name := '_PK_function'
-		var gd_code := 'static func %s(S, PK) -> void:\n%s' % [func_name, parsed.content.indent('	')] # Define code for the script.
+		# Define code.
+		var gd_code := Execute_script_code_template % [func_name, parsed.content.indent('	')]
 		# Apply source code to script.
 		if Execute_script.source_code != gd_code:
 			Execute_script.source_code = gd_code

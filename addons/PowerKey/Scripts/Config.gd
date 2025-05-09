@@ -14,7 +14,7 @@ const default_config := {
 
 
 func load_config() -> Dictionary: ## Loads the config file. Returns default config data if config file not found.
-	var config_json:Dictionary
+	var config_json
 	var file := FileAccess.open(config_file_path, FileAccess.READ) # Open config file.
 	# If file doesn't exist or could not read from file, use default data.
 	if not file:

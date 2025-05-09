@@ -70,7 +70,6 @@ text = "Resources Script Path:"
 [node name="Text Box" type="TextEdit" parent="Tabs/Configure/Resources Path"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "res://addons/PowerKey/Example/PKResources.gd"
 placeholder_text = "Enter path to Script..."
 scroll_fit_content_height = true
 caret_blink = true
