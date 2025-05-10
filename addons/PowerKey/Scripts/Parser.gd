@@ -10,18 +10,19 @@ const Property_name_requester_token := ':' # Should NEVER be more than one chara
 const Valid_property_name_characters := 'abcdefghijklmnopqrstuvwxyz0123456789_.'
 const Valid_property_name_starting_characters := 'abcdefghijklmnopqrstuvwxyz_'
 const Valid_assign_content_characters := 'abcdefghijklmnopqrstuvwxyz0123456789_.'
-const Supported_pkexp_value_property_types := ['Dictionary','Object']
+const Supported_pkexp_value_property_types := ['Dictionary','Object', 'Vector2']
 const Errors := {
 	'pkexp_parse_failed': 'PowerKey: Failed to process PKExpression "%s" for Node "%s" with reason "%s".',
 	'pkexp_property_not_found': 'PowerKey: Failed to find property "%s" for Node "%s" in Resources Script ("%s").',
 	'pkexp_property_not_found_in_node': 'PowerKey: Failed to find property "%s" in Node "%s".',
 	'pkexp_accessing_unsupported_type': 'PowerKey: PKExpression "%s" for Node "%s" tried requesting property from an unsupported Type "%s", expected one of the following: %s.',
+	'pkexp_accessing_nonexistent_value_on_vector2': 'PowerKey: PKExpression "%s" for Node "%s" tried accessing non-existent property "%s" from a "Vector2".',
 }
 const Parse_Errors := [
 	'Invalid expression type',
 	'Invalid starting character in property name.',
 	'Invalid character in property name.',
-	'Assign expression Content should be only contain ASCII characters',
+	'Assign/Link expression content should only contain basic characters',
 	'No expression type defined',
 	'No content defined',
 ]
@@ -45,11 +46,12 @@ func init(config:Dictionary, resources) -> void:
 # -----------------------
 func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expression details. Returns null if invalid expression.
 	# Check cache, return cached result is available.
-	var cached:Dictionary
-	for i in cached_pkexpressions:
-		if i[0] != text: continue
-		cached = i[1]
-	if cached: return cached
+	if not Engine.is_editor_hint():
+		var cached:Dictionary
+		for i in cached_pkexpressions:
+			if i[0] != text: continue
+			cached = i[1]
+		if cached: return cached
 
 	var error := 0
 	var expression_type:String
@@ -113,7 +115,7 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 
 		elif stage == 'content':
 			# If expression type == assign.
-			if expression_type == ExpTypes.assign:
+			if expression_type in [ExpTypes.assign, ExpTypes.link]:
 				# Throw error if invalid character for an "assign" expression.
 				if char.to_lower() not in Valid_assign_content_characters:
 					error = 4
@@ -137,9 +139,10 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 		'content': content,
 	}
 	# Cache expression for reuse.
-	cached_pkexpressions.append([text,result])
-	if cached_pkexpressions.size() > Config.max_cached_pkexpressions:
-		cached_pkexpressions.remove_at(0)
+	if not Engine.is_editor_hint():
+		cached_pkexpressions.append([text,result])
+		if cached_pkexpressions.size() > Config.max_cached_pkexpressions:
+			cached_pkexpressions.remove_at(0)
 	# Return.
 	return result
 
@@ -155,9 +158,9 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 		# Assign expression.
 		ExpTypes.assign:
 			if parsed.property_name == '': return # Return if no property name.
-			var value = _find_value(parsed.content.split('.'), node, raw_expression)
+			var value = _get_value(parsed.content.split('.'), node, raw_expression)
 			# Set value, regardless of whether or not the Node property or Resources property exists.
-			node.set(parsed.property_name, value)
+			_set_value(parsed.property_name.split('.'), node, value)
 
 		# Link expression.
 		ExpTypes.link:
@@ -179,11 +182,11 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 			var last_value
 			var split_content:PackedStringArray = parsed.content.split('.')
 			update_timer.timeout.connect(func():
-				var value = _find_value(split_content, node, raw_expression)
+				var value = _get_value(split_content, node, raw_expression)
 				# Set value if different.
 				if value != last_value:
 					# Set value, regardless of whether or not the Node property or Resources property exists.
-					node.set(parsed.property_name, value)
+					_set_value(parsed.property_name.split('.'), node, value)
 					last_value = value
 			)
 
@@ -204,23 +207,72 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 
 
 # Utility functions.
-func _find_value_error_helper_1(stopped_value, node:Node, raw_expression:String) -> void:
+func _get_value_error_helper_1(stopped_value, node:Node, raw_expression:String) -> void:
 	printerr(Errors.pkexp_accessing_unsupported_type % [raw_expression, node.name, type_string(typeof(stopped_value)),', '.join(Supported_pkexp_value_property_types)])
+func _get_value_error_helper_2(var_name, node:Node, raw_expression:String) -> void:
+	printerr(Errors.pkexp_accessing_nonexistent_value_on_vector2 % [raw_expression, node.name, var_name])
 
-func _find_value(split_content:PackedStringArray, node:Node, raw_expression:String): ## Finds the value of a variable in Resources Script. Returns Variant. If failed, reutrns null.
-	var value = Resources.get(split_content[0]) # Get top-level value from Resources.
-	for i in range(1,split_content.size()):
+func _get_value(split_varpath:PackedStringArray, node:Node, raw_expression:String): ## Gets the value of a variable in Resources Script. Returns Variant. If failed, reutrns null.
+	var variable = Resources.get(split_varpath[0]) # Get top-level value from Resources.
+	for i in range(1,split_varpath.size()):
 		# Return early if value is null.
-		if value == null:
-			_find_value_error_helper_1(value, node, raw_expression)
+		if variable == null:
+			_get_value_error_helper_1(variable, node, raw_expression)
 			return
 		# Get next value based on current value type.
-		match typeof(value):
+		match typeof(variable):
 			# If acessing property of a Dictionary or Object, proceed.
 			TYPE_DICTIONARY, TYPE_OBJECT:
-				value = value.get(split_content[i])
+				variable = variable.get(split_varpath[i])
+			# If acessing property of a Vector2, proceed.
+			TYPE_VECTOR2:
+				# If invalid access, return & throw error.
+				if split_varpath[i] not in 'xy':
+					_get_value_error_helper_2(split_varpath[i], node, raw_expression)
+					return
+				variable = variable[split_varpath[i]]
 			# If other type, return & throw error.
 			_:
-				_find_value_error_helper_1(value, node, raw_expression)
+				_get_value_error_helper_1(variable, node, raw_expression)
 				return
-	return value
+	return variable
+
+
+func _set_value(split_varpath:PackedStringArray, target:Node, value) -> void: ## Sets the value of a variable in the target.
+	var split_varpath_size := split_varpath.size()
+	# If top-level, set directly.
+	if split_varpath_size < 2:
+		target.set(split_varpath[0], value)
+		return
+	var variable = target.get(split_varpath[0]) # Get top-level variable from target.
+	
+	return
+	# NOTE: This code is blocked off because it doesn't work properly yet. For now, only top-level setting is possible.
+	for i in range(1,split_varpath.size()):
+		print(variable,split_varpath[i])
+		# Set value on the variable.
+		if split_varpath_size-1 == i:
+			match typeof(variable):
+				TYPE_DICTIONARY, TYPE_OBJECT:
+					variable.set(split_varpath[i], value)
+				TYPE_VECTOR2:
+					if split_varpath[i] not in 'xy': return # Return if invalid property.
+					variable[split_varpath[i]] = value
+				_:
+					target.set(split_varpath[i], value)
+			return
+
+		# Get next value based on current value type.
+		match typeof(variable):
+			# If acessing property of a Dictionary or Object, proceed.
+			TYPE_DICTIONARY, TYPE_OBJECT:
+				variable = variable.get(split_varpath[i])
+			# If acessing property of a Vector2, proceed.
+			TYPE_VECTOR2:
+				print(111)
+				if split_varpath[i] not in 'xy': return # Return if invalid property.
+				variable = variable[split_varpath[i]]
+				print(222)
+			# If other type, return & throw error.
+			_:
+				return
