@@ -20,8 +20,8 @@ const Errors := {
 }
 const Parse_Errors := [
 	'Invalid expression type',
-	'Invalid starting character in property name.',
-	'Invalid character in property name.',
+	'Invalid starting character in property name',
+	'Invalid character in property name',
 	'Assign/Link expression content should only contain basic characters',
 	'No expression type defined',
 	'No content defined',
@@ -56,8 +56,8 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 	var error := 0
 	var expression_type:String
 	var property_name:String
+	var content:String
 	var stage := 'expression_type' ## The parsing stage.
-	var buffer := PackedStringArray([])
 	var expecting_flag := 0
 
 	# If comment line, throw silent error.
@@ -71,7 +71,6 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 			# Set expression type.
 			if char == Property_name_requester_token:
 				stage = 'property_name'
-				buffer.clear()
 				expecting_flag = 0
 				# Throw error if not a valid expression type.
 				if expression_type not in ExpTypes.values():
@@ -80,7 +79,6 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 			# Progress to content stage if not specifying "property_name".
 			elif char == ' ':
 				stage = 'content'
-				buffer.clear()
 				expecting_flag = 0
 				# Throw error if not a valid expression type.
 				if expression_type not in ExpTypes.values():
@@ -93,9 +91,7 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 		elif stage == 'property_name':
 			# Progress to translation_key stage.
 			if char == ' ':
-				property_name = ''.join(buffer)
 				stage = 'content'
-				buffer.clear()
 				expecting_flag = 0
 			# Throw error if invalid start of property name.
 			elif expecting_flag == 0 && char.to_lower() not in Valid_property_name_starting_characters:
@@ -107,11 +103,11 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 				break
 			# Look for start of property name.
 			if expecting_flag == 0 && char.to_lower() in Valid_property_name_starting_characters:
-				buffer.append(char)
+				property_name += char
 				expecting_flag = 1
 			# Add to property name.
 			elif expecting_flag == 1 && char.to_lower() in Valid_property_name_characters:
-				buffer.append(char)
+				property_name += char
 
 		elif stage == 'content':
 			# If expression type == assign.
@@ -121,16 +117,17 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 					error = 4
 					break
 			# Add to content.
-			buffer.append(char)
+			content += char
 
 
+	# Error checks.
 	if error != 0: pass
 	elif expression_type == '':
 		error = 5
-	elif buffer.size() == 0:
+	elif expression_type not in ExpTypes.values():
+		error = 1
+	elif content == '':
 		error = 6
-
-	var content := ''.join(buffer)
 
 	var result := {
 		'error': error,
@@ -249,7 +246,6 @@ func _set_value(split_varpath:PackedStringArray, target:Node, value) -> void: ##
 	return
 	# NOTE: This code is blocked off because it doesn't work properly yet. For now, only top-level setting is possible.
 	for i in range(1,split_varpath.size()):
-		print(variable,split_varpath[i])
 		# Set value on the variable.
 		if split_varpath_size-1 == i:
 			match typeof(variable):
@@ -269,10 +265,8 @@ func _set_value(split_varpath:PackedStringArray, target:Node, value) -> void: ##
 				variable = variable.get(split_varpath[i])
 			# If acessing property of a Vector2, proceed.
 			TYPE_VECTOR2:
-				print(111)
 				if split_varpath[i] not in 'xy': return # Return if invalid property.
 				variable = variable[split_varpath[i]]
-				print(222)
 			# If other type, return & throw error.
 			_:
 				return
