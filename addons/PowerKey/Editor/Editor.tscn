@@ -65,6 +65,10 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="Tabs/Configure/Resources Path"]
 layout_mode = 2
+tooltip_text = "Path to a GDScript file to be used as the Resources Script.
+
+The script file will be instantiated during runtime & used by PKExpressions."
+mouse_filter = 0
 text = "Resources Script Path:"
 
 [node name="Text Box" type="TextEdit" parent="Tabs/Configure/Resources Path"]
@@ -84,10 +88,18 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="Tabs/Configure/Max Cached PKExpressions"]
 layout_mode = 2
+tooltip_text = "How many PKExpressions can be stored in cache memory at any given moment.
+If the cache size is not limited, it could potentially waste RAM for storing every expression ever parsed.
+I recommend keeping the max cache size low, or even 0 if you don't think you need it.
+
+Before parsing an expression, it searches for a cached expression that has previously been parsed.
+This removes the need re-parse the same expression. However if the max cache limit is reached, older cached expressions get deleted & will need to be re-parsed if used again."
+mouse_filter = 0
 text = "Max Cached PKExpressions:"
 
 [node name="SpinBox" type="SpinBox" parent="Tabs/Configure/Max Cached PKExpressions"]
 layout_mode = 2
+max_value = 500.0
 value = 3.0
 
 [node name="Debug" type="VBoxContainer" parent="Tabs/Configure"]
