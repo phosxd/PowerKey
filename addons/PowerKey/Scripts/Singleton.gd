@@ -4,6 +4,8 @@ var PKConfig := PK_Config.new()
 var Config := PKConfig.load_config()
 @onready var Resources_script = load(Config.resources_script_path) if FileAccess.file_exists(Config.resources_script_path) else null
 var Resources
+var Resources_script_has_ready := false
+var Resources_script_has_process := false
 
 
 func _ready() -> void:
@@ -11,16 +13,18 @@ func _ready() -> void:
 	if Resources_script is Script:
 		var new_node := Node.new()
 		new_node.set_script(Resources_script)
-		if new_node.has_method('_ready'): new_node.call('_ready')
+		# Store "has_method" checks.
+		Resources_script_has_ready = new_node.has_method('_ready')
+		Resources_script_has_process = new_node.has_method('_process')
+		# Call "_ready".
+		if Resources_script_has_ready: new_node.call('_ready')
+		# Update "Resources".
 		Resources = new_node
 	# If no script, set Resources to empty Dictionary.
 	else:
 		Resources = {}
 		
-	# Initialize Parser.
-	Parser.init(Config,Resources)
-	
-	# Setup hook.
+	Parser.init(Config,Resources) # Initialize Parser.
 	_hook_onto_nodes() # Hook onto all nodes currently in the tree.
 
 
@@ -29,7 +33,7 @@ func _ready() -> void:
 
 func _process(delta:float) -> void:
 	if Resources is Node:
-		if not Resources.has_method('_process'): return
+		if not Resources_script_has_process: return
 		Resources.call('_process', delta)
 
 
@@ -37,14 +41,19 @@ func _process(delta:float) -> void:
 
 # Evaluator functions.
 # --------------------
-func evaluate_node_tree(node:Node) -> void: ## Recursively evaluates all Nodes under the given Node.
+func evaluate_node_tree(node:Node) -> void: ## Recursively evaluate all Nodes under the given Node.
 	_recursive(node, func(_node:Node) -> void:
 		evaluate_node(_node)
 	)
 
-func evaluate_node(node:Node) -> void: ## Evaluates PKExpressions present on the Node.
+
+func evaluate_node(node:Node) -> void: ## Evaluate PKExpressions present on the Node.
 	var pkexpressions = node.get_meta('PKExpressions', false)
+	
 	if not pkexpressions: return
+	if typeof(pkexpressions) != TYPE_STRING: return
+	if pkexpressions.strip_edges() == '': return
+	
 	var lines:PackedStringArray = pkexpressions.split('\n')
 	for line in lines:
 		var parsed = Parser.parse_pkexp(line) # Parse line.
@@ -64,16 +73,13 @@ func evaluate_node(node:Node) -> void: ## Evaluates PKExpressions present on the
 # Hook methods.
 # -------------
 func _hook_onto_nodes() -> void: ## Hook to all nodes in the project.
-	_recursive(get_tree().root, func(node:Node):
-		_hook_node(node)
-	)
-
-func _hook_node(node:Node) -> void: ## Evaluates the node & hooks any new child nodes that get instantiated.
-	# If not already hooked.
-	if not node.child_entered_tree.is_connected(_hook_node):
-		node.child_entered_tree.connect(_hook_node)
-		# Evaluate PKExpressions on node.
+	var tree := get_tree()
+	# Hook to every new Node.
+	tree.node_added.connect(func(node:Node) -> void:
 		evaluate_node(node)
+	)
+	# Hook to currently initialized Nodes.
+	evaluate_node_tree(tree.root)
 
 func _recursive(node:Node, callback:Callable) -> void:
 	for child in node.get_children():
