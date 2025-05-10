@@ -40,7 +40,7 @@ Each translation has 3 properties:
 
 1. Property: the property on the Node to translate.
 2. Key: the key to look for in the Node's property before translation.
-3. Value: the property in the Resources Script to assign to the Node's property, if the key matches the Node's property (beofre translation).
+3. Value: the property in the Resources Script to assign to the Node's property, if the key matches the Node's property (before translation).
 
 This works more like the translation system built-into Godot, but still provides all the advantages of PowerKey.
 ## Enhanced property access support:

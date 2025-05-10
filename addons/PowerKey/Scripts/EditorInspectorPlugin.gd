@@ -12,7 +12,8 @@ func _parse_category(object:Object, category:String) -> void:
 		var PKExpEditor_instance := PKExpression_Editor.instantiate()
 		var pk_expressions = object.get_meta('PKExpressions', false)
 		if pk_expressions:
-			PKExpEditor_instance.init(pk_expressions)
+			if typeof(pk_expressions) == TYPE_STRING:
+				PKExpEditor_instance.init(pk_expressions)
 			
 		# On PKExp Editor sends update signal, update the Node.
 		PKExpEditor_instance.on_update.connect(func(pk_expressions:String) -> void:
