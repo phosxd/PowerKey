@@ -27,10 +27,6 @@ For basic localization, the systems already in place for Godot should suffice.
 PowerKey is meant to serve as a more user-friendly & more powerful approach. But sometimes more power isn't what you need.
 
 # TO-DO:
-## Node type excluder:
-**Milestone:** 1.5.0
-
-"Excluded Nodes" field in the Configuration menu in which you can define Node types to be ignored when hooking & evaluating Nodes. Excluded Nodes will not have the PKExpressions dropdown & will not run PKExpressions.
 ## Visual PKExpression builder:
 **Milestone:** 1.5.0
 
@@ -47,7 +43,7 @@ Each translation has 3 properties:
 3. Value: the property in the Resources Script to assign to the Node's property, if the key matches the Node's property (beofre translation).
 
 This works more like the translation system built-into Godot, but still provides all the advantages of PowerKey.
-## List property support:
+## Enhanced property access support:
 **Milestone:** 1.5.0
 
-Currently, in "Link" & "Assign" PKExpressions you can only acess properties from objects of type `Dictionary` or `Object`. I want to add the ability to access values from `Array`s as well.
+Currently, in "Link" & "Assign" PKExpressions you can only acess properties from objects of type `Dictionary`, `Object` & `Vector2`. I want to add the ability to access values from `Array`, `Rect2`, `Rect2i`, `Plane`, `Quaternion`, `AABB`, `Transform2D`, `Basis`, `Vector2i`, `Vector3`, `Vector3i`, `Vector4`, `Vector4i`, `StringName`, & `Color` types as well.
