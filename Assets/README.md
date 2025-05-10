@@ -12,27 +12,15 @@ Say for example, you wanted to randomize some text or texture, or any property o
 Instead of doing that, you could simply add a line of text to the PKExpressions field in the Inspector for the Node that needs it.
 
 This CAN be used for randomized translation but it is very much not limited to just translation. You can do anything with it that a Script can do, **however**, it is not meant to serve as a replacement for Scripts! Use only for simple tasks.
-# How do I use it?
-## Define a Resources script:
-PowerKey reads all variables from a single script. Create a new GDScript file, *make sure it extends Node*. Now copy the file path & paste it into the "Resources Script Path" field within the PowerKey configuration menu.
-
-In order for PowerKey to use variables in the script, they must be defined in the script's globals! You can define variables with null values & give them new values in the "_ready" function if needed.
-## Write a PKExpression:
-Select any Node, then in the Inspector dock, scroll down to the "PKExpressions" dropdown located under the "Node" category. Open it up & manage the Node's PKExpressions from there.
-View the integrated Guide to learn how PKExpressions work.
-
-There is a full integrated guide section in the add-on. It should give you all the information you need. If you need help, join my [Discord](https://dsc.gg/sohp) for assistance.
-# When NOT to use PowerKey:
-For basic localization, the systems already in place for Godot should suffice.
-PowerKey is meant to serve as a more user-friendly & more powerful approach. But sometimes more power isn't what you need.
-
 # TO-DO:
-## Visual PKExpression builder:
-**Milestone:** 1.5.0
+## "Eval" ("V") PKExpression type:
+**Milestone:** ???
 
-A "Add Visually" button in the PKExpressions dropdown for the Inspector dock. Pressing the "Add Visually" button will show a pop-up form that makes it possible to add an expression without knowing the syntax. It will also be very helpful for getting started learning the syntax.
+This PKExpression type will let you safely evaluate GDScript expressions with access to the Node's properties & Resource script's properties.
+This lets you perform calculations without needing to rely on the unsafe & more expensive "Execute" PKExpression type.
+The result is applied to the specified property on the Node. Just like the "Assign" PKExpression type, it is one-off so it only runs on the Node once.
 ## Broad translations:
-**Milestone:** 1.5.0
+**Milestone:** ???
 
 "Translations" field in the Configuration menu in which you can add/modifiy translations.
 
@@ -43,6 +31,10 @@ Each translation has 3 properties:
 3. Value: the property in the Resources Script to assign to the Node's property, if the key matches the Node's property (before translation).
 
 This works more like the translation system built-into Godot, but still provides all the advantages of PowerKey.
+## Visual PKExpression builder:
+**Milestone:** 1.5.0
+
+A "Add Visually" button in the PKExpressions dropdown for the Inspector dock. Pressing the "Add Visually" button will show a pop-up form that makes it possible to add an expression without knowing the syntax. It will also be very helpful for getting started learning the syntax.
 ## Enhanced property access support:
 **Milestone:** 1.5.0
 
