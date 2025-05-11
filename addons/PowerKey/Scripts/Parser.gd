@@ -12,19 +12,18 @@ const Comment_token := '#' ## Used to denote a commented line.
 const Property_name_requester_token := ':' # Should NEVER be more than one character.
 const Valid_property_name_characters := 'abcdefghijklmnopqrstuvwxyz0123456789_.'
 const Valid_property_name_starting_characters := 'abcdefghijklmnopqrstuvwxyz_'
-const Valid_assign_content_characters := 'abcdefghijklmnopqrstuvwxyz0123456789_.'
 const Supported_pkexp_value_property_types := ['Dictionary','Object', 'Vector2']
 const Errors := {
-	'pkexp_parse_failed': 'PowerKey: Failed to process PKExpression "%s" for Node "%s" with reason "%s".',
-	'pkexp_property_not_found': 'PowerKey: Failed to find property "%s" for Node "%s" in Resources Script ("%s").',
-	'pkexp_property_not_found_in_node': 'PowerKey: Failed to find property "%s" in Node "%s".',
-	'pkexp_accessing_unsupported_type': 'PowerKey: PKExpression "%s" for Node "%s" tried requesting property from an unsupported Type "%s", expected one of the following: %s.',
-	'pkexp_accessing_nonexistent_value_on_vector2': 'PowerKey: PKExpression "%s" for Node "%s" tried accessing non-existent property "%s" from a "Vector2".',
+	'pkexp_parse_failed': 'PowerKey PKExpression: (@char %s) Failed to parse expression "%s" for Node "%s" with reason "%s".',
+	'pkexp_property_not_found': 'PowerKey PKExpression: (@char %s) Failed to find property "%s" for Node "%s" in Resources Script ("%s").',
+	'pkexp_property_not_found_in_node': 'PowerKey PKExpression: (@char %s) Failed to find property "%s" in Node "%s".',
+	'pkexp_accessing_unsupported_type': 'PowerKey PKExpression: (@char %s) Expression "%s" for Node "%s" tried requesting property from an unsupported Type "%s", expected one of the following: %s.',
+	'pkexp_accessing_nonexistent_value_on_vector2': 'PowerKey PKExpression: (@char %s) Expression "%s" for Node "%s" tried accessing non-existent property "%s" from a "Vector2".',
 }
 const Parse_Errors := [
 	'Invalid expression type',
-	'Invalid starting character in property name',
-	'Invalid character in property name',
+	'Invalid starting character in variable path',
+	'Invalid character in variable path',
 	'Assign/Link expression content should only contain basic characters',
 	'No expression type defined',
 	'No content defined',
@@ -45,8 +44,8 @@ func init(config:Dictionary, resources) -> void:
 
 
 
-# PKExpression functions.
-# -----------------------
+# PKExpression parsing functions.
+# -------------------------------
 func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expression details. Returns null if invalid expression.
 	# Check cache, return cached result is available.
 	if not Engine.is_editor_hint():
@@ -55,21 +54,21 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 			if i[0] != text: continue
 			cached = i[1]
 		if cached: return cached
-
+	# Define variables.
 	var error := 0
 	var expression_type:String
 	var property_name:String
 	var content:String
 	var stage := 'expression_type' ## The parsing stage.
 	var expecting_flag := 0
-
 	# If comment line, throw silent error.
 	if text.begins_with(Comment_token):
 		error = 999
 		return {'error':error}
 
-
+	var current_char := 0
 	for char in text:
+		current_char += 1
 		if stage == 'expression_type':
 			# Set expression type.
 			if char == Property_name_requester_token:
@@ -92,36 +91,28 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 				expression_type += char
 
 		elif stage == 'property_name':
-			# Progress to translation_key stage.
-			if char == ' ':
+			var res := _parse_variable_path(char, expecting_flag)
+			if res.error != 0:
+				error = res.error
+				break
+			property_name += res.char
+			expecting_flag = res.expecting_flag
+			if res.end:
 				stage = 'content'
 				expecting_flag = 0
-			# Throw error if invalid start of property name.
-			elif expecting_flag == 0 && char.to_lower() not in Valid_property_name_starting_characters:
-				error = 2
-				break
-			# Throw error if invalid character.
-			elif char.to_lower() not in Valid_property_name_characters:
-				error = 3
-				break
-			# Look for start of property name.
-			if expecting_flag == 0 && char.to_lower() in Valid_property_name_starting_characters:
-				property_name += char
-				expecting_flag = 1
-			# Add to property name.
-			elif expecting_flag == 1 && char.to_lower() in Valid_property_name_characters:
-				property_name += char
 
 		elif stage == 'content':
-			# If expression type == assign.
+			# If expression type == assign, handle properly.
 			if expression_type in [ExpTypes.assign, ExpTypes.link]:
-				# Throw error if invalid character for an "assign" expression.
-				if char.to_lower() not in Valid_assign_content_characters:
-					error = 4
+				var res := _parse_variable_path(char, expecting_flag)
+				if res.error != 0:
+					error = res.error
+					break
+				expecting_flag = res.expecting_flag
+				if res.end:
 					break
 			# Add to content.
 			content += char
-
 
 	# Error checks.
 	if error != 0: pass
@@ -131,9 +122,10 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 		error = 1
 	elif content == '':
 		error = 6
-
+	# Define result.
 	var result := {
 		'error': error,
+		'current_char': current_char,
 		'type': expression_type,
 		'property_name': property_name,
 		'content': content,
@@ -143,12 +135,38 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 		cached_pkexpressions.append([text,result])
 		if cached_pkexpressions.size() > Config.max_cached_pkexpressions:
 			cached_pkexpressions.remove_at(0)
-	# Return.
+	# Return the results.
+	return result
+
+
+func _parse_variable_path(char:String, expecting_flag:int) -> Dictionary: ## Parses a variable path. Returns the error, whether or not it's finished, a character to add to the final String, & the next expecting flag.
+	var result := {'error':0, 'end':false, 'char':'', 'expecting_flag':expecting_flag}
+	# End current stage.
+	if char == ' ':
+		result.end = true
+		return result
+	# Throw error if invalid character.
+	elif char.to_lower() not in Valid_property_name_characters:
+		result.error = 3
+		return result
+	# Throw error if invalid start of variable path.
+	elif expecting_flag == 0 && char.to_lower() not in Valid_property_name_starting_characters:
+		result.error = 2
+		return result
+	# If start of variable path, add to, & change expecting flag.
+	elif expecting_flag == 0 && char.to_lower() in Valid_property_name_starting_characters:
+		result.char += char
+		result.expecting_flag = 1
+	# Add to variable path.
+	elif expecting_flag == 1 && char.to_lower() in Valid_property_name_characters:
+		result.char += char
 	return result
 
 
 
 
+# PKExpression processing functions.
+# ----------------------------------
 func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void: ## Executes a parsed PowerKey expression on the Node.
 	# Debug printing.
 	if Config.debug_print_any_pkexpression_processed:
@@ -203,10 +221,6 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 
 
 
-
-
-
-# Utility functions.
 func _get_value_error_helper_1(stopped_value, node:Node, raw_expression:String) -> void:
 	printerr(Errors.pkexp_accessing_unsupported_type % [raw_expression, node.name, type_string(typeof(stopped_value)),', '.join(Supported_pkexp_value_property_types)])
 func _get_value_error_helper_2(var_name, node:Node, raw_expression:String) -> void:

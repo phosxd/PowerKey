@@ -24,11 +24,11 @@ func init(pk_expressions:String) -> void:
 
 
 
-func _update_validation_label(mode:int) -> void:
+func _update_validation_label(mode:int, current_char=null) -> void:
 	if mode == 0:
 		$'Content/Items/Validation/Label'.text = 'Looks good! No parsing errors found.'
 	else:
-		$'Content/Items/Validation/Label'.text = 'Error while parsing expression "%s".' % Parser.Parse_Errors[mode-1]
+		$'Content/Items/Validation/Label'.text = '(@char %s) Error while parsing expression "%s".' % [current_char, Parser.Parse_Errors[mode-1]]
 
 
 
@@ -57,6 +57,7 @@ func _on_text_editor_text_changed() -> void:
 	%'Text Editor'.set_line_background_color(0, Color(0,0,0,0))
 	# Validate expressions, if not empty.
 	var error := 0
+	var current_char := 0
 	# Count & parse each line.
 	var line_index := -1
 	for line in PKExpressions.split('\n'):
@@ -71,7 +72,8 @@ func _on_text_editor_text_changed() -> void:
 		# If failed to parse line, set error & highlight line.
 		elif parsed.error != 0:
 			error = parsed.error
+			current_char = parsed.current_char
 			%'Text Editor'.set_line_background_color(line_index, Color(1,0.3,0.3,0.5)) # Highlight line in Text Editor.
 			break
 	# Update validation label with error as mode.
-	_update_validation_label(error)
+	_update_validation_label(error, current_char)

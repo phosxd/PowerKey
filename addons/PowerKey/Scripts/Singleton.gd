@@ -64,7 +64,7 @@ func evaluate_node(node:Node) -> void: ## Evaluate PKExpressions present on the 
 			continue
 		# If error, print error.
 		elif parsed.error != 0:
-			printerr(PK_Parser.Errors.pkexp_parse_failed % [line, node.name, PK_Parser.Parse_Errors[parsed.error-1]])
+			printerr(PK_Parser.Errors.pkexp_parse_failed % [parsed.current_char, line, node.name, PK_Parser.Parse_Errors[parsed.error-1]])
 		# If no errors, process expression.
 		else:
 			Parser.process_pkexp(node, line, parsed)
