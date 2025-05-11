@@ -1,3 +1,5 @@
+# This script is responsible for adding the "PKExpressions" dropdown option for Nodes in the Insector dock.
+
 extends EditorInspectorPlugin
 const PKExpression_Editor := preload('res://addons/PowerKey/Editor/Editor Inspector/PKExpression Editor.tscn')
 

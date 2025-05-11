@@ -1,3 +1,5 @@
+# This script is the core of the whole plugin during run-time, it can also be accessed by any other scripts in the project as the `PowerKey` singleton.
+
 extends Node
 var Parser := PK_Parser.new()
 var PKConfig := PK_Config.new()

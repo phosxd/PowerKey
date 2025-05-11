@@ -1,3 +1,6 @@
+# This script loads & manages the configuration, from a config text file.
+# New instance should be created if used (call `.new`).
+
 class_name PK_Config extends Node
 
 const config_file_path := 'res://addons/PowerKey/config.json'

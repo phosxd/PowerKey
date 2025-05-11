@@ -1,3 +1,6 @@
+# This script handles all proccessing & parsing of PKExpressions.
+# New instance should be created if used (call `.new`).
+
 class_name PK_Parser extends Node
 const ExpTypes := {
 	'assign': 'A',
