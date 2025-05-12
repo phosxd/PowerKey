@@ -50,10 +50,11 @@ icon = ExtResource("1_sgcgi")
 [node name="Tabs" type="TabContainer" parent="."]
 layout_mode = 2
 size_flags_vertical = 3
-current_tab = 0
+current_tab = 1
 tabs_visible = false
 
 [node name="Configure" type="VBoxContainer" parent="Tabs"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -152,7 +153,6 @@ text = "Resources Script Path not found."
 label_settings = SubResource("LabelSettings_fjtuu")
 
 [node name="Guide" type="VBoxContainer" parent="Tabs"]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
@@ -162,23 +162,12 @@ size_flags_vertical = 3
 tab_alignment = 1
 current_tab = 0
 
-[node name="About" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
-layout_mode = 2
-size_flags_vertical = 3
-bbcode_enabled = true
-text = "PowerKey is a more intuitive solution to translating text & properties. With this, you can define variables in a Script to be read by PowerKey & assigned to a Node's property accordingly during runtime.
-
-If you have any questions not answered by the Guide, you are free to ask in my [color=royal_blue][url=https://dsc.gg/sohp]Discord Server[/url][/color]. If you wan't to contribute or report any issues, do that in the [color=beige][url=https://github.com/phosxd/PowerKey]Github Repo[/url][/color].
-
-[font_size=30]Why does this exist?[/font_size]
-While developing various projects I found it tedious to attach a new script if I wanted to dynamically change a Node's property or text. This plugin makes it easy by letting you use a single script to apply translations & small-eval-statements to unlimited Node's."
-metadata/_tab_index = 0
-
 [node name="Getting Started" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
-visible = false
 layout_mode = 2
 bbcode_enabled = true
-text = "[font_size=30]Assigning a Script:[/font_size]
+text = "For additional help, don't hesitate to ask in the [color=royal_blue][url=https://dsc.gg/sohp]Discord Server[/url][/color]. If you find any issues please report them on the [color=royal_blue][url=https://github.com/phosxd/PowerKey]Github Repo[/url][/color].
+
+[font_size=30]Assigning a Script:[/font_size]
 To use PowerKey, you will need to create a GDScript file to hold all your variables.
 [ol] Create a new GDScript file that extends Node.
  In your Script, load any & all resources you plan to use. You can also run any logic needed in the \"_ready\" function, just make sure your variables are defined in the Scripts globals if you wan't to use them.
@@ -187,7 +176,7 @@ To use PowerKey, you will need to create a GDScript file to hold all your variab
 
 [font_size=30]Writing an Expression:[/font_size]
 Read through the \"Expressions\" guide page to understand how expressions work and how to implement them. If you still don't understand how everything works, please take a look at some examples located in the PowerKey addon directory."
-metadata/_tab_index = 1
+metadata/_tab_index = 0
 
 [node name="Expressions" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
 visible = false
@@ -233,7 +222,7 @@ This expression type just lets you do whatever you wan't, AT YOUR OWN RISK. Your
 [ul] E print('hello world')
  E S.text = PK.some_string
  E var a := self.some_variable; print(a)"
-metadata/_tab_index = 2
+metadata/_tab_index = 1
 
 [connection signal="tab_changed" from="Top Bar/Tab Bar" to="." method="_on_tab_bar_tab_changed"]
 [connection signal="pressed" from="Top Bar/Button Github" to="." method="_on_button_github_pressed"]

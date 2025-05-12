@@ -1,18 +1,21 @@
-[gd_scene load_steps=6 format=3 uid="uid://cklwwr4htvoa0"]
+[gd_scene load_steps=9 format=3 uid="uid://cklwwr4htvoa0"]
 
 [ext_resource type="Script" uid="uid://cl53u7hsjfh00" path="res://addons/PowerKey/Editor/Editor Inspector/PKExpression Editor.gd" id="1_hvuxj"]
+[ext_resource type="StyleBox" uid="uid://dmx54n3nof1ea" path="res://addons/PowerKey/Editor/Editor Inspector/dropdown_panel_normal.tres" id="2_es0o0"]
+[ext_resource type="StyleBox" uid="uid://2oldccxcjxrf" path="res://addons/PowerKey/Editor/Editor Inspector/dropdown_panel_hover.tres" id="2_flkrg"]
 [ext_resource type="Texture2D" uid="uid://1um78pocay0q" path="res://addons/PowerKey/Editor/Editor Inspector/collapsed.svg" id="2_m5lue"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hvuxj"]
-bg_color = Color(0.329412, 0.305882, 0.427451, 1)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_7nutv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hvuxj"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lglc1"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_hvuxj"]
 font_size = 13
 font_color = Color(0.800491, 0.800491, 0.800491, 1)
 outline_size = 2
 outline_color = Color(0.8, 0.8, 0.8, 1)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hvuxj"]
 
 [node name="PKExpression Editor" type="VBoxContainer"]
 anchors_preset = 15
@@ -24,11 +27,27 @@ script = ExtResource("1_hvuxj")
 
 [node name="Dropdown Button Panel" type="PanelContainer" parent="."]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_hvuxj")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_7nutv")
+
+[node name="Button" type="Button" parent="Dropdown Button Panel"]
+layout_mode = 2
+tooltip_text = "PKExpressions"
+theme_override_styles/focus = SubResource("StyleBoxEmpty_hvuxj")
+theme_override_styles/hover = ExtResource("2_flkrg")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_lglc1")
+theme_override_styles/normal_mirrored = ExtResource("2_es0o0")
+theme_override_styles/normal = ExtResource("2_es0o0")
+alignment = 0
 
 [node name="Visuals" type="HBoxContainer" parent="Dropdown Button Panel"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 0
+
+[node name="VSeparator" type="VSeparator" parent="Dropdown Button Panel/Visuals"]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_constants/separation = 2
 
 [node name="Icon" type="TextureRect" parent="Dropdown Button Panel/Visuals"]
 layout_mode = 2
@@ -39,13 +58,6 @@ stretch_mode = 3
 layout_mode = 2
 text = "PKExpressions"
 label_settings = SubResource("LabelSettings_hvuxj")
-
-[node name="Button" type="Button" parent="Dropdown Button Panel"]
-layout_mode = 2
-tooltip_text = "PKExpressions"
-theme_override_styles/focus = SubResource("StyleBoxEmpty_hvuxj")
-flat = true
-alignment = 0
 
 [node name="Content" type="HBoxContainer" parent="."]
 visible = false

@@ -24,11 +24,11 @@ func init(pk_expressions:String) -> void:
 
 
 
-func _update_validation_label(mode:int, current_char=null) -> void:
-	if mode == 0:
+func _update_validation_label(error:int, current_char=null) -> void:
+	if error == 0:
 		$'Content/Items/Validation/Label'.text = 'Looks good! No parsing errors found.'
 	else:
-		$'Content/Items/Validation/Label'.text = '(@char %s) Error while parsing expression "%s".' % [current_char, Parser.Parse_Errors[mode-1]]
+		$'Content/Items/Validation/Label'.text = '(@char %s) Error "%s" while parsing expression.' % [current_char, Parser.Parse_Errors[error-1]]
 
 
 
