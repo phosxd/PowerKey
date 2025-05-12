@@ -39,7 +39,7 @@ Instead of doing that, you could simply add a line of text to the PKExpressions 
 
 This CAN be used for randomized translation but it is very much not limited to just translation. You can do anything with it that a GDScript can do, however, it is not meant to serve as a replacement for scripts! Use only for simple tasks.
 ### Fast & efficient:
-You can rest assured that every system in PowerKey runs as smoothly as possible & has no noticeable affect on performance or RAM usage. The only time you may see issues with performance or memory is when you are using thousands of high impact expressions. And if you aren't using the more advanced features of PowerKey, and just use it for translation, then you have absolutely nothing to worry about as there is effectively ZERO impact when using "Assign" PKExpressions, even at massive quantities.
+You can rest assured that every system in PowerKey runs as smoothly as possible & has no noticeable effect on performance or RAM usage. The only time you may see issues with performance or memory is when you are using thousands of high impact expressions. And if you aren't using the more advanced features of PowerKey, and just use it for translation, then you have absolutely nothing to worry about as there is effectively ZERO impact when using "Assign" PKExpressions, even at massive quantities.
 # TO-DO:
 ### "Eval" ("V") PKExpression type:
 **Milestone:** ???
@@ -71,4 +71,4 @@ Currently, in "Link" & "Assign" PKExpressions you can only acess properties from
 **Milestone:** 1.5.0
 
 A new parameter in Link expressions that allow you to define how frequently the value updates. By default the frequency is 0 (every frame), this parameter option will let users set the frequency to whatever they want, to better suite their need.
-However, because no expression type expects multiple parameters, I will need to implement code to allow defining multiple parameters. Here is how this new frequency parameter would be used: `L:<property_name>,<frequency> <content>`. The frequency parameter will be optional.
+Here is how this new frequency parameter would be used: `L:<property_name>,<frequency> <content>`. The frequency parameter will be optional.

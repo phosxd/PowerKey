@@ -2,37 +2,38 @@
 # New instance should be created if used (call `.new`).
 
 class_name PK_Parser extends Node
-const ExpTypes := {
+const ExpTypes:Dictionary[StringName,StringName] = {
 	'assign': 'A',
 	'link': 'L',
 	'execute': 'E',
 }
-const ExpTypes_require_property_name := ['assign','link']
-const Comment_token := '#' ## Used to denote a commented line.
-const Parameter_separator := ',' ## Used to separate expression parameters.
-const Property_name_requester_token := ':' # Should NEVER be more than one character.
-const Valid_property_name_characters := 'abcdefghijklmnopqrstuvwxyz0123456789_.'
-const Valid_property_name_starting_characters := 'abcdefghijklmnopqrstuvwxyz_'
-const Supported_pkexp_value_property_types := ['Dictionary','Object', 'Vector2']
-const Errors := {
+const ExpType_values:Array[String] = ['A','L','E'] ## Pre-compiled ExpType values as array.
+const Lowercases:Dictionary[StringName,StringName] = {'A':'a','B':'b','C':'c','D':'d','E':'e','F':'f','G':'g','H':'h','I':'i','J':'j','K':'k','L':'l','M':'m','N':'n','O':'o','P':'p','Q':'q','S':'s','T':'t','U':'u','V':'v','W':'w','X':'x','Y':'y','Z':'z'} ## Performs better than using `.to_lower`.
+const Comment_token:StringName = '#' ## Used to denote a commented line.
+const Parameter_separator:StringName = ',' ## Used to separate expression parameters.
+const Property_name_requester_token:StringName = ':' # Should NEVER be more than one character.
+const Valid_property_name_characters:StringName = 'abcdefghijklmnopqrstuvwxyz0123456789_.'
+const Valid_property_name_starting_characters:StringName = 'abcdefghijklmnopqrstuvwxyz_'
+const Supported_pkexp_value_property_types:Array[StringName] = ['Dictionary','Object', 'Vector2']
+const Errors:Dictionary[StringName,StringName] = {
 	'pkexp_parse_failed': 'PowerKey PKExpression: (@char %s) Failed to parse expression "%s" for Node "%s" with reason "%s".',
 	'pkexp_property_not_found': 'PowerKey PKExpression: (@char %s) Failed to find property "%s" for Node "%s" in Resources Script ("%s").',
 	'pkexp_property_not_found_in_node': 'PowerKey PKExpression: (@char %s) Failed to find property "%s" in Node "%s".',
 	'pkexp_accessing_unsupported_type': 'PowerKey PKExpression: (@char %s) Expression "%s" for Node "%s" tried requesting property from an unsupported Type "%s", expected one of the following: %s.',
 	'pkexp_accessing_nonexistent_value_on_vector2': 'PowerKey PKExpression: (@char %s) Expression "%s" for Node "%s" tried accessing non-existent property "%s" from a "Vector2".',
 }
-const Parse_Errors := [
+const Parse_Errors:Array[StringName] = [
 	'Invalid expression type',
 	'Invalid starting character in variable path',
 	'Invalid character in variable path',
 	'Assign/Link expression content should only contain basic characters',
 	'No expression type defined',
 	'No content defined',
-	'Parameter cannot be empty.',
+	'Parameter cannot be empty',
 ]
 const Link_timer_name := '_pk_link_timer'
-var Execute_script := GDScript.new()
-var Execute_script_code_template := 'static func %s(S, PK) -> void:\n	S=S; PK=PK;\n%s'
+var Execute_script:Script = GDScript.new()
+var Execute_script_code_template:StringName = 'static func %s(S, PK) -> void:\n	S=S; PK=PK;\n%s'
 
 var Config
 var Resources
@@ -55,7 +56,7 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 		if cached_pkexps.has(text):
 			return cached_pkexps[text]
 	# Define the parsing state & it's data.
-	var ps:Dictionary = { ## The parsing state.
+	var ps:Dictionary[StringName,Variant] = { ## The parsing state.
 		'error': 0, # Parse error. 0 = OK.
 		'current_char': 0,
 		'type': '', # The expression type.
@@ -81,7 +82,7 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 	if ps.error != 0: pass
 	elif ps.type == '':
 		ps.error = 5
-	elif ps.type not in ExpTypes.values():
+	elif ps.type not in ExpType_values:
 		ps.error = 1
 	elif ps.content == '':
 		ps.error = 6
@@ -105,7 +106,7 @@ func _parse_type(char:String, ps:Dictionary) -> bool: ## Parses the "type" stage
 		ps.buffers.append(0) # expecting flag
 		ps.buffers.append('') # current parameter
 		# Throw error if not a valid expression type.
-		if ps.type not in ExpTypes.values():
+		if ps.type not in ExpType_values:
 			ps.error = 1
 			return true
 	# Progress to content stage if not specifying "property_name".
@@ -114,7 +115,7 @@ func _parse_type(char:String, ps:Dictionary) -> bool: ## Parses the "type" stage
 		ps.buffers.clear()
 		ps.buffers.append(0) # expecting flag
 		# Throw error if not a valid expression type.
-		if ps.type not in ExpTypes.values():
+		if ps.type not in ExpType_values:
 			ps.error = 1
 			return true
 	# Add to expression_type.
@@ -128,7 +129,7 @@ func _parse_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "param
 		if ps.buffers[1] == '':
 			ps.error = 7
 			return true
-		ps.parameters.append(ps.buffers[1])
+		ps.parameters.append(StringName(ps.buffers[1]))
 		# Reset buffers to stage's default.
 		ps.buffers[0] = 0
 		ps.buffers[1] = ''
@@ -147,7 +148,7 @@ func _parse_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "param
 			if ps.buffers[1] == '':
 				ps.error = 7
 				return true
-			ps.parameters.append(ps.buffers[1])
+			ps.parameters.append(StringName(ps.buffers[1]))
 			ps.stage = 'content'
 			ps.buffers.clear()
 			ps.buffers.append(0) # expecting flag
@@ -172,7 +173,7 @@ func _parse_content(char:String, ps:Dictionary) -> bool: ## Parses the "content"
 
 func _parse_variable_path(char:String, expecting_flag:int) -> Dictionary: ## Parses a variable path. Returns the error, whether or not it's finished, a character to add to the final String, & the next expecting flag.
 	var result:Dictionary = {'error':0, 'end':false, 'char':'', 'expecting_flag':expecting_flag}
-	var lower_char:String = char.to_lower()
+	var lower_char:StringName = Lowercases.get(char,char)
 	# End current stage.
 	if char == ' ':
 		result.end = true
@@ -208,7 +209,7 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 		# Assign expression.
 		ExpTypes.assign:
 			if parsed.parameters.size() == 0: return # Return if no parameters.
-			var node_property:String = parsed.parameters[0]
+			var node_property:StringName = parsed.parameters[0]
 			var value = _get_value(parsed.content.split('.'), node, raw_expression)
 			# Set value, regardless of whether or not the Node property or Resources property exists.
 			_set_value(node_property.split('.'), node, value)
@@ -216,7 +217,7 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 		# Link expression.
 		ExpTypes.link:
 			if parsed.parameters.size() == 0: return # Return if no parameters.
-			var node_property:String = parsed.parameters[0]
+			var node_property:StringName = parsed.parameters[0]
 			# Create new timer.
 			var update_timer:Timer
 			# Get timer already on Node, if it exists, use this instead.
@@ -244,9 +245,9 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 
 		# Execute expression.
 		ExpTypes.execute:
-			var func_name := '_PK_function'
+			var func_name:StringName = '_PK_function'
 			# Define code.
-			var gd_code := Execute_script_code_template % [func_name, parsed.content.indent('	')]
+			var gd_code:StringName = Execute_script_code_template % [func_name, parsed.content.indent('	')]
 			# Apply source code to script.
 			if Execute_script.source_code != gd_code:
 				Execute_script.source_code = gd_code
@@ -287,7 +288,7 @@ func _get_value(split_varpath:PackedStringArray, node:Node, raw_expression:Strin
 
 
 func _set_value(split_varpath:PackedStringArray, target:Node, value) -> void: ## Sets the value of a variable in the target.
-	var split_varpath_size := split_varpath.size()
+	var split_varpath_size:int = split_varpath.size()
 	# If top-level, set directly.
 	if split_varpath_size < 2:
 		target.set(split_varpath[0], value)
