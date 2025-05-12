@@ -40,7 +40,7 @@ tab_1/title = "Guide"
 [node name="Version" type="Label" parent="Top Bar"]
 layout_mode = 2
 size_flags_horizontal = 10
-text = "v1.4.1"
+text = "v1.4.2"
 
 [node name="Button Github" type="Button" parent="Top Bar"]
 layout_mode = 2
@@ -178,7 +178,7 @@ To use PowerKey, you will need to create a GDScript file to hold all your variab
 Read through the \"Expressions\" guide page to understand how expressions work and how to implement them. If you still don't understand how everything works, please take a look at some examples located in the PowerKey addon directory."
 metadata/_tab_index = 0
 
-[node name="Expressions" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
+[node name="PKExpressions" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
 visible = false
 layout_mode = 2
 bbcode_enabled = true

@@ -9,6 +9,7 @@ const ExpTypes := {
 }
 const ExpTypes_require_property_name := ['assign','link']
 const Comment_token := '#' ## Used to denote a commented line.
+const Parameter_separator := ',' ## Used to separate expression parameters.
 const Property_name_requester_token := ':' # Should NEVER be more than one character.
 const Valid_property_name_characters := 'abcdefghijklmnopqrstuvwxyz0123456789_.'
 const Valid_property_name_starting_characters := 'abcdefghijklmnopqrstuvwxyz_'
@@ -54,89 +55,113 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 			if i[0] != text: continue
 			cached = i[1]
 		if cached: return cached
-	# Define variables.
-	var error := 0
-	var expression_type:String
-	var property_name:String
-	var content:String
-	var stage := 'expression_type' ## The parsing stage.
-	var expecting_flag := 0
+	# Define the parsing state & it's data.
+	var ps := { ## The parsing state.
+		'error': 0, # Parse error. 0 = OK.
+		'current_char': 0,
+		'type': '', # The expression type.
+		'parameters': [], # The expression parameters.
+		'content': '', # The expression content.
+		'stage': 'type', # The parsing stage.
+		'buffers': [], # The current stage's temporary data.
+	}
 	# If comment line, throw silent error.
 	if text.begins_with(Comment_token):
-		error = 999
-		return {'error':error}
+		ps.error = 999
+		return ps
 
-	var current_char := 0
 	for char in text:
-		current_char += 1
-		if stage == 'expression_type':
-			# Set expression type.
-			if char == Property_name_requester_token:
-				stage = 'property_name'
-				expecting_flag = 0
-				# Throw error if not a valid expression type.
-				if expression_type not in ExpTypes.values():
-					error = 1
-					break
-			# Progress to content stage if not specifying "property_name".
-			elif char == ' ':
-				stage = 'content'
-				expecting_flag = 0
-				# Throw error if not a valid expression type.
-				if expression_type not in ExpTypes.values():
-					error = 1
-					break
-			# Add to expression_type.
-			else:
-				expression_type += char
-
-		elif stage == 'property_name':
-			var res := _parse_variable_path(char, expecting_flag)
-			if res.error != 0:
-				error = res.error
-				break
-			property_name += res.char
-			expecting_flag = res.expecting_flag
-			if res.end:
-				stage = 'content'
-				expecting_flag = 0
-
-		elif stage == 'content':
-			# If expression type == assign, handle properly.
-			if expression_type in [ExpTypes.assign, ExpTypes.link]:
-				var res := _parse_variable_path(char, expecting_flag)
-				if res.error != 0:
-					error = res.error
-					break
-				expecting_flag = res.expecting_flag
-				if res.end:
-					break
-			# Add to content.
-			content += char
+		if ps.error != 0: break # Stop if there was an error during the previous iteration.
+		ps.current_char += 1
+		if ps.stage == 'type':
+			_parse_type(char, ps)
+		elif ps.stage == 'parameters':
+			_parse_parameters(char, ps)
+		elif ps.stage == 'content':
+			_parse_content(char, ps)
 
 	# Error checks.
-	if error != 0: pass
-	elif expression_type == '':
-		error = 5
-	elif expression_type not in ExpTypes.values():
-		error = 1
-	elif content == '':
-		error = 6
-	# Define result.
-	var result := {
-		'error': error,
-		'current_char': current_char,
-		'type': expression_type,
-		'property_name': property_name,
-		'content': content,
-	}
+	if ps.error != 0: pass
+	elif ps.type == '':
+		ps.error = 5
+	elif ps.type not in ExpTypes.values():
+		ps.error = 1
+	elif ps.content == '':
+		ps.error = 6
 	# Cache expression for reuse.
 	if not Engine.is_editor_hint():
-		cached_pkexpressions.append([text,result])
+		cached_pkexpressions.append([text,ps])
 		if cached_pkexpressions.size() > Config.max_cached_pkexpressions:
 			cached_pkexpressions.remove_at(0)
 	# Return the results.
-	return result
+	return ps
+
+
+func _parse_type(char:String, ps:Dictionary) -> bool: ## Parses the "type" stage. Returns true if ready to progress to next stage.
+	# Set expression type.
+	if char == Property_name_requester_token:
+		ps.stage = 'parameters'
+		# Set up buffers.
+		ps.buffers.clear()
+		ps.buffers.append(0) # expecting flag
+		ps.buffers.append('') # current parameter
+		# Throw error if not a valid expression type.
+		if ps.type not in ExpTypes.values():
+			ps.error = 1
+			return true
+	# Progress to content stage if not specifying "property_name".
+	elif char == ' ':
+		ps.stage = 'content'
+		ps.buffers.clear()
+		ps.buffers.append(0) # expecting flag
+		# Throw error if not a valid expression type.
+		if ps.type not in ExpTypes.values():
+			ps.error = 1
+			return true
+	# Add to expression_type.
+	else:
+		ps.type += char
+	return false
+
+func _parse_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "parameters" stage. Returns true if ready to progress to next stage.
+	if char == Parameter_separator:
+		ps.parameters.append(ps.buffers[1])
+		# Reset buffers to stage's default.
+		ps.buffers[0] = 0
+		ps.buffers[1] = ''
+		return true
+	else:
+		var res := _parse_variable_path(char, ps.buffers[0])
+		# If error, throw.
+		if res.error != 0:
+			ps.error = res.error
+			return true
+		# Update buffers.
+		ps.buffers[0] = res.expecting_flag
+		ps.buffers[1] += res.char
+		# Move to next stage.
+		if res.end:
+			ps.stage = 'content'
+			ps.parameters.append(ps.buffers[1])
+			ps.buffers.clear()
+			ps.buffers.append(0) # expecting flag
+			return true
+	return false
+
+
+func _parse_content(char:String, ps:Dictionary) -> bool: ## Parses the "content" stage. Retruns true if ready to progress to the next stage.
+	# If expression type == assign, handle properly.
+	if ps.type in [ExpTypes.assign, ExpTypes.link]:
+		var res := _parse_variable_path(char, ps.buffers[0])
+		if res.error != 0:
+			ps.error = res.error
+			return true
+		ps.buffers[0] = res.expecting_flag
+		if res.end:
+			return true
+	# Add to content.
+	ps.content += char
+	return false
 
 
 func _parse_variable_path(char:String, expecting_flag:int) -> Dictionary: ## Parses a variable path. Returns the error, whether or not it's finished, a character to add to the final String, & the next expecting flag.
@@ -175,14 +200,16 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 	match parsed.type:
 		# Assign expression.
 		ExpTypes.assign:
-			if parsed.property_name == '': return # Return if no property name.
+			if parsed.parameters.size() == 0: return # Return if no parameters.
+			var node_property:String = parsed.parameters[0]
 			var value = _get_value(parsed.content.split('.'), node, raw_expression)
 			# Set value, regardless of whether or not the Node property or Resources property exists.
-			_set_value(parsed.property_name.split('.'), node, value)
+			_set_value(node_property.split('.'), node, value)
 
 		# Link expression.
 		ExpTypes.link:
-			if parsed.property_name == '': return # Return if no property name.
+			if parsed.parameters.size() == 0: return # Return if no parameters.
+			var node_property:String = parsed.parameters[0]
 			# Create new timer.
 			var update_timer:Timer
 			# Get timer already on Node, if it exists, use this instead.
@@ -204,7 +231,7 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 				# Set value if different.
 				if value != last_value:
 					# Set value, regardless of whether or not the Node property or Resources property exists.
-					_set_value(parsed.property_name.split('.'), node, value)
+					_set_value(node_property.split('.'), node, value)
 					last_value = value
 			)
 
