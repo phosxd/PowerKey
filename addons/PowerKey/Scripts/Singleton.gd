@@ -50,13 +50,18 @@ func evaluate_node_tree(node:Node) -> void: ## Recursively evaluate all Nodes un
 
 
 func evaluate_node(node:Node) -> void: ## Evaluate PKExpressions present on the Node.
-	var pkexpressions = node.get_meta('PKExpressions', false)
+	var pkexps = node.get_meta('PKExpressions', false)
+	if not pkexps: return # Return if no metadata.
+	var type_of_pkexps:int = typeof(pkexps)
+	# If is a String, convert to StringName.
+	if type_of_pkexps == TYPE_STRING:
+		pkexps = StringName(pkexps)
+	# If not a StringName then return.
+	elif type_of_pkexps != TYPE_STRING_NAME: return
+	# If empty, return.
+	if pkexps.strip_edges() == '': return
 	
-	if not pkexpressions: return
-	if typeof(pkexpressions) != TYPE_STRING: return
-	if pkexpressions.strip_edges() == '': return
-	
-	var lines:PackedStringArray = pkexpressions.split('\n')
+	var lines:PackedStringArray = pkexps.split('\n')
 	for line in lines:
 		var parsed = Parser.parse_pkexp(line) # Parse line.
 		# If silent error, skip line.

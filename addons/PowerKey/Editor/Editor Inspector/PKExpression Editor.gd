@@ -7,7 +7,7 @@ const expanded_icon := preload('res://addons/PowerKey/Editor/Editor Inspector/ex
 var expanded := false
 var PKExpressions:String
 
-signal on_update(pk_expressions:String)
+signal on_update(pk_expressions:StringName)
 
 
 
@@ -15,9 +15,9 @@ func _ready() -> void:
 	# Setup Parser.
 	var config := PK_Config.new().load_config()
 	Parser.init(config, {})
-func init(pk_expressions:String) -> void:
+func init(pk_expressions:StringName) -> void:
 	# Set PKExpressions.
-	%'Text Editor'.text = pk_expressions
+	%'Text Editor'.text = String(pk_expressions)
 	PKExpressions = pk_expressions
 	_on_text_editor_text_changed()
 
@@ -47,7 +47,7 @@ func _on_dropdown_button_down() -> void:
 func _on_text_editor_text_changed() -> void:
 	# Update current PKExpressions.
 	PKExpressions = %'Text Editor'.text
-	on_update.emit(PKExpressions)
+	on_update.emit(StringName(PKExpressions))
 	
 	# Ensure dropdown is expanded when typing.
 	if not expanded:

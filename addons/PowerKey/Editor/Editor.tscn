@@ -50,11 +50,10 @@ icon = ExtResource("1_sgcgi")
 [node name="Tabs" type="TabContainer" parent="."]
 layout_mode = 2
 size_flags_vertical = 3
-current_tab = 1
+current_tab = 0
 tabs_visible = false
 
 [node name="Configure" type="VBoxContainer" parent="Tabs"]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -153,6 +152,7 @@ text = "Resources Script Path not found."
 label_settings = SubResource("LabelSettings_fjtuu")
 
 [node name="Guide" type="VBoxContainer" parent="Tabs"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 

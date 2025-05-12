@@ -28,6 +28,7 @@ const Parse_Errors := [
 	'Assign/Link expression content should only contain basic characters',
 	'No expression type defined',
 	'No content defined',
+	'Parameter cannot be empty.',
 ]
 const Link_timer_name := '_pk_link_timer'
 var Execute_script := GDScript.new()
@@ -35,7 +36,8 @@ var Execute_script_code_template := 'static func %s(S, PK) -> void:\n	S=S; PK=PK
 
 var Config
 var Resources
-var cached_pkexpressions:Array[Array] = []
+var cached_pkexps:Dictionary[StringName,Dictionary] = {}
+var cached_pkexps_order:Array[StringName] = []
 
 func init(config:Dictionary, resources) -> void:
 	Config = config
@@ -47,16 +49,13 @@ func init(config:Dictionary, resources) -> void:
 
 # PKExpression parsing functions.
 # -------------------------------
-func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expression details. Returns null if invalid expression.
+func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expression details. Returns null if invalid expression.
 	# Check cache, return cached result is available.
 	if not Engine.is_editor_hint():
-		var cached:Dictionary
-		for i in cached_pkexpressions:
-			if i[0] != text: continue
-			cached = i[1]
-		if cached: return cached
+		if cached_pkexps.has(text):
+			return cached_pkexps[text]
 	# Define the parsing state & it's data.
-	var ps := { ## The parsing state.
+	var ps:Dictionary = { ## The parsing state.
 		'error': 0, # Parse error. 0 = OK.
 		'current_char': 0,
 		'type': '', # The expression type.
@@ -70,15 +69,13 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 		ps.error = 999
 		return ps
 
-	for char in text:
+	for char in String(text):
 		if ps.error != 0: break # Stop if there was an error during the previous iteration.
 		ps.current_char += 1
-		if ps.stage == 'type':
-			_parse_type(char, ps)
-		elif ps.stage == 'parameters':
-			_parse_parameters(char, ps)
-		elif ps.stage == 'content':
-			_parse_content(char, ps)
+		match ps.stage:
+			'type': _parse_type(char, ps)
+			'parameters': _parse_parameters(char, ps)
+			'content': _parse_content(char, ps)
 
 	# Error checks.
 	if ps.error != 0: pass
@@ -90,9 +87,11 @@ func parse_pkexp(text:String): ## Parses a PowerKey expression. Returns expressi
 		ps.error = 6
 	# Cache expression for reuse.
 	if not Engine.is_editor_hint():
-		cached_pkexpressions.append([text,ps])
-		if cached_pkexpressions.size() > Config.max_cached_pkexpressions:
-			cached_pkexpressions.remove_at(0)
+		cached_pkexps[text] = ps
+		cached_pkexps_order.append(text)
+		if cached_pkexps_order.size() > Config.max_cached_pkexpressions:
+			var oldest_key:String = cached_pkexps_order.pop_front()
+			cached_pkexps.erase(oldest_key)
 	# Return the results.
 	return ps
 
@@ -123,15 +122,19 @@ func _parse_type(char:String, ps:Dictionary) -> bool: ## Parses the "type" stage
 		ps.type += char
 	return false
 
+
 func _parse_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "parameters" stage. Returns true if ready to progress to next stage.
 	if char == Parameter_separator:
+		if ps.buffers[1] == '':
+			ps.error = 7
+			return true
 		ps.parameters.append(ps.buffers[1])
 		# Reset buffers to stage's default.
 		ps.buffers[0] = 0
 		ps.buffers[1] = ''
 		return true
 	else:
-		var res := _parse_variable_path(char, ps.buffers[0])
+		var res:Dictionary = _parse_variable_path(char, ps.buffers[0])
 		# If error, throw.
 		if res.error != 0:
 			ps.error = res.error
@@ -141,8 +144,11 @@ func _parse_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "param
 		ps.buffers[1] += res.char
 		# Move to next stage.
 		if res.end:
-			ps.stage = 'content'
+			if ps.buffers[1] == '':
+				ps.error = 7
+				return true
 			ps.parameters.append(ps.buffers[1])
+			ps.stage = 'content'
 			ps.buffers.clear()
 			ps.buffers.append(0) # expecting flag
 			return true
@@ -152,7 +158,7 @@ func _parse_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "param
 func _parse_content(char:String, ps:Dictionary) -> bool: ## Parses the "content" stage. Retruns true if ready to progress to the next stage.
 	# If expression type == assign, handle properly.
 	if ps.type in [ExpTypes.assign, ExpTypes.link]:
-		var res := _parse_variable_path(char, ps.buffers[0])
+		var res:Dictionary = _parse_variable_path(char, ps.buffers[0])
 		if res.error != 0:
 			ps.error = res.error
 			return true
@@ -165,25 +171,26 @@ func _parse_content(char:String, ps:Dictionary) -> bool: ## Parses the "content"
 
 
 func _parse_variable_path(char:String, expecting_flag:int) -> Dictionary: ## Parses a variable path. Returns the error, whether or not it's finished, a character to add to the final String, & the next expecting flag.
-	var result := {'error':0, 'end':false, 'char':'', 'expecting_flag':expecting_flag}
+	var result:Dictionary = {'error':0, 'end':false, 'char':'', 'expecting_flag':expecting_flag}
+	var lower_char:String = char.to_lower()
 	# End current stage.
 	if char == ' ':
 		result.end = true
 		return result
 	# Throw error if invalid character.
-	elif char.to_lower() not in Valid_property_name_characters:
+	elif lower_char not in Valid_property_name_characters:
 		result.error = 3
 		return result
 	# Throw error if invalid start of variable path.
-	elif expecting_flag == 0 && char.to_lower() not in Valid_property_name_starting_characters:
+	elif expecting_flag == 0 && lower_char not in Valid_property_name_starting_characters:
 		result.error = 2
 		return result
 	# If start of variable path, add to, & change expecting flag.
-	elif expecting_flag == 0 && char.to_lower() in Valid_property_name_starting_characters:
+	elif expecting_flag == 0 && lower_char in Valid_property_name_starting_characters:
 		result.char += char
 		result.expecting_flag = 1
 	# Add to variable path.
-	elif expecting_flag == 1 && char.to_lower() in Valid_property_name_characters:
+	elif expecting_flag == 1 && lower_char in Valid_property_name_characters:
 		result.char += char
 	return result
 

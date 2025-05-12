@@ -14,11 +14,13 @@ func _parse_category(object:Object, category:String) -> void:
 		var PKExpEditor_instance := PKExpression_Editor.instantiate()
 		var pk_expressions = object.get_meta('PKExpressions', false)
 		if pk_expressions:
-			if typeof(pk_expressions) == TYPE_STRING:
+			if typeof(pk_expressions) == TYPE_STRING_NAME:
 				PKExpEditor_instance.init(pk_expressions)
+			elif typeof(pk_expressions) == TYPE_STRING:
+				PKExpEditor_instance.init(StringName(pk_expressions))
 			
 		# On PKExp Editor sends update signal, update the Node.
-		PKExpEditor_instance.on_update.connect(func(pk_expressions:String) -> void:
+		PKExpEditor_instance.on_update.connect(func(pk_expressions:StringName) -> void:
 			# NOTE: Adding or removing metadata modifies Inspector controls, which closes the PKExpEditor dropdown. This is sort-of counteracted in the PKExpEditor Script.
 			# If not empty, set meta.
 			if pk_expressions.length() > 0:
