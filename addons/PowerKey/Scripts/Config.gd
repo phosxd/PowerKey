@@ -10,7 +10,7 @@ const Errors := {
 }
 const default_config := {
 	'resources_script_path': '',
-	'max_cached_pkexpressions': 3,
+	'max_cached_pkexpressions': 3.0,
 	'debug_print_any_pkexpression_processed': false
 }
 

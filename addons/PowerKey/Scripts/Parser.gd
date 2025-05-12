@@ -91,7 +91,7 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 		cached_pkexps[text] = ps
 		cached_pkexps_order.append(text)
 		if cached_pkexps_order.size() > Config.max_cached_pkexpressions:
-			var oldest_key:String = cached_pkexps_order.pop_front()
+			var oldest_key:StringName = cached_pkexps_order.pop_front()
 			cached_pkexps.erase(oldest_key)
 	# Return the results.
 	return ps
