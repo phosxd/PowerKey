@@ -9,6 +9,7 @@ const ExpTypes:Dictionary[StringName,StringName] = {
 }
 const ExpType_values:Array[String] = ['A','L','E'] ## Pre-compiled ExpType values as array.
 const Lowercases:Dictionary[StringName,StringName] = {'A':'a','B':'b','C':'c','D':'d','E':'e','F':'f','G':'g','H':'h','I':'i','J':'j','K':'k','L':'l','M':'m','N':'n','O':'o','P':'p','Q':'q','S':'s','T':'t','U':'u','V':'v','W':'w','X':'x','Y':'y','Z':'z'} ## Performs better than using `.to_lower`.
+enum Parse_stages {TYPE,PARAMS,CONTENT} ## Each stage of parsing.
 const Comment_token:StringName = '#' ## Used to denote a commented line.
 const Parameter_separator:StringName = ',' ## Used to separate expression parameters.
 const Property_name_requester_token:StringName = ':' # Should NEVER be more than one character.
@@ -60,23 +61,25 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 		'error': 0, # Parse error. 0 = OK.
 		'current_char': 0,
 		'type': '', # The expression type.
-		'parameters': [], # The expression parameters.
-		'content': '', # The expression content.
-		'stage': 'type', # The parsing stage.
-		'buffers': [], # The current stage's temporary data.
+		'parameters': PackedStringArray(), # The expression parameters.
+		'content': PackedStringArray(), # The expression content.
+		'stage': Parse_stages.TYPE, # The parsing stage.
+		'buffers': [null,null,null], # The current stage's temporary data.
 	}
 	# If comment line, throw silent error.
 	if text.begins_with(Comment_token):
 		ps.error = 999
 		return ps
 
+	#var start := Time.get_ticks_usec()
 	for char in String(text):
 		if ps.error != 0: break # Stop if there was an error during the previous iteration.
 		ps.current_char += 1
 		match ps.stage:
-			'type': _parse_type(char, ps)
-			'parameters': _parse_parameters(char, ps)
-			'content': _parse_content(char, ps)
+			Parse_stages.TYPE: _parse_type(char, ps)
+			Parse_stages.PARAMS: _parse_parameters(char, ps)
+			Parse_stages.CONTENT: _parse_content(char, ps)
+	#print(Time.get_ticks_usec()-start)
 
 	# Error checks.
 	if ps.error != 0: pass
@@ -84,15 +87,16 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 		ps.error = 5
 	elif ps.type not in ExpType_values:
 		ps.error = 1
-	elif ps.content == '':
+	elif ps.content.size() == 0:
 		ps.error = 6
 	# Cache expression for reuse.
 	if not Engine.is_editor_hint():
-		cached_pkexps[text] = ps
-		cached_pkexps_order.append(text)
-		if cached_pkexps_order.size() > Config.max_cached_pkexpressions:
-			var oldest_key:StringName = cached_pkexps_order.pop_front()
-			cached_pkexps.erase(oldest_key)
+		if Config.max_cached_pkexpressions > 0:
+			cached_pkexps[text] = ps
+			cached_pkexps_order.append(text)
+			if cached_pkexps_order.size() > Config.max_cached_pkexpressions:
+				var oldest_key:StringName = cached_pkexps_order.pop_front()
+				cached_pkexps.erase(oldest_key)
 	# Return the results.
 	return ps
 
@@ -100,20 +104,19 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 func _parse_type(char:String, ps:Dictionary) -> bool: ## Parses the "type" stage. Returns true if ready to progress to next stage.
 	# Set expression type.
 	if char == Property_name_requester_token:
-		ps.stage = 'parameters'
+		ps.stage = Parse_stages.PARAMS
 		# Set up buffers.
-		ps.buffers.clear()
-		ps.buffers.append(0) # expecting flag
-		ps.buffers.append('') # current parameter
+		ps.buffers[0] = 0 # expecting flag
+		ps.buffers[1] = '' # current parameter
 		# Throw error if not a valid expression type.
 		if ps.type not in ExpType_values:
 			ps.error = 1
 			return true
-	# Progress to content stage if not specifying "property_name".
+	# Progress to content stage if not specifying any parameters.
 	elif char == ' ':
-		ps.stage = 'content'
-		ps.buffers.clear()
-		ps.buffers.append(0) # expecting flag
+		ps.stage = Parse_stages.CONTENT
+		_reset_parse_state_buffers(ps)
+		ps.buffers[0] = 0 # expecting flag
 		# Throw error if not a valid expression type.
 		if ps.type not in ExpType_values:
 			ps.error = 1
@@ -135,23 +138,17 @@ func _parse_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "param
 		ps.buffers[1] = ''
 		return true
 	else:
-		var res:Dictionary = _parse_variable_path(char, ps.buffers[0])
-		# If error, throw.
-		if res.error != 0:
-			ps.error = res.error
-			return true
-		# Update buffers.
-		ps.buffers[0] = res.expecting_flag
-		ps.buffers[1] += res.char
+		var end:bool = _parse_variable_path(char, ps)
 		# Move to next stage.
-		if res.end:
+		if end:
 			if ps.buffers[1] == '':
 				ps.error = 7
 				return true
 			ps.parameters.append(StringName(ps.buffers[1]))
-			ps.stage = 'content'
-			ps.buffers.clear()
-			ps.buffers.append(0) # expecting flag
+			ps.stage = Parse_stages.CONTENT
+			_reset_parse_state_buffers(ps)
+			ps.buffers[0] = 0 # expecting flag.
+			ps.buffers[1] = '' # string 1.
 			return true
 	return false
 
@@ -159,41 +156,43 @@ func _parse_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "param
 func _parse_content(char:String, ps:Dictionary) -> bool: ## Parses the "content" stage. Retruns true if ready to progress to the next stage.
 	# If expression type == assign, handle properly.
 	if ps.type in [ExpTypes.assign, ExpTypes.link]:
-		var res:Dictionary = _parse_variable_path(char, ps.buffers[0])
-		if res.error != 0:
-			ps.error = res.error
-			return true
-		ps.buffers[0] = res.expecting_flag
-		if res.end:
+		var end:bool = _parse_variable_path(char, ps)
+		if end:
+			ps.error = 3
 			return true
 	# Add to content.
-	ps.content += char
+	ps.content.append(char)
 	return false
 
 
-func _parse_variable_path(char:String, expecting_flag:int) -> Dictionary: ## Parses a variable path. Returns the error, whether or not it's finished, a character to add to the final String, & the next expecting flag.
-	var result:Dictionary = {'error':0, 'end':false, 'char':'', 'expecting_flag':expecting_flag}
+func _parse_variable_path(char:String, ps:Dictionary) -> bool: ## Parses a variable path.
 	var lower_char:StringName = Lowercases.get(char,char)
 	# End current stage.
 	if char == ' ':
-		result.end = true
-		return result
+		return true
 	# Throw error if invalid character.
 	elif lower_char not in Valid_property_name_characters:
-		result.error = 3
-		return result
+		ps.error = 3
+		return true
 	# Throw error if invalid start of variable path.
-	elif expecting_flag == 0 && lower_char not in Valid_property_name_starting_characters:
-		result.error = 2
-		return result
+	elif ps.buffers[0] == 0 && lower_char not in Valid_property_name_starting_characters:
+		ps.error = 2
+		return true
 	# If start of variable path, add to, & change expecting flag.
-	elif expecting_flag == 0 && lower_char in Valid_property_name_starting_characters:
-		result.char += char
-		result.expecting_flag = 1
+	elif ps.buffers[0] == 0 && lower_char in Valid_property_name_starting_characters:
+		ps.buffers[1] += char # Add char.
+		ps.buffers[0] = 1 # Set new expecting flag.
 	# Add to variable path.
-	elif expecting_flag == 1 && lower_char in Valid_property_name_characters:
-		result.char += char
-	return result
+	elif ps.buffers[0] == 1 && lower_char in Valid_property_name_characters:
+		ps.buffers[1] += char # Add char.
+	return false
+
+
+func _reset_parse_state_buffers(ps:Dictionary) -> void: ## Resets the parsing state's buffers to null.
+	ps.buffers[0] = null
+	ps.buffers[1] = null
+	ps.buffers[2] = null
+
 
 
 
@@ -204,13 +203,15 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 	# Debug printing.
 	if Config.debug_print_any_pkexpression_processed:
 		print_rich('[b][color=gold]PowerKey Debug:[/color][/b] Now processing expression "[color=tomato]%s[/color]" on Node "[color=orange]%s[/color]" ("[color=dim_gray]%s[/color]").' % [raw_expression, node.name, node.get_instance_id()])
+	
+	var string_content:String = ''.join(parsed.content)
 
 	match parsed.type:
 		# Assign expression.
 		ExpTypes.assign:
 			if parsed.parameters.size() == 0: return # Return if no parameters.
 			var node_property:StringName = parsed.parameters[0]
-			var value = _get_value(parsed.content.split('.'), node, raw_expression)
+			var value = _get_value(string_content.split('.'), node, raw_expression)
 			# Set value, regardless of whether or not the Node property or Resources property exists.
 			_set_value(node_property.split('.'), node, value)
 
@@ -233,7 +234,7 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 				update_timer.start()
 			# Connect function to process every tick.
 			var last_value
-			var split_content:PackedStringArray = parsed.content.split('.')
+			var split_content:PackedStringArray = string_content.split('.')
 			update_timer.timeout.connect(func():
 				var value = _get_value(split_content, node, raw_expression)
 				# Set value if different.
@@ -247,7 +248,7 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 		ExpTypes.execute:
 			var func_name:StringName = '_PK_function'
 			# Define code.
-			var gd_code:StringName = Execute_script_code_template % [func_name, parsed.content.indent('	')]
+			var gd_code:StringName = Execute_script_code_template % [func_name, string_content.indent('	')]
 			# Apply source code to script.
 			if Execute_script.source_code != gd_code:
 				Execute_script.source_code = gd_code
