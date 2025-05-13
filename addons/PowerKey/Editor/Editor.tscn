@@ -182,9 +182,9 @@ metadata/_tab_index = 0
 visible = false
 layout_mode = 2
 bbcode_enabled = true
-text = "When you activated PowerKey in your project, it added a custom \"PKExpressions\" dropdown in the Inspector. Navigate to the \"PKExpressions\" dropdown located under the \"Node\" category. Now expanding the dropdown will show a text field where you can enter all your expressions. A PKExpression line should always start with the Expression Type.
+text = "When you activated PowerKey in your project, it added a custom \"PKExpressions\" dropdown in the Inspector. Navigate to the \"PKExpressions\" dropdown located under the \"Node\" category. Now expanding the dropdown will show a text field where you can enter all your expressions. A PKExpression line should always start with the type.
 
-Each \"Expression Type\" is labled with their performance/memory impacts. Here are the definitions for each label:
+Each \"Type\" is labled with their performance/memory impacts. Here are the definitions for each label:
 - [color=green]None:[/color] Absolutely no impact.
 - [color=green_yellow]Effectively None:[/color] Close to no impact. Difference only slightly noticable at very high quantities.
 - [color=yellow_green]Low:[/color] Low impact, at very high quantities.
@@ -192,16 +192,23 @@ Each \"Expression Type\" is labled with their performance/memory impacts. Here a
 - [color=orange]Moderate:[/color] Harmful impact, when dealing with high quantities.
 By \"very high quantities\" I am talking near the hundred thousand range. Actual impact will greatly vary with your hardware, but I am just trying to convey the relative difference between the labels.
 
-[font_size=30]A (Assign) Expression Type:[/font_size]
+[font_size=30]Syntactic Structure:[/font_size]
+PKExpressions' syntax & structural rules are simple, and should always follow the schemas below. \"<>\" denotes a required part, \"[]\" denotes an optional part.
+[b]Schemas:[/b]
+[ul] <Type> <Content>
+ <Type>:[Parameters] <Content>
+[/ul]
+
+[font_size=30]A (Assign) Type:[/font_size]
 [color=cyan]Memory Impact:[/color] [color=green]None[/color]
 [color=cyan]Performance Impact (initial):[/color] [color=green_yellow]Effectively None[/color]
 [color=cyan]Performance Impact (ongoing):[/color] [color=green]None[/color]
 This expression type is very limiting & can only be used to assign a value from the Resources Script to a Node's property. You cannot access a property from any Variant other than a Dictionary or Object & you cannot call functions/methods. You cannot run code of any kind with this, but in return, PowerKey skips over any invalid expression & will only print errors instead of stopping the whole project & crashing it.
-[b]Correct Usage:[/b]
+[b]Correct Examples:[/b]
 [ul] A:text some_string
  A:text my_strings.this_one
  A:label_settings some_label_settings_resource
-[/ul][b]Incorrect Usage:[/b]
+[/ul][b]Incorrect Examples:[/b]
 [ul] A:text my_strings[0]
  A:text get_random_string()
  A some_value[/ul]
@@ -210,7 +217,6 @@ This expression type is very limiting & can only be used to assign a value from 
 [color=cyan]Memory Impact:[/color] [color=yellow]Okay[/color]
 [color=cyan]Performance Impact (initial):[/color] [color=orange]Moderate[/color]
 [color=cyan]Performance Impact (ongoing):[/color] [color=yellow]Okay[/color]
-[color=gold]Experimental:[/color] This type is subject to change or removal.
 Much like the Assign expression type, this type applies a value to a Node property. The syntax & rules are nearly identical. The only difference being that with this type any changes made to the variable in the Resources Script are immediately reflected onto the Node property as if they were one in the same. [b]However[/b], this expression is not one-off & runs every frame which may cause performance issues when more than a thousand are running. This should only be used in careful consideration of the impacts it may cause.
 
 [font_size=30]E (Execute) Expression Type:[/font_size]
@@ -218,7 +224,7 @@ Much like the Assign expression type, this type applies a value to a Node proper
 [color=cyan]Performance Impact (initial):[/color] [color=yellow]Okay[/color]
 [color=cyan]Performance Impact (ongoing):[/color] [color=green]None[/color]
 This expression type just lets you do whatever you wan't, AT YOUR OWN RISK. Your project WILL crash if you use invalid code or have missing variables. That said, this expression type does give you unlimited freedom to run any GDScript code. With this you can call functions, set values on the Node, & do complex logic if you wanted to. [b]However[/b], to access variables from the Resources Script, you will need to prefix any variable names with \"PK.\". To access the Node, instead of using \"self\", use \"S\".
-[b]Correct Usage:[/b]
+[b]Correct Examples:[/b]
 [ul] E print('hello world')
  E S.text = PK.some_string
  E var a := self.some_variable; print(a)"
