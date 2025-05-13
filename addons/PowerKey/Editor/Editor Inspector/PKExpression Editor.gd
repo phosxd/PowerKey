@@ -1,6 +1,6 @@
 @tool
 extends VBoxContainer
-var Parser := PK_Parser.new()
+var PKEE := PK_EE.new()
 const collapsed_icon := preload('res://addons/PowerKey/Editor/Editor Inspector/collapsed.svg')
 const expanded_icon := preload('res://addons/PowerKey/Editor/Editor Inspector/expanded.svg')
 
@@ -12,9 +12,8 @@ signal on_update(pk_expressions:StringName)
 
 
 func _ready() -> void:
-	# Setup Parser.
 	var config := PK_Config.new().load_config()
-	Parser.init(config, {})
+	PKEE.init(config, {})
 func init(pk_expressions:StringName) -> void:
 	# Set PKExpressions.
 	%'Text Editor'.text = String(pk_expressions)
@@ -28,7 +27,7 @@ func _update_validation_label(error:int, current_char=null) -> void:
 	if error == 0:
 		$'Content/Items/Validation/Label'.text = 'Looks good! No parsing errors found.'
 	else:
-		$'Content/Items/Validation/Label'.text = '(@char %s) Error "%s" while parsing expression.' % [current_char, Parser.Parse_Errors[error-1]]
+		$'Content/Items/Validation/Label'.text = '(@char %s) Error "%s" while parsing expression.' % [current_char, PKEE.Parse_errors[error-1]]
 
 
 
@@ -64,7 +63,7 @@ func _on_text_editor_text_changed() -> void:
 		line_index += 1
 		%'Text Editor'.set_line_background_color(line_index, Color(0,0,0,0)) # Reset line color.
 		if line.length() == 0: continue
-		var parsed = Parser.parse_pkexp(line) # Parse line.
+		var parsed = PKEE.parse_pkexp(line) # Parse line.
 		# If silent error, dim line & skip.
 		if parsed.error == 999:
 			%'Text Editor'.set_line_background_color(line_index, Color(0.3, 0.3, 0.3)) # Highlight line in Text Editor.

@@ -1,7 +1,7 @@
 # This script is the core of the whole plugin during run-time, it can also be accessed by any other scripts in the project as the `PowerKey` singleton.
 
 extends Node
-var Parser := PK_Parser.new()
+var PKEE := PK_EE.new()
 var PKConfig := PK_Config.new()
 var Config := PKConfig.load_config()
 @onready var Resources_script = load(Config.resources_script_path) if FileAccess.file_exists(Config.resources_script_path) else null
@@ -26,7 +26,7 @@ func _ready() -> void:
 	else:
 		Resources = {}
 		
-	Parser.init(Config,Resources) # Initialize Parser.
+	PKEE.init(Config,Resources) # Initialize Expresion Engine.
 	_hook_onto_nodes() # Hook onto all nodes currently in the tree.
 
 
@@ -63,16 +63,16 @@ func evaluate_node(node:Node) -> void: ## Evaluate PKExpressions present on the 
 	
 	var lines:PackedStringArray = pkexps.split('\n')
 	for line in lines:
-		var parsed = Parser.parse_pkexp(line) # Parse line.
+		var parsed = PKEE.parse_pkexp(line) # Parse line.
 		# If silent error, skip line.
 		if parsed.error == 999:
 			continue
 		# If error, print error.
 		elif parsed.error != 0:
-			printerr(PK_Parser.Errors.pkexp_parse_failed % [parsed.current_char, line, node.name, PK_Parser.Parse_Errors[parsed.error-1]])
+			printerr(PK_EE.Errors.pkexp_parse_failed % [parsed.current_char, line, node.name, PK_EE.Parse_errors[parsed.error-1]])
 		# If no errors, process expression.
 		else:
-			Parser.process_pkexp(node, line, parsed)
+			PKEE.process_pkexp(node, line, parsed)
 
 
 
