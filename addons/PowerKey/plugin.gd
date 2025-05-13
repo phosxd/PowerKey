@@ -11,10 +11,8 @@ func _enter_tree() -> void:
 	# Add InspectorPlugin.
 	EditorInspectorPlugin_instance = EditorInspectorPlugin_.new()
 	add_inspector_plugin(EditorInspectorPlugin_instance)
-	
 	# Enable singleton that will run when running the project.
 	add_autoload_singleton('PowerKey', 'res://addons/PowerKey/Scripts/Singleton.gd')
-	
 	# Add PowerKey Editor menu to Godot editor.
 	PowerKey_editor_instance = PowerKey_editor_tscn.instantiate()
 	EditorInterface.get_editor_main_screen().add_child(PowerKey_editor_instance)
@@ -24,10 +22,8 @@ func _enter_tree() -> void:
 func _exit_tree() -> void:
 	# Remove InspectorPlugin.
 	remove_inspector_plugin(EditorInspectorPlugin_instance)
-	
 	# Remove singleton, when addon removed.
 	remove_autoload_singleton('PowerKey')
-	
 	# Remove PowerKey Editor menu.
 	if PowerKey_editor_instance:
 		PowerKey_editor_instance.queue_free()

@@ -34,8 +34,7 @@ func _ready() -> void:
 
 
 func _process(delta:float) -> void:
-	if Resources is Node:
-		if not Resources_script_has_process: return
+	if Resources_script_has_process:
 		Resources.call('_process', delta)
 
 
@@ -61,8 +60,7 @@ func evaluate_node(node:Node) -> void: ## Evaluate PKExpressions present on the 
 	# If empty, return.
 	if pkexps.strip_edges() == '': return
 	
-	var lines:PackedStringArray = pkexps.split('\n')
-	for line in lines:
+	for line in pkexps.split('\n'):
 		var parsed = PKEE.parse_pkexp(line) # Parse line.
 		# If silent error, skip line.
 		if parsed.error == 999:
