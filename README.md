@@ -47,7 +47,7 @@ You can rest assured that every system in PowerKey runs as smoothly as possible 
 This PKExpression type will let you safely evaluate GDScript expressions with access to the Node's properties & Resource script's properties.
 This lets you perform calculations without needing to rely on the unsafe & more expensive "Execute" PKExpression type.
 The result is applied to the specified property on the Node. Just like the "Assign" PKExpression type, it is one-off so it only runs on the Node once.
-### Broad translations:
+### Global Translations:
 **Milestone:** ???
 
 "Translations" field in the Configuration menu in which you can add/modifiy translations.
@@ -66,7 +66,7 @@ A "Add Visually" button in the PKExpressions dropdown for the Inspector dock. Pr
 ### Enhanced property access support:
 **Milestone:** 1.5.0
 
-Currently, in "Link" & "Assign" PKExpressions you can only acess properties from objects of type `Dictionary`, `Object` & `Vector2`. I want to add the ability to access values from `Array`, `Rect2`, `Rect2i`, `Plane`, `Quaternion`, `AABB`, `Transform2D`, `Basis`, `Vector2i`, `Vector3`, `Vector3i`, `Vector4`, `Vector4i`, `StringName`, & `Color` types as well.
+Currently, in "Link" & "Assign" PKExpressions you can only acess properties from objects of type `Dictionary`, `Object` & `Vector2`. I want to add the ability to access values from `Array`, `Rect2`, `Rect2i`, `Plane`, `Quaternion`, `AABB`, `Transform2D`, `Basis`, `Vector2i`, `Vector3`, `Vector3i`, `Vector4`, `Vector4i`, & `Color` types as well.
 ### "Frequency" parameter for "Link" PKExpressions:
 **Milestone:** 1.5.0
 

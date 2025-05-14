@@ -2,6 +2,7 @@ extends Node
 # Define some variables to use.
 const explanation := 'In this example we are setting every single label\'s text & label settings using PowerKey PKExpressions. There is even a real-time FPS counter running! All while there are 0 script files attached to the scene or any of it\'s Nodes.'
 const titles := {'a':'Whoah! A title!', 'b':'ANOTHER TITLE?! No way..'}
+const bottom_text:Array[String] = ['Text from an array :)']
 var title_label_settings := LabelSettings.new()
 
 # Define constantly changing FPS variables.

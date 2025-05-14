@@ -203,13 +203,16 @@ PKExpressions' syntax & structural rules are simple, and should always follow th
 [color=cyan]Memory Impact:[/color] [color=green]None[/color]
 [color=cyan]Performance Impact (initial):[/color] [color=green_yellow]Effectively None[/color]
 [color=cyan]Performance Impact (ongoing):[/color] [color=green]None[/color]
-This expression type is very limiting & can only be used to assign a value from the Resources Script to a Node's property. You cannot access a property from any Variant other than a Dictionary or Object & you cannot call functions/methods. You cannot run code of any kind with this, but in return, PowerKey skips over any invalid expression & will only print errors instead of stopping the whole project & crashing it.
+This expression type is very limiting & can only be used to assign a value from the Resources Script to a Node's property. You cannot call functions/methods. You cannot run code of any kind with this, but in return, PowerKey skips over any invalid expression & will only print errors instead of stopping the whole project & crashing it. To access a value in an array, instead of using square brackets, you can just type the number, however you cannot use negative numbers.
 [b]Correct Examples:[/b]
 [ul] A:text some_string
- A:text my_strings.this_one
+ A:text my_dictionary.this_one
+ A:text my_array.23
  A:label_settings some_label_settings_resource
 [/ul][b]Incorrect Examples:[/b]
-[ul] A:text my_strings[0]
+[ul] A:text my_dictionary['this_one']
+ A:text my_array[23]
+ A:text my_array.-1
  A:text get_random_string()
  A some_value[/ul]
 

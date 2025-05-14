@@ -6,18 +6,32 @@ enum ExpTypes {ASSIGN,LINK,EXEC}
 const ExpType_values:Array[StringName] = ['A','L','E'] ## ExpType values as Strings instead of enum int.
 const Lowercases:Dictionary[StringName,StringName] = {'A':'a','B':'b','C':'c','D':'d','E':'e','F':'f','G':'g','H':'h','I':'i','J':'j','K':'k','L':'l','M':'m','N':'n','O':'o','P':'p','Q':'q','S':'s','T':'t','U':'u','V':'v','W':'w','X':'x','Y':'y','Z':'z'} ## Performs better than using `.to_lower`.
 enum Parse_stages {TYPE,PARAMS,CONTENT} ## Each stage of parsing.
-const Comment_token:StringName = '#' ## Used to denote a commented line.
-const Parameter_separator:StringName = ',' ## Used to separate expression parameters.
-const Parameters_denotator:StringName = ':' # Should NEVER be more than one character.
-const Variable_path_characters:StringName = 'abcdefghijklmnopqrstuvwxyz0123456789_.'
-const Variable_path_starting_characters:StringName = 'abcdefghijklmnopqrstuvwxyz_'
-const Supported_pkexp_value_property_types:Array[StringName] = ['Dictionary','Object', 'Vector2']
+const Comment_token:StringName = &'#' ## Used to denote a commented line.
+const Parameter_separator:StringName = &',' ## Used to separate expression parameters.
+const Parameters_denotator:StringName = &':' # Should NEVER be more than one character.
+const Variable_path_characters:StringName = &'abcdefghijklmnopqrstuvwxyz0123456789_.'
+const Variable_path_starting_characters:StringName = &'abcdefghijklmnopqrstuvwxyz_'
+const Array_builtin_types:Array[int] = [TYPE_ARRAY,TYPE_PACKED_BYTE_ARRAY,TYPE_PACKED_INT32_ARRAY,TYPE_PACKED_INT64_ARRAY,TYPE_PACKED_FLOAT32_ARRAY,TYPE_PACKED_FLOAT64_ARRAY,TYPE_PACKED_STRING_ARRAY,TYPE_PACKED_VECTOR2_ARRAY,TYPE_PACKED_VECTOR3_ARRAY,TYPE_PACKED_VECTOR4_ARRAY,TYPE_PACKED_COLOR_ARRAY]
+const Valid_properties_for_builtin_type = {
+	TYPE_VECTOR2: &'xy',
+	TYPE_VECTOR2I: &'xy',
+	TYPE_VECTOR3: &'xyz',
+	TYPE_VECTOR3I: &'xyz',
+	TYPE_VECTOR4: &'wxyz',
+	TYPE_VECTOR4I: &'wxyz',
+	TYPE_BASIS: &'xyz',
+	TYPE_QUATERNION: &'wxyz',
+	TYPE_PROJECTION: &'wxyz',
+	TYPE_TRANSFORM2D: [&'origin',&'x',&'y'],
+	TYPE_TRANSFORM3D: [&'basis',&'origin'],
+	TYPE_PLANE: [&'d',&'normal',&'x',&'y',&'z'],
+	TYPE_AABB: [&'end',&'posiiton',&'size'],
+	TYPE_COLOR: [&'r',&'r8',&'g',&'g8',&'b',&'b8',&'a',&'a8',&'h',&'s',&'v',&'ok_hsl_h',&'ok_hsl_s',&'ok_hsl_l'],
+}
 const Errors:Dictionary[StringName,StringName] = {
 	'pkexp_parse_failed': 'PowerKey PKExpression: (@char %s) Failed to parse expression "%s" for Node "%s" with reason "%s".',
-	'pkexp_property_not_found': 'PowerKey PKExpression: (@char %s) Failed to find property "%s" for Node "%s" in Resources Script ("%s").',
-	'pkexp_property_not_found_in_node': 'PowerKey PKExpression: (@char %s) Failed to find property "%s" in Node "%s".',
-	'pkexp_accessing_unsupported_type': 'PowerKey PKExpression: (@char %s) Expression "%s" for Node "%s" tried requesting property from an unsupported Type "%s", expected one of the following: %s.',
-	'pkexp_accessing_nonexistent_value_on_vector2': 'PowerKey PKExpression: (@char %s) Expression "%s" for Node "%s" tried accessing non-existent property "%s" from a "Vector2".',
+	'pkexp_accessing_unsupported_builtin_type': 'PowerKey PKExpression: Expression "%s" for Node "%s" tried accessing property from an unsupported built-in type "%s".',
+	'pkexp_accessing_nonexistent_property_for_builtin_type': 'PowerKey PKExpression: Expression "%s" for Node "%s" tried accessing non-existent property "%s" from a "%s".',
 }
 const Parse_errors:Array[StringName] = [
 	'Invalid expression type',
@@ -255,33 +269,45 @@ func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void:
 
 
 func _get_value_error_helper_1(stopped_value, node:Node, raw_expression:String) -> void:
-	printerr(Errors.pkexp_accessing_unsupported_type % [raw_expression, node.name, type_string(typeof(stopped_value)),', '.join(Supported_pkexp_value_property_types)])
-func _get_value_error_helper_2(var_name, node:Node, raw_expression:String) -> void:
-	printerr(Errors.pkexp_accessing_nonexistent_value_on_vector2 % [raw_expression, node.name, var_name])
+	printerr(Errors.pkexp_accessing_unsupported_builtin_type % [raw_expression, node.name, type_string(typeof(stopped_value))])
+func _get_value_error_helper_2(var_name:String, object_type:String, node:Node, raw_expression:String) -> void:
+	printerr(Errors.pkexp_accessing_nonexistent_property_for_builtin_type % [raw_expression, node.name, var_name, object_type])
 
 func _get_value(split_varpath:PackedStringArray, node:Node, raw_expression:String): ## Gets the value of a variable in Resources Script. Returns Variant. If failed, reutrns null.
 	var variable = Resources.get(split_varpath[0]) # Get top-level value from Resources.
+	var variable_type:int
 	for i in range(1,split_varpath.size()):
 		# Return early if value is null.
 		if variable == null:
 			_get_value_error_helper_1(variable, node, raw_expression)
 			return
-		# Get next value based on current value type.
-		match typeof(variable):
-			# If acessing property of a Dictionary or Object, proceed.
-			TYPE_DICTIONARY, TYPE_OBJECT:
-				variable = variable.get(split_varpath[i])
-			# If acessing property of a Vector2, proceed.
-			TYPE_VECTOR2:
-				# If invalid access, return & throw error.
-				if split_varpath[i] not in 'xy':
-					_get_value_error_helper_2(split_varpath[i], node, raw_expression)
-					return
-				variable = variable[split_varpath[i]]
-			# If other type, return & throw error.
-			_:
-				_get_value_error_helper_1(variable, node, raw_expression)
+		variable_type = typeof(variable)
+
+		# Get next value from objects or dictionaries with dynamic set of properties.
+		if variable_type in [TYPE_DICTIONARY,TYPE_OBJECT]:
+			if split_varpath[i] not in variable:
+				_get_value_error_helper_2(split_varpath[i], type_string(variable_type), node, raw_expression)
 				return
+			variable = variable[split_varpath[i]]
+
+		# Get next value from built-in types with strict set of properties.
+		elif variable_type in Valid_properties_for_builtin_type:
+			if split_varpath[i] not in Valid_properties_for_builtin_type[variable_type]:
+				_get_value_error_helper_2(split_varpath[i], type_string(variable_type), node, raw_expression)
+				return
+			variable = variable[split_varpath[i]]
+		
+		elif variable_type in Array_builtin_types:
+			var index = int(split_varpath[i])
+			if index == 0 && split_varpath[i] != '0' || index > variable.size()-1:
+				_get_value_error_helper_2(split_varpath[i], type_string(variable_type), node, raw_expression)
+				return
+			variable = variable[index]
+
+		# If other type, throw error.
+		else:
+			_get_value_error_helper_1(variable, node, raw_expression)
+			return
 	return variable
 
 
