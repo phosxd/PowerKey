@@ -64,7 +64,7 @@ This works more like the translation system built-into Godot, but still provides
 
 A "Add Visually" button in the PKExpressions dropdown for the Inspector dock. Pressing the "Add Visually" button will show a pop-up form that makes it possible to add an expression without knowing the syntax. It will also be very helpful for getting started learning the syntax.
 ### Enhanced property access support:
-**Milestone:** 1.5.0
+✅ **Milestone:** 1.5.0
 
 Currently, in "Link" & "Assign" PKExpressions you can only acess properties from objects of type `Dictionary`, `Object` & `Vector2`. I want to add the ability to access values from `Array`, `Rect2`, `Rect2i`, `Plane`, `Quaternion`, `AABB`, `Transform2D`, `Basis`, `Vector2i`, `Vector3`, `Vector3i`, `Vector4`, `Vector4i`, & `Color` types as well.
 ### "Frequency" parameter for "Link" PKExpressions:
