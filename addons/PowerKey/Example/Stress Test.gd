@@ -41,5 +41,5 @@ func _on_button_clear_scenes_pressed() -> void:
 
 
 
-func _on_pkexpression_editor_update(pk_expressions:String) -> void:
-	Current_pkexpressions = pk_expressions
+func _on_pkexpression_editor_update(raw:StringName, parsed:Array[Dictionary]) -> void:
+	Current_pkexpressions = raw

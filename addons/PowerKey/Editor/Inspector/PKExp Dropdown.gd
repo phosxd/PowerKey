@@ -1,23 +1,26 @@
 @tool
 extends VBoxContainer
 var PKEE := PK_EE.new()
-const collapsed_icon := preload('res://addons/PowerKey/Editor/Editor Inspector/collapsed.svg')
-const expanded_icon := preload('res://addons/PowerKey/Editor/Editor Inspector/expanded.svg')
+const collapsed_icon := preload('res://addons/PowerKey/Editor/Inspector/collapsed.svg')
+const expanded_icon := preload('res://addons/PowerKey/Editor/Inspector/expanded.svg')
 
 var expanded := false
-var PKExpressions:String
+var Raw:String
+var Parsed:Array[Dictionary]
 
-signal on_update(pk_expressions:StringName)
+signal on_update(raw:StringName, parsed:Array[Dictionary])
 
 
 
 func _ready() -> void:
 	var config := PK_Config.new().load_config()
 	PKEE.init(config, {})
-func init(pk_expressions:StringName) -> void:
+func init(raw:StringName, parsed:Array[Dictionary]) -> void:
 	# Set PKExpressions.
-	%'Text Editor'.text = String(pk_expressions)
-	PKExpressions = pk_expressions
+	%'Text Editor'.text = raw
+	%'Button Store Parsed'.button_pressed = true if parsed.size() > 0 else false
+	Raw = raw
+	Parsed = parsed
 	_on_text_editor_text_changed()
 
 
@@ -44,26 +47,26 @@ func _on_dropdown_button_down() -> void:
 
 
 func _on_text_editor_text_changed() -> void:
-	# Update current PKExpressions.
-	PKExpressions = %'Text Editor'.text
-	on_update.emit(StringName(PKExpressions))
-	
+	Raw = %'Text Editor'.text
 	# Ensure dropdown is expanded when typing.
 	if not expanded:
 		_on_dropdown_button_down()
-	
 	# Reset line color for first line.
 	%'Text Editor'.set_line_background_color(0, Color(0,0,0,0))
+	
 	# Validate expressions, if not empty.
+	Parsed.clear() # Remove parsed expressions.
 	var error := 0
 	var current_char := 0
 	# Count & parse each line.
 	var line_index := -1
-	for line in PKExpressions.split('\n'):
+	for line in Raw.split('\n'):
 		line_index += 1
 		%'Text Editor'.set_line_background_color(line_index, Color(0,0,0,0)) # Reset line color.
-		if line.length() == 0: continue
-		var parsed = PKEE.parse_pkexp(line) # Parse line.
+		if line.strip_edges() == '': continue # If empty, return.
+		# Parse line & store parsed line in "Parsed".
+		var parsed = PKEE.parse_pkexp(line)
+		if %'Button Store Parsed'.button_pressed: Parsed.append(parsed)
 		# If silent error, dim line & skip.
 		if parsed.error == 999:
 			%'Text Editor'.set_line_background_color(line_index, Color(0.3, 0.3, 0.3)) # Highlight line in Text Editor.
@@ -76,3 +79,15 @@ func _on_text_editor_text_changed() -> void:
 			break
 	# Update validation label with error as mode.
 	_update_validation_label(error, current_char)
+	
+	# Send signal.
+	on_update.emit(StringName(Raw), Parsed)
+
+
+
+func _on_button_store_parsed_toggled(toggled_on:bool) -> void:
+	if toggled_on:
+		_on_text_editor_text_changed() # Re-parse the expressions.
+	else:
+		Parsed.clear() # Empty the array of Parsed expressions.
+		on_update.emit(StringName(Raw), Parsed)

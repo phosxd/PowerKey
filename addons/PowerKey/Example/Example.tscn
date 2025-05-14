@@ -31,6 +31,6 @@ size_flags_horizontal = 4
 size_flags_vertical = 6
 metadata/PKExpressions = &"L:text current_fps"
 
-[node name="Label" type="Label" parent="."]
+[node name="Label E" type="Label" parent="."]
 layout_mode = 2
 metadata/PKExpressions = &"A:text bottom_text.0"

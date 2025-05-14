@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bmwv7xnilsmi3"]
 
 [ext_resource type="Script" uid="uid://qxyftsve6caj" path="res://addons/PowerKey/Example/Stress Test.gd" id="1_6hlxh"]
-[ext_resource type="PackedScene" uid="uid://cklwwr4htvoa0" path="res://addons/PowerKey/Editor/Editor Inspector/PKExpression Editor.tscn" id="2_j1gsl"]
+[ext_resource type="PackedScene" uid="uid://cklwwr4htvoa0" path="res://addons/PowerKey/Editor/Inspector/PKExp Dropdown.tscn" id="2_j1gsl"]
 
 [node name="Stress Test" type="MarginContainer"]
 anchors_preset = 15
@@ -64,6 +64,9 @@ visible = false
 visible = true
 
 [node name="Indent" parent="VBox/PKExpressions/PKExpression Editor/Content" index="0"]
+visible = false
+
+[node name="Actions" parent="VBox/PKExpressions/PKExpression Editor/Content/Items" index="2"]
 visible = false
 
 [node name="HFlow" type="HFlowContainer" parent="VBox/PKExpressions"]

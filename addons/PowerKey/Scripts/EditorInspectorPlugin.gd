@@ -1,7 +1,7 @@
 # This script is responsible for adding the "PKExpressions" dropdown option for Nodes in the Insector dock.
 
 extends EditorInspectorPlugin
-const PKExpression_Editor := preload('res://addons/PowerKey/Editor/Editor Inspector/PKExpression Editor.tscn')
+const PKExp_Dropdown := preload('res://addons/PowerKey/Editor/Inspector/PKExp Dropdown.tscn')
 
 
 func _can_handle(object:Object) -> bool:
@@ -11,24 +11,31 @@ func _can_handle(object:Object) -> bool:
 func _parse_category(object:Object, category:String) -> void:
 	if category == 'Node':
 		# Create PKExpression Editor instance & initialize it.
-		var PKExpEditor_instance := PKExpression_Editor.instantiate()
-		var pk_expressions = object.get_meta('PKExpressions', false)
-		if pk_expressions:
-			if typeof(pk_expressions) == TYPE_STRING_NAME:
-				PKExpEditor_instance.init(pk_expressions)
-			elif typeof(pk_expressions) == TYPE_STRING:
-				PKExpEditor_instance.init(StringName(pk_expressions))
+		var dropdown_instance := PKExp_Dropdown.instantiate()
+		var pkexps = object.get_meta('PKExpressions', false)
+		var pkexps_parsed = object.get_meta('PKExpressions_parsed', Array([],TYPE_DICTIONARY,'',null))
+		if pkexps:
+			if typeof(pkexps) == TYPE_STRING_NAME:
+				dropdown_instance.init(pkexps, pkexps_parsed)
+			elif typeof(pkexps) == TYPE_STRING:
+				dropdown_instance.init(StringName(pkexps), pkexps_parsed)
 			
 		# On PKExp Editor sends update signal, update the Node.
-		PKExpEditor_instance.on_update.connect(func(pk_expressions:StringName) -> void:
+		dropdown_instance.on_update.connect(func(raw:StringName, parsed:Array[Dictionary]) -> void:
 			# NOTE: Adding or removing metadata modifies Inspector controls, which closes the PKExpEditor dropdown. This is sort-of counteracted in the PKExpEditor Script.
-			# If not empty, set meta.
-			if pk_expressions.length() > 0:
-				object.set_meta('PKExpressions', pk_expressions)
-			# If empty, remove meta.
-			else:
+			# If empty, remove data & return.
+			if raw.strip_edges() == '':
 				object.remove_meta('PKExpressions')
+				if object.has_meta('PKExpressions_parsed'): object.remove_meta('PKExpressions_parsed')
+				return
+			# Update data.
+			object.set_meta('PKExpressions', raw)
+			if parsed.size() > 0:
+				object.set_meta('PKExpressions_parsed', parsed)
+			# If empty parsed data, try to remove it.
+			else:
+				if object.has_meta('PKExpressions_parsed'): object.remove_meta('PKExpressions_parsed')
 		)
 		
 		# Add PKExpression Editor to the inspector for this Node.
-		self.add_custom_control(PKExpEditor_instance)
+		self.add_custom_control(dropdown_instance)

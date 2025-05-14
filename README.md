@@ -25,6 +25,8 @@ If everything installed correctly, you should see a "PowerKey" tab near the uppe
  4. Move the `addons/PowerKey` folder from your new folder to the "addons" folder in your Godot project.
  5. Activate the plugin from your project settings, then refresh the project.
 
+[Watch installation tutorial](https://youtu.be/KQRSI6Z-3Io)
+
 # What are the advantages?
 Here are some key points to consider when choosing PowerKey.
 ### Easier to implement:
@@ -73,6 +75,6 @@ Currently, in "Link" & "Assign" PKExpressions you can only acess properties from
 A new parameter in Link expressions that allow you to define how frequently the value updates. By default the frequency is 0 (every frame), this parameter option will let users set the frequency to whatever they want, to better suite their need.
 Here is how this new frequency parameter would be used: `L:<property_name>,<frequency> <content>`. The frequency parameter will be optional.
 ### Option to store parsed PKExpressions on Node:
-**Milestone:** 1.5.0
+✅ **Milestone:** 1.5.0
 
 A button under the "PKExpressions" dropdown in the Inspector, which would store the parsed PKExpressions onto the Node to be used during runtime instead of parsing it during runtime. The reason this would not be the default is because parsed PKExpression data is larger in size than the raw expression, & parsing times are negligable unless parsing very large quantities at once. But having this as an option will let users sacrifice file size for runtime performance, which could be useful for scenes with thousands of Nodes with PKExpressions as none of them would need to be parsed.
