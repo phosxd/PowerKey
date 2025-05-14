@@ -230,6 +230,11 @@ This expression type just lets you do whatever you wan't, AT YOUR OWN RISK. Your
  E var a := self.some_variable; print(a)"
 metadata/_tab_index = 1
 
+[node name="Global Translations" type="VBoxContainer" parent="Tabs"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
 [connection signal="tab_changed" from="Top Bar/Tab Bar" to="." method="_on_tab_bar_tab_changed"]
 [connection signal="pressed" from="Top Bar/Button Github" to="." method="_on_button_github_pressed"]
 [connection signal="text_changed" from="Tabs/Configure/Resources Path/Text Box" to="." method="_on_resources_script_path_text_changed"]

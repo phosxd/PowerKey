@@ -1,7 +1,6 @@
 @tool
 extends VBoxContainer
 @onready var Config := PK_Config.new()
-
 @onready var resources_script_path_text_box := get_node('Tabs/Configure/Resources Path/Text Box')
 @onready var max_cached_pkexpressions_spin_box := get_node('Tabs/Configure/Max Cached PKExpressions/SpinBox')
 @onready var warning_tag := get_node('Tabs/Configure/Warning Tag')

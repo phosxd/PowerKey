@@ -47,7 +47,6 @@ func evaluate_node_tree(node:Node) -> void: ## Recursively evaluate all Nodes un
 		evaluate_node(_node)
 	)
 
-
 func evaluate_node(node:Node) -> void: ## Evaluate PKExpressions present on the Node.
 	var pkexps = node.get_meta('PKExpressions', false)
 	if not pkexps: return # Return if no metadata.
@@ -59,7 +58,7 @@ func evaluate_node(node:Node) -> void: ## Evaluate PKExpressions present on the 
 	elif type_of_pkexps != TYPE_STRING_NAME: return
 	# If empty, return.
 	if pkexps.strip_edges() == '': return
-	
+	# Evaluate each line.
 	for line in pkexps.split('\n'):
 		var parsed = PKEE.parse_pkexp(line) # Parse line.
 		# If silent error, skip line.
@@ -78,7 +77,7 @@ func evaluate_node(node:Node) -> void: ## Evaluate PKExpressions present on the 
 # Hook methods.
 # -------------
 func _hook_onto_nodes() -> void: ## Hook to all nodes in the project.
-	var tree := get_tree()
+	var tree:SceneTree = get_tree()
 	# Hook to every new Node.
 	tree.node_added.connect(func(node:Node) -> void:
 		evaluate_node(node)
