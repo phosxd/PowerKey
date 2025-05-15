@@ -8,7 +8,7 @@ var expanded := false
 var Raw:String
 var Parsed:Array[Dictionary]
 
-signal on_update(raw:StringName, parsed:Array[Dictionary])
+signal on_update(raw:StringName, parsed:Array[Dictionary], parse_time:float)
 
 
 
@@ -54,10 +54,11 @@ func _on_text_editor_text_changed() -> void:
 	# Reset line color for first line.
 	%'Text Editor'.set_line_background_color(0, Color(0,0,0,0))
 	
-	# Validate expressions, if not empty.
 	Parsed.clear() # Remove parsed expressions.
 	var error := 0
 	var current_char := 0
+	var parse_time:float
+	
 	# Count & parse each line.
 	var line_index := -1
 	for line in Raw.split('\n'):
@@ -65,7 +66,9 @@ func _on_text_editor_text_changed() -> void:
 		%'Text Editor'.set_line_background_color(line_index, Color(0,0,0,0)) # Reset line color.
 		if line.strip_edges() == '': continue # If empty, return.
 		# Parse line & store parsed line in "Parsed".
+		var start_time := Time.get_ticks_usec()
 		var parsed = PKEE.parse_pkexp(line)
+		parse_time += Time.get_ticks_usec()-start_time
 		if %'Button Store Parsed'.button_pressed: Parsed.append(parsed)
 		# If silent error, dim line & skip.
 		if parsed.error == 999:
@@ -81,7 +84,7 @@ func _on_text_editor_text_changed() -> void:
 	_update_validation_label(error, current_char)
 	
 	# Send signal.
-	on_update.emit(StringName(Raw), Parsed)
+	on_update.emit(StringName(Raw), Parsed, parse_time)
 
 
 
@@ -90,4 +93,4 @@ func _on_button_store_parsed_toggled(toggled_on:bool) -> void:
 		_on_text_editor_text_changed() # Re-parse the expressions.
 	else:
 		Parsed.clear() # Empty the array of Parsed expressions.
-		on_update.emit(StringName(Raw), Parsed)
+		on_update.emit(StringName(Raw), Parsed, 0)

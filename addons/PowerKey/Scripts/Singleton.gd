@@ -49,18 +49,21 @@ func evaluate_node_tree(node:Node) -> void: ## Recursively evaluate all Nodes un
 
 func evaluate_node(node:Node) -> void: ## Evaluate PKExpressions present on the Node.
 	var pkexps = node.get_meta('PKExpressions', false)
+	var pkexps_parsed = node.get_meta('PKExpressions_parsed', false)
 	if not pkexps: return # Return if no metadata.
 	var type_of_pkexps:int = typeof(pkexps)
 	# If is a String, convert to StringName.
 	if type_of_pkexps == TYPE_STRING:
 		pkexps = StringName(pkexps)
-	# If not a StringName then return.
-	elif type_of_pkexps != TYPE_STRING_NAME: return
-	# If empty, return.
-	if pkexps.strip_edges() == '': return
+	elif type_of_pkexps != TYPE_STRING_NAME: return # If not a StringName then return.
+	if pkexps.strip_edges() == '': return # If empty, return.
+
 	# Evaluate each line.
+	var count:int = 0
 	for line in pkexps.split('\n'):
-		var parsed = PKEE.parse_pkexp(line) # Parse line.
+		var parsed
+		if pkexps_parsed && pkexps_parsed.size() > count: parsed = pkexps_parsed[count];
+		else: parsed = PKEE.parse_pkexp(line) # Parse line.
 		# If silent error, skip line.
 		if parsed.error == 999:
 			continue
@@ -70,6 +73,8 @@ func evaluate_node(node:Node) -> void: ## Evaluate PKExpressions present on the 
 		# If no errors, process expression.
 		else:
 			PKEE.process_pkexp(node, line, parsed)
+
+		count += 1
 
 
 

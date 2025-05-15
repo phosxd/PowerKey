@@ -21,7 +21,7 @@ func _parse_category(object:Object, category:String) -> void:
 				dropdown_instance.init(StringName(pkexps), pkexps_parsed)
 			
 		# On PKExp Editor sends update signal, update the Node.
-		dropdown_instance.on_update.connect(func(raw:StringName, parsed:Array[Dictionary]) -> void:
+		dropdown_instance.on_update.connect(func(raw:StringName, parsed:Array[Dictionary], _parse_time:float) -> void:
 			# NOTE: Adding or removing metadata modifies Inspector controls, which closes the PKExpEditor dropdown. This is sort-of counteracted in the PKExpEditor Script.
 			# If empty, remove data & return.
 			if raw.strip_edges() == '':
