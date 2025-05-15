@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cklwwr4htvoa0"]
+[gd_scene load_steps=8 format=3 uid="uid://cklwwr4htvoa0"]
 
 [ext_resource type="Script" uid="uid://cl53u7hsjfh00" path="res://addons/PowerKey/Editor/Inspector/PKExp Dropdown.gd" id="1_hvuxj"]
 [ext_resource type="StyleBox" uid="uid://dmx54n3nof1ea" path="res://addons/PowerKey/Editor/Inspector/dropdown_panel_normal.tres" id="2_es0o0"]
@@ -11,13 +11,7 @@
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lglc1"]
 
-[sub_resource type="LabelSettings" id="LabelSettings_hvuxj"]
-font_size = 13
-font_color = Color(0.800491, 0.800491, 0.800491, 1)
-outline_size = 2
-outline_color = Color(0.8, 0.8, 0.8, 1)
-
-[node name="PKExpression Editor" type="VBoxContainer"]
+[node name="PKExp Dropdown" type="VBoxContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -44,20 +38,23 @@ layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 0
 
-[node name="VSeparator" type="VSeparator" parent="Dropdown Button Panel/Visuals"]
+[node name="Sep" type="VSeparator" parent="Dropdown Button Panel/Visuals"]
 self_modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 theme_override_constants/separation = 2
 
 [node name="Icon" type="TextureRect" parent="Dropdown Button Panel/Visuals"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(13, 0)
 layout_mode = 2
 texture = ExtResource("2_m5lue")
-stretch_mode = 3
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Label" type="Label" parent="Dropdown Button Panel/Visuals"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "PKExpressions"
-label_settings = SubResource("LabelSettings_hvuxj")
 
 [node name="Content" type="HBoxContainer" parent="."]
 visible = false

@@ -42,5 +42,8 @@ func _has_main_screen() -> bool:
 func _get_plugin_name():
 	return 'PowerKey'
 
-func _get_plugin_icon() -> Texture2D:
-	return Icon
+func _get_plugin_icon() -> Texture2D: ## Return scaled plugin icon.
+	var image := Icon.get_image() # Get base image from Icon.
+	var new_size:Vector2i = image.get_size()*EditorInterface.get_editor_scale() # Calculate new base image size to match Editor display scale.
+	image.resize(new_size.x, new_size.y) # Apply new scale.
+	return ImageTexture.create_from_image(image) # Return new ImageTexture from resized base image.
