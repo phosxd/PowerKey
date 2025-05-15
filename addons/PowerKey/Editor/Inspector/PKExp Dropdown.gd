@@ -1,7 +1,6 @@
 @tool
 extends VBoxContainer
 var PKEE := PK_EE.new()
-const base_label_settings := preload('res://addons/PowerKey/Editor/Inspector/dropdown_label_settings.tres')
 const base_icon_size := Vector2(13,0)
 const collapsed_icon := preload('res://addons/PowerKey/Editor/Inspector/collapsed.svg')
 const expanded_icon := preload('res://addons/PowerKey/Editor/Inspector/expanded.svg')
@@ -15,13 +14,11 @@ signal on_update(raw:StringName, parsed:Array[Dictionary], parse_time:float)
 
 
 func _ready() -> void:
+	# Scale items to Editor scale.
+	var editor_settings := EditorInterface.get_editor_settings()
 	var editor_scale := EditorInterface.get_editor_scale()
-	# Scale label font size with Editor display scale.
-	var new_label_settings:LabelSettings = base_label_settings.duplicate()
-	new_label_settings.font_size = new_label_settings.font_size*editor_scale
-	%Label.label_settings = new_label_settings
-	# Scale icon size with Editor display scale.
-	%Icon.custom_minimum_size = base_icon_size*editor_scale
+	%Label.push_font_size(editor_settings.get_setting('interface/editor/main_font_size')) # Set label font size to Editor font size.
+	%Icon.custom_minimum_size = base_icon_size*editor_scale # Scale icon size with Editor display scale.
 	# Initialize other.
 	var config := PK_Config.new().load_config()
 	PKEE.init(config, {})
@@ -49,10 +46,10 @@ func _update_validation_label(error:int, current_char=null) -> void:
 func _on_dropdown_button_down() -> void:
 	if expanded:
 		expanded = false
-		$'Dropdown Button Panel/Visuals/Icon'.texture = collapsed_icon
+		%Icon.texture = collapsed_icon
 	else:
 		expanded = true
-		$'Dropdown Button Panel/Visuals/Icon'.texture = expanded_icon
+		%Icon.texture = expanded_icon
 	$Content.visible = expanded
 
 

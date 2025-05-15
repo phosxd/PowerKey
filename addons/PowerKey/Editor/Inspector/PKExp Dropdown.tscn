@@ -1,15 +1,21 @@
-[gd_scene load_steps=8 format=3 uid="uid://cklwwr4htvoa0"]
+[gd_scene load_steps=11 format=3 uid="uid://cklwwr4htvoa0"]
 
 [ext_resource type="Script" uid="uid://cl53u7hsjfh00" path="res://addons/PowerKey/Editor/Inspector/PKExp Dropdown.gd" id="1_hvuxj"]
 [ext_resource type="StyleBox" uid="uid://dmx54n3nof1ea" path="res://addons/PowerKey/Editor/Inspector/dropdown_panel_normal.tres" id="2_es0o0"]
 [ext_resource type="StyleBox" uid="uid://2oldccxcjxrf" path="res://addons/PowerKey/Editor/Inspector/dropdown_panel_hover.tres" id="2_flkrg"]
 [ext_resource type="Texture2D" uid="uid://1um78pocay0q" path="res://addons/PowerKey/Editor/Inspector/collapsed.svg" id="2_m5lue"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_7nutv"]
-
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hvuxj"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lglc1"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jwi1u"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ea6m3"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qu6wk"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_g6wke"]
 
 [node name="PKExp Dropdown" type="VBoxContainer"]
 anchors_preset = 15
@@ -19,11 +25,12 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_hvuxj")
 
-[node name="Dropdown Button Panel" type="PanelContainer" parent="."]
+[node name="Dropdown Button" type="MarginContainer" parent="."]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_7nutv")
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_bottom = 2
 
-[node name="Button" type="Button" parent="Dropdown Button Panel"]
+[node name="Button" type="Button" parent="Dropdown Button"]
 layout_mode = 2
 tooltip_text = "PKExpressions"
 theme_override_styles/focus = SubResource("StyleBoxEmpty_hvuxj")
@@ -33,17 +40,18 @@ theme_override_styles/normal_mirrored = ExtResource("2_es0o0")
 theme_override_styles/normal = ExtResource("2_es0o0")
 alignment = 0
 
-[node name="Visuals" type="HBoxContainer" parent="Dropdown Button Panel"]
+[node name="Visuals" type="HBoxContainer" parent="Dropdown Button"]
 layout_mode = 2
+size_flags_vertical = 0
 mouse_filter = 2
 theme_override_constants/separation = 0
 
-[node name="Sep" type="VSeparator" parent="Dropdown Button Panel/Visuals"]
+[node name="Sep" type="VSeparator" parent="Dropdown Button/Visuals"]
 self_modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="Icon" type="TextureRect" parent="Dropdown Button Panel/Visuals"]
+[node name="Icon" type="TextureRect" parent="Dropdown Button/Visuals"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(13, 0)
 layout_mode = 2
@@ -51,10 +59,28 @@ texture = ExtResource("2_m5lue")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="Dropdown Button Panel/Visuals"]
+[node name="Label" type="RichTextLabel" parent="Dropdown Button/Visuals"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "PKExpressions"
+size_flags_vertical = 0
+mouse_filter = 2
+theme_override_styles/fill = SubResource("StyleBoxEmpty_jwi1u")
+theme_override_styles/background = SubResource("StyleBoxEmpty_ea6m3")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_qu6wk")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_g6wke")
+bbcode_enabled = true
+text = "[b]PKExpressions"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="Dropdown Button"]
+visible = false
+layout_mode = 2
+
+[node name="Panel" type="PanelContainer" parent="Dropdown Button/VBox"]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 2
 
 [node name="Content" type="HBoxContainer" parent="."]
 visible = false
@@ -101,6 +127,6 @@ tooltip_text = "Store parsed PKExpression data on the Node.
 This removes the need for it to parse during run-time, however will take up more space."
 text = "Store Parsed"
 
-[connection signal="button_down" from="Dropdown Button Panel/Button" to="." method="_on_dropdown_button_down"]
+[connection signal="button_down" from="Dropdown Button/Button" to="." method="_on_dropdown_button_down"]
 [connection signal="text_changed" from="Content/Items/Text Editor" to="." method="_on_text_editor_text_changed"]
 [connection signal="toggled" from="Content/Items/Actions/Button Store Parsed" to="." method="_on_button_store_parsed_toggled"]
