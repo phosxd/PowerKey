@@ -14,11 +14,12 @@ signal on_update(raw:StringName, parsed:Array[Dictionary], parse_time:float)
 
 
 func _ready() -> void:
-	# Scale items to Editor scale.
-	var editor_settings := EditorInterface.get_editor_settings()
-	var editor_scale := EditorInterface.get_editor_scale()
-	%Label.push_font_size(editor_settings.get_setting('interface/editor/main_font_size')) # Set label font size to Editor font size.
-	%Icon.custom_minimum_size = base_icon_size*editor_scale # Scale icon size with Editor display scale.
+	if Engine.is_editor_hint():
+		# Scale items to Editor scale.
+		var editor_settings := EditorInterface.get_editor_settings()
+		var editor_scale := EditorInterface.get_editor_scale()
+		%Label.push_font_size(editor_settings.get_setting('interface/editor/main_font_size')) # Set label font size to Editor font size.
+		%Icon.custom_minimum_size = base_icon_size*editor_scale # Scale icon size with Editor display scale.
 	# Initialize other.
 	var config := PK_Config.new().load_config()
 	PKEE.init(config, {})
