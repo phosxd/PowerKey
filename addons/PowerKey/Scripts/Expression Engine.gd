@@ -2,7 +2,7 @@
 # New instance should be created if used (call `.new`).
 
 class_name PK_EE extends Node
-enum ExpTypes {ASSIGN,LINK,EXEC}
+enum ExpTypes {ASSIGN,LINK,EXECUTE}
 const ExpType_values:Array[StringName] = ['A','L','E'] ## ExpType values as Strings instead of enum int.
 const Lowercases:Dictionary[StringName,StringName] = {'A':'a','B':'b','C':'c','D':'d','E':'e','F':'f','G':'g','H':'h','I':'i','J':'j','K':'k','L':'l','M':'m','N':'n','O':'o','P':'p','Q':'q','S':'s','T':'t','U':'u','V':'v','W':'w','X':'x','Y':'y','Z':'z'} ## Performs better than using `.to_lower`.
 enum Parse_stages {TYPE,PARAMS,CONTENT} ## Each stage of parsing.
@@ -64,6 +64,9 @@ func init(config:Dictionary, resources) -> void:
 # PKExpression parsing functions.
 # -------------------------------
 func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expression details. Returns null if invalid expression.
+	# If comment line, throw silent error.
+	if text.begins_with(Comment_token):
+		return {'error':999}
 	# Check cache, return cached result is available.
 	if not Engine.is_editor_hint():
 		if cached_pkexps.has(text):
@@ -76,12 +79,10 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 		'parameters': PackedStringArray(), # The expression parameters.
 		'content': PackedStringArray(), # The expression content.
 		'stage': Parse_stages.TYPE, # The parsing stage.
-		'buffers': [null,'',null], # The current stage's temporary data.
+		'buffers': [null,null], # The current stage's temporary data.
 	}
-	# If comment line, throw silent error.
-	if text.begins_with(Comment_token):
-		ps.error = 999
-		return ps
+	# Set buffers.
+	_reset_parse_state_buffers(ps)
 
 	#var start := Time.get_ticks_usec()
 	for char in String(text):
@@ -93,6 +94,8 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 			Parse_stages.CONTENT: _parse_content(char, ps)
 	#print(Time.get_ticks_usec()-start)
 
+	# Clear buffers.
+	ps.buffers.clear()
 	# Error checks.
 	if ps.error != 0: pass
 	elif ps.type == -1:
@@ -113,28 +116,26 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 
 
 func _parse_type(char:String, ps:Dictionary) -> bool: ## Parses the "type" stage. Returns true if ready to progress to next stage.
-	# Set expression type.
+	# If intending to specify parameters.
 	if char == Parameters_denotator:
 		# Throw error if not a valid expression type.
 		ps.type = ExpType_values.find(StringName(ps.buffers[1]))
 		if ps.type == -1:
 			ps.error = 1
 			return true
+		# Next stage.
 		ps.stage = Parse_stages.PARAMS
-		# Set up buffers.
-		ps.buffers[0] = 0 # expecting flag
-		ps.buffers[1] = '' # current parameter
-	# Progress to content stage if not specifying any parameters.
+		_reset_parse_state_buffers(ps)
+	# If not intending to specify any parameters.
 	elif char == ' ':
 		# Throw error if not a valid expression type.
 		ps.type = ExpType_values.find(StringName(ps.buffers[1]))
 		if ps.type == -1:
 			ps.error = 1
 			return true
+		# Next stage.
 		ps.stage = Parse_stages.CONTENT
 		_reset_parse_state_buffers(ps)
-		ps.buffers[0] = 0 # expecting flag
-		ps.buffers[1] = ''
 		
 	# Add to expression_type.
 	else:
@@ -148,9 +149,7 @@ func _parse_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "param
 			ps.error = 7
 			return true
 		ps.parameters.append(StringName(ps.buffers[1]))
-		# Reset buffers to stage's default.
-		ps.buffers[0] = 0
-		ps.buffers[1] = ''
+		_reset_parse_state_buffers(ps)
 		return true
 	else:
 		var end:bool = _parse_variable_path(char, ps)
@@ -162,8 +161,6 @@ func _parse_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "param
 			ps.parameters.append(StringName(ps.buffers[1]))
 			ps.stage = Parse_stages.CONTENT
 			_reset_parse_state_buffers(ps)
-			ps.buffers[0] = 0 # expecting flag.
-			ps.buffers[1] = '' # string 1.
 			return true
 	return false
 
@@ -203,10 +200,9 @@ func _parse_variable_path(char:String, ps:Dictionary) -> bool: ## Parses a varia
 	return false
 
 
-func _reset_parse_state_buffers(ps:Dictionary) -> void: ## Resets the parsing state's buffers to null.
-	ps.buffers[0] = null
-	ps.buffers[1] = null
-	ps.buffers[2] = null
+func _reset_parse_state_buffers(ps:Dictionary) -> void: ## Resets the parsing state's buffers.
+	ps.buffers[0] = 0 # Expecting flag.
+	ps.buffers[1] = '' # General purpose string.
 
 
 
@@ -214,58 +210,62 @@ func _reset_parse_state_buffers(ps:Dictionary) -> void: ## Resets the parsing st
 
 # PKExpression processing functions.
 # ----------------------------------
-func process_pkexp(node:Node, raw_expression:String, parsed:Dictionary) -> void: ## Executes a parsed PowerKey expression on the Node.
+func process_pkexp(node:Node, raw:StringName, parsed:Dictionary) -> void: ## Executes a parsed PowerKey expression on the Node.
 	# Debug printing.
 	if Config.debug_print_any_pkexpression_processed:
-		print_rich('[b][color=gold]PowerKey Debug:[/color][/b] Now processing expression "[color=tomato]%s[/color]" on Node "[color=orange]%s[/color]" ("[color=dim_gray]%s[/color]").' % [raw_expression, node.name, node.get_instance_id()])
-	var string_content:String = ''.join(parsed.content)
+		print_rich('[b][color=gold]PowerKey Debug:[/color][/b] Now processing expression "[color=tomato]%s[/color]" on Node "[color=orange]%s[/color]" ("[color=dim_gray]%s[/color]").' % [raw, node.name, node.get_instance_id()])
+	# Process expression.
 	match parsed.type:
-		# Assign expression.
-		ExpTypes.ASSIGN:
-			if parsed.parameters.size() == 0: return # Return if no parameters.
-			var value = _get_value(string_content.split('.'), node, raw_expression)
+		ExpTypes.ASSIGN: _process_pkexp_assign(node, raw, parsed)
+		ExpTypes.LINK: _process_pkexp_link(node, raw, parsed)
+		ExpTypes.EXECUTE: _process_pkexp_execute(node, raw, parsed)
+
+
+func _process_pkexp_assign(node:Node, raw:StringName, parsed:Dictionary) -> void: ## Process "Assign" type PKExpression.
+	if parsed.parameters.size() == 0: return # Return if no parameters.
+	var value = _get_value(''.join(parsed.content).split('.'), node, raw)
+	# Set value, regardless of whether or not the Node property or Resources property exists.
+	_set_value(parsed.parameters[0].split('.'), node, value, raw)
+
+func _process_pkexp_link(node:Node, raw:StringName, parsed:Dictionary) -> void: ## Process "Link" type PKExpression.
+	if parsed.parameters.size() == 0: return # Return if no parameters.
+	# Create new timer.
+	var update_timer:Timer
+	# Get timer already on Node, if it exists, use this instead.
+	if node.has_node(Link_timer_name):
+		var current_timer = node.get_node(Link_timer_name)
+		update_timer = current_timer
+	# If no timer already exists, create new one.
+	else:
+		update_timer = Timer.new()
+		update_timer.name = Link_timer_name
+		node.add_child(update_timer)
+		update_timer.wait_time = 0.0000001 # Set time to effectively zero.
+		update_timer.start()
+	# Connect function to process every tick.
+	var last_value
+	var split_content:PackedStringArray = ''.join(parsed.content).split('.')
+	var split_node_property:PackedStringArray = parsed.parameters[0].split('.')
+	update_timer.timeout.connect(func():
+		var value = _get_value(split_content, node, raw)
+		# Set value if different.
+		if value != last_value:
 			# Set value, regardless of whether or not the Node property or Resources property exists.
-			_set_value(parsed.parameters[0].split('.'), node, value, raw_expression)
+			_set_value(split_node_property, node, value, raw)
+			last_value = value
+	)
 
-		# Link expression.
-		ExpTypes.LINK:
-			if parsed.parameters.size() == 0: return # Return if no parameters.
-			# Create new timer.
-			var update_timer:Timer
-			# Get timer already on Node, if it exists, use this instead.
-			if node.has_node(Link_timer_name):
-				var current_timer = node.get_node(Link_timer_name)
-				update_timer = current_timer
-			# If no timer already exists, create new one.
-			else:
-				update_timer = Timer.new()
-				update_timer.name = Link_timer_name
-				node.add_child(update_timer)
-				update_timer.wait_time = 0.0000001 # Set time to effectively zero.
-				update_timer.start()
-			# Connect function to process every tick.
-			var last_value
-			var split_content:PackedStringArray = string_content.split('.')
-			var split_node_property:PackedStringArray = parsed.parameters[0].split('.')
-			update_timer.timeout.connect(func():
-				var value = _get_value(split_content, node, raw_expression)
-				# Set value if different.
-				if value != last_value:
-					# Set value, regardless of whether or not the Node property or Resources property exists.
-					_set_value(split_node_property, node, value, raw_expression)
-					last_value = value
-			)
+func _process_pkexp_execute(node:Node, raw:String, parsed:Dictionary) -> void: ## Process "Execute" type PKExpression.
+	var func_name:StringName = '_PK_function'
+	# Define code.
+	var gd_code:StringName = Execute_script_code_template % [func_name, ''.join(parsed.content).indent('	')]
+	# Apply source code to script.
+	if Execute_script.source_code != gd_code:
+		Execute_script.source_code = gd_code
+		Execute_script.reload()
+	Execute_script.call(func_name, node, Resources)
 
-		# Execute expression.
-		ExpTypes.EXEC:
-			var func_name:StringName = '_PK_function'
-			# Define code.
-			var gd_code:StringName = Execute_script_code_template % [func_name, string_content.indent('	')]
-			# Apply source code to script.
-			if Execute_script.source_code != gd_code:
-				Execute_script.source_code = gd_code
-				Execute_script.reload()
-			Execute_script.call(func_name, node, Resources)
+
 
 
 
