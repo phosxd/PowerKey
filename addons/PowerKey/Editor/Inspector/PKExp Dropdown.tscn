@@ -1,9 +1,10 @@
-[gd_scene load_steps=11 format=3 uid="uid://cklwwr4htvoa0"]
+[gd_scene load_steps=12 format=3 uid="uid://cklwwr4htvoa0"]
 
 [ext_resource type="Script" uid="uid://cl53u7hsjfh00" path="res://addons/PowerKey/Editor/Inspector/PKExp Dropdown.gd" id="1_hvuxj"]
 [ext_resource type="StyleBox" uid="uid://dmx54n3nof1ea" path="res://addons/PowerKey/Editor/Inspector/dropdown_panel_normal.tres" id="2_es0o0"]
 [ext_resource type="StyleBox" uid="uid://2oldccxcjxrf" path="res://addons/PowerKey/Editor/Inspector/dropdown_panel_hover.tres" id="2_flkrg"]
 [ext_resource type="Texture2D" uid="uid://1um78pocay0q" path="res://addons/PowerKey/Editor/Inspector/collapsed.svg" id="2_m5lue"]
+[ext_resource type="Texture2D" uid="uid://cl7a2s0ob1n1f" path="res://addons/PowerKey/Editor/Inspector/EditAddRemove.svg" id="5_jwi1u"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hvuxj"]
 
@@ -120,6 +121,13 @@ autowrap_mode = 2
 [node name="Actions" type="HFlowContainer" parent="Content/Items"]
 layout_mode = 2
 
+[node name="Button Builder" type="Button" parent="Content/Items/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/icon_max_width = 16
+text = "Builder"
+icon = ExtResource("5_jwi1u")
+
 [node name="Button Store Parsed" type="CheckButton" parent="Content/Items/Actions"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -129,4 +137,5 @@ text = "Store Parsed"
 
 [connection signal="button_down" from="Dropdown Button/Button" to="." method="_on_dropdown_button_down"]
 [connection signal="text_changed" from="Content/Items/Text Editor" to="." method="_on_text_editor_text_changed"]
+[connection signal="pressed" from="Content/Items/Actions/Button Builder" to="." method="_on_button_builder_pressed"]
 [connection signal="toggled" from="Content/Items/Actions/Button Store Parsed" to="." method="_on_button_store_parsed_toggled"]

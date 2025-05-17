@@ -15,6 +15,7 @@ func _enter_tree() -> void:
 	add_autoload_singleton('PowerKey', 'res://addons/PowerKey/Scripts/Singleton.gd')
 	# Add PowerKey Editor menu to Godot editor.
 	PowerKey_editor_instance = PowerKey_editor_tscn.instantiate()
+	PowerKey_editor_instance.init()
 	EditorInterface.get_editor_main_screen().add_child(PowerKey_editor_instance)
 	_make_visible(false)
 

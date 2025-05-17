@@ -1,12 +1,18 @@
 @tool
 extends VBoxContainer
-@onready var Config := PK_Config.new()
-@onready var resources_script_path_text_box := get_node('Tabs/Configure/Resources Path/Text Box')
-@onready var max_cached_pkexpressions_spin_box := get_node('Tabs/Configure/Max Cached PKExpressions/SpinBox')
-@onready var warning_tag := get_node('Tabs/Configure/Warning Tag')
-@onready var guide_tabs := get_node('Tabs/Guide/Tabs')
+var Config:PK_Config
+var resources_script_path_text_box:Node
+var max_cached_pkexpressions_spin_box:Node
+var warning_tag:Node
+var guide_tabs:Node
 
-func _ready() -> void:
+func init() -> void:
+	# Initialize values.
+	Config = PK_Config.new()
+	resources_script_path_text_box = get_node('Tabs/Configure/Resources Path/Text Box')
+	max_cached_pkexpressions_spin_box = get_node('Tabs/Configure/Max Cached PKExpressions/SpinBox')
+	warning_tag = get_node('Tabs/Configure/Warning Tag')
+	guide_tabs = get_node('Tabs/Guide/Tabs')
 	# Set UI values based on config.
 	var config := Config.load_config()
 	resources_script_path_text_box.text = config.resources_script_path

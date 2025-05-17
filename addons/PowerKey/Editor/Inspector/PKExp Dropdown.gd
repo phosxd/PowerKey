@@ -2,10 +2,12 @@
 extends VBoxContainer
 var PKEE := PK_EE.new()
 const base_icon_size := Vector2(13,0)
+const base_builder_icon_size := 16
 const collapsed_icon := preload('res://addons/PowerKey/Editor/Inspector/collapsed.svg')
 const expanded_icon := preload('res://addons/PowerKey/Editor/Inspector/expanded.svg')
 
 var expanded := false
+var Invalid:bool = false
 var Raw:String
 var Parsed:Array[Dictionary]
 
@@ -20,16 +22,22 @@ func _ready() -> void:
 		var editor_scale := EditorInterface.get_editor_scale()
 		%Label.push_font_size(editor_settings.get_setting('interface/editor/main_font_size')) # Set label font size to Editor font size.
 		%Icon.custom_minimum_size = base_icon_size*editor_scale # Scale icon size with Editor display scale.
-	# Initialize other.
-	var config := PK_Config.new().load_config()
-	PKEE.init(config, {})
+		%'Button Builder'.remove_theme_constant_override('icon_max_width') # Remove current override.
+		%'Button Builder'.add_theme_constant_override('icon_max_width', base_builder_icon_size*editor_scale) # Add scaled override.
 
 func init(raw:StringName, parsed:Array[Dictionary]) -> void:
+	# Initialize stuff.
+	var config := PK_Config.new().load_config()
+	PKEE.init(config, {})
 	# Set PKExpressions.
 	%'Text Editor'.text = raw
 	%'Button Store Parsed'.button_pressed = true if parsed.size() > 0 else false
 	Raw = raw
 	Parsed = parsed
+	_on_text_editor_text_changed()
+
+func set_text(text:String) -> void:
+	%'Text Editor'.text = text
 	_on_text_editor_text_changed()
 
 
@@ -73,7 +81,7 @@ func _on_text_editor_text_changed() -> void:
 	for line in Raw.split('\n'):
 		line_index += 1
 		%'Text Editor'.set_line_background_color(line_index, Color(0,0,0,0)) # Reset line color.
-		if line.strip_edges() == '': continue # If empty, return.
+		#if line.strip_edges() == '': continue # If empty, return.
 		# Parse line & store parsed line in "Parsed".
 		var start_time := Time.get_ticks_usec()
 		var parsed = PKEE.parse_pkexp(line)
@@ -89,7 +97,10 @@ func _on_text_editor_text_changed() -> void:
 			current_char = parsed.current_char
 			%'Text Editor'.set_line_background_color(line_index, Color(1,0.3,0.3,0.5)) # Highlight line in Text Editor.
 			break
-	# Update validation label with error as mode.
+
+	if error == 0: Invalid = false
+	else: Invalid = true
+	# Update validation label with error.
 	_update_validation_label(error, current_char)
 	
 	# Send signal.
@@ -103,3 +114,13 @@ func _on_button_store_parsed_toggled(toggled_on:bool) -> void:
 	else:
 		Parsed.clear() # Empty the array of Parsed expressions.
 		on_update.emit(StringName(Raw), Parsed, 0)
+
+
+func _on_button_builder_pressed() -> void:
+	var builder_scene:Window = load('res://addons/PowerKey/Editor/PKExp Builder/PKExp Builder.tscn').instantiate()
+	builder_scene.init()
+	EditorInterface.popup_dialog(builder_scene)
+	builder_scene.finished.connect(func(raw:String) -> void:
+		%'Text Editor'.text += '\n%s' % raw
+		_on_text_editor_text_changed()
+	)

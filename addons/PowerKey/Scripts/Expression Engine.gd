@@ -50,6 +50,7 @@ const Parse_errors:Array[StringName] = [
 	'Parameter cannot be empty',
 	'Invalid amount of parameters for this expression type',
 	'Improperly formed float value',
+	'Empty',
 ]
 const Link_timer_name := '_pk_link_timer'
 var Execute_script:Script = GDScript.new()
@@ -75,6 +76,8 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 	# If comment line, throw silent error.
 	if text.begins_with(Comment_token):
 		return {'error':999}
+	if text.strip_edges() == '':
+		return {'error':10,'current_char':0}
 	# Check cache, return cached result is available.
 	if not Engine.is_editor_hint():
 		if cached_pkexps.has(text):

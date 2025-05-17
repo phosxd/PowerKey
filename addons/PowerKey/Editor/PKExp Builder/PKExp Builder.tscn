@@ -1,0 +1,212 @@
+[gd_scene load_steps=4 format=3 uid="uid://bmgaspe6uuetm"]
+
+[ext_resource type="Script" uid="uid://dcjay8l6g55qi" path="res://addons/PowerKey/Editor/PKExp Builder/PKExp Builder.gd" id="1_cpqj3"]
+[ext_resource type="PackedScene" uid="uid://cklwwr4htvoa0" path="res://addons/PowerKey/Editor/Inspector/PKExp Dropdown.tscn" id="2_4wjiw"]
+[ext_resource type="Texture2D" uid="uid://dja7qfpsdq7up" path="res://addons/PowerKey/Editor/Inspector/expanded.svg" id="3_n3e8b"]
+
+[node name="PKExp Builder" type="Window"]
+title = "PKExpression Builder"
+initial_position = 2
+size = Vector2i(400, 400)
+transient = true
+popup_window = true
+script = ExtResource("1_cpqj3")
+
+[node name="Panel" type="PanelContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+
+[node name="Type" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/Type"]
+layout_mode = 2
+text = "Expression Type:"
+
+[node name="Type Options" type="OptionButton" parent="Panel/VBox/Type"]
+unique_name_in_owner = true
+layout_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "Assign"
+popup/item_0/id = 0
+popup/item_1/text = "Link"
+popup/item_1/id = 1
+popup/item_2/text = "Execute"
+popup/item_2/id = 2
+
+[node name="Details" type="PanelContainer" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Assign" type="VBoxContainer" parent="Panel/VBox/Details"]
+layout_mode = 2
+
+[node name="Property" type="HBoxContainer" parent="Panel/VBox/Details/Assign"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/Details/Assign/Property"]
+layout_mode = 2
+tooltip_text = "The Node property to set the value on."
+mouse_filter = 1
+text = "*Property:"
+
+[node name="Assign Property LineEdit" type="LineEdit" parent="Panel/VBox/Details/Assign/Property"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+clear_button_enabled = true
+
+[node name="Value" type="HBoxContainer" parent="Panel/VBox/Details/Assign"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/Details/Assign/Value"]
+layout_mode = 2
+tooltip_text = "The value to set on the Node's property. Must be a variable from the Resources script."
+mouse_filter = 1
+text = "*Value:"
+
+[node name="Assign Value LineEdit" type="LineEdit" parent="Panel/VBox/Details/Assign/Value"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+clear_button_enabled = true
+
+[node name="Link" type="VBoxContainer" parent="Panel/VBox/Details"]
+visible = false
+layout_mode = 2
+
+[node name="Property" type="HBoxContainer" parent="Panel/VBox/Details/Link"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/Details/Link/Property"]
+layout_mode = 2
+tooltip_text = "The Node property to set the value on."
+mouse_filter = 1
+text = "*Property:"
+
+[node name="Link Property LineEdit" type="LineEdit" parent="Panel/VBox/Details/Link/Property"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+clear_button_enabled = true
+
+[node name="Frequency" type="HBoxContainer" parent="Panel/VBox/Details/Link"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/Details/Link/Frequency"]
+layout_mode = 2
+tooltip_text = "How frequently the Node property updates with the value."
+mouse_filter = 1
+text = "Frequency:"
+
+[node name="Link Frequency SpinBox" type="SpinBox" parent="Panel/VBox/Details/Link/Frequency"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1000.0
+step = 0.01
+suffix = "seconds"
+
+[node name="Value" type="HBoxContainer" parent="Panel/VBox/Details/Link"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/Details/Link/Value"]
+layout_mode = 2
+tooltip_text = "The value to set on the Node's property. Must be a variable from the Resources script."
+mouse_filter = 1
+text = "*Value:"
+
+[node name="Link Value LineEdit" type="LineEdit" parent="Panel/VBox/Details/Link/Value"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+clear_button_enabled = true
+
+[node name="Execute" type="VBoxContainer" parent="Panel/VBox/Details"]
+visible = false
+layout_mode = 2
+
+[node name="Code" type="HBoxContainer" parent="Panel/VBox/Details/Execute"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/Details/Execute/Code"]
+layout_mode = 2
+tooltip_text = "The GDScript code to execute on the Node. Use \"S\" for \"self\", use \"PK\" for Resources script."
+mouse_filter = 1
+text = "*Code:"
+
+[node name="Execute Code TextEdit" type="TextEdit" parent="Panel/VBox/Details/Execute/Code"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+scroll_fit_content_height = true
+
+[node name="Validation Warning" type="Label" parent="Panel/VBox/Details/Execute"]
+self_modulate = Color(1, 1, 0.239216, 1)
+layout_mode = 2
+size_flags_vertical = 1
+text = "GDScript code not validated, use at your own risk."
+
+[node name="Result" parent="Panel/VBox" instance=ExtResource("2_4wjiw")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Dropdown Button" parent="Panel/VBox/Result" index="0"]
+visible = false
+
+[node name="Icon" parent="Panel/VBox/Result/Dropdown Button/Visuals" index="1"]
+texture = ExtResource("3_n3e8b")
+
+[node name="Content" parent="Panel/VBox/Result" index="1"]
+visible = true
+
+[node name="Indent" parent="Panel/VBox/Result/Content" index="0"]
+visible = false
+
+[node name="Text Editor" parent="Panel/VBox/Result/Content/Items" index="0"]
+custom_minimum_size = Vector2(0, 0)
+placeholder_text = "Resulting Expression..."
+editable = false
+drag_and_drop_selection_enabled = false
+scroll_fit_content_height = true
+
+[node name="Actions" parent="Panel/VBox/Result/Content/Items" index="2"]
+visible = false
+
+[node name="Actions" type="HFlowContainer" parent="Panel/VBox"]
+layout_mode = 2
+
+[node name="Button Done" type="Button" parent="Panel/VBox/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Done"
+
+[node name="Button Cancel" type="Button" parent="Panel/VBox/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel"
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="item_selected" from="Panel/VBox/Type/Type Options" to="." method="_on_type_options_item_selected"]
+[connection signal="text_changed" from="Panel/VBox/Details/Assign/Property/Assign Property LineEdit" to="." method="_on_assign_property_text_changed"]
+[connection signal="text_changed" from="Panel/VBox/Details/Assign/Value/Assign Value LineEdit" to="." method="_on_assign_value_text_changed"]
+[connection signal="text_changed" from="Panel/VBox/Details/Link/Property/Link Property LineEdit" to="." method="_on_link_property_text_changed"]
+[connection signal="value_changed" from="Panel/VBox/Details/Link/Frequency/Link Frequency SpinBox" to="." method="_on_link_frequency_value_changed"]
+[connection signal="text_changed" from="Panel/VBox/Details/Link/Value/Link Value LineEdit" to="." method="_on_link_value_text_changed"]
+[connection signal="text_changed" from="Panel/VBox/Details/Execute/Code/Execute Code TextEdit" to="." method="_on_execute_code_text_changed"]
+[connection signal="pressed" from="Panel/VBox/Actions/Button Done" to="." method="_on_button_done_pressed"]
+[connection signal="pressed" from="Panel/VBox/Actions/Button Cancel" to="." method="_on_button_cancel_pressed"]
+
+[editable path="Panel/VBox/Result"]
