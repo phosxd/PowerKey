@@ -62,9 +62,9 @@ Each translation has 3 properties:
 
 This works more like the translation system built-into Godot, but still provides all the advantages of PowerKey.
 ### Visual PKExpression builder:
-**Milestone:** ???
+✅ **Milestone:** 1.5.0
 
-A "Add Visually" button in the PKExpressions dropdown for the Inspector dock. Pressing the "Add Visually" button will show a pop-up form that makes it possible to add an expression without knowing the syntax. It will also be very helpful for getting started learning the syntax.
+A "Builder" button in the PKExpressions dropdown for the Inspector dock. Pressing the "Builder" button will show a pop-up window that makes it possible to add a PKexpression without knowing the syntax. It will also be very helpful for getting started learning the syntax.
 ### Enhanced property access support:
 ✅ **Milestone:** 1.5.0
 
