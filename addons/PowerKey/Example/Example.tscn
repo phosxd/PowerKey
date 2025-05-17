@@ -13,24 +13,30 @@ layout_mode = 2
 autowrap_mode = 2
 metadata/PKExpressions = &"A:text explanation"
 
-[node name="Label A" type="Label" parent="."]
+[node name="Text Example 1" type="Label" parent="."]
 layout_mode = 2
 metadata/PKExpressions = &"A:text titles.a\nA:label_settings title_label_settings"
 
-[node name="Label B" type="Label" parent="."]
+[node name="Text Example 2" type="Label" parent="."]
 layout_mode = 2
 metadata/PKExpressions = &"A:text titles.b\nA:label_settings title_label_settings"
 
-[node name="Label C" type="Label" parent="."]
+[node name="Random Number" type="Label" parent="."]
 layout_mode = 2
 metadata/PKExpressions = &"E S.text = \'Random Number: %s\' % randi_range(10000,99999)\nA:label_settings title_label_settings"
 
-[node name="Label D" type="Label" parent="."]
+[node name="FPS" type="Label" parent="."]
 layout_mode = 2
 size_flags_horizontal = 4
-size_flags_vertical = 6
+size_flags_vertical = 10
 metadata/PKExpressions = &"L:text current_fps"
 
-[node name="Label E" type="Label" parent="."]
+[node name="Slow Counter" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 2
+metadata/PKExpressions = &"A:text frame_count\nL:text,1.25 frame_count"
+
+[node name="Text Example 3" type="Label" parent="."]
 layout_mode = 2
 metadata/PKExpressions = &"A:text bottom_text.0"

@@ -70,7 +70,7 @@ A "Add Visually" button in the PKExpressions dropdown for the Inspector dock. Pr
 
 Currently, in "Link" & "Assign" PKExpressions you can only acess properties from objects of type `Dictionary`, `Object` & `Vector2`. I want to add the ability to access values from `Array`, `Rect2`, `Rect2i`, `Plane`, `Quaternion`, `AABB`, `Transform2D`, `Basis`, `Vector2i`, `Vector3`, `Vector3i`, `Vector4`, `Vector4i`, & `Color` types as well.
 ### "Frequency" parameter for "Link" PKExpressions:
-**Milestone:** 1.5.0
+✅ **Milestone:** 1.5.0
 
 A new parameter in Link expressions that allow you to define how frequently the value updates. By default the frequency is 0 (every frame), this parameter option will let users set the frequency to whatever they want, to better suite their need.
 Here is how this new frequency parameter would be used: `L:<property_name>,<frequency> <content>`. The frequency parameter will be optional.

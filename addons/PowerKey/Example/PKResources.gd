@@ -4,14 +4,20 @@ const explanation := 'In this example we are setting every single label\'s text 
 const titles := {'a':'Whoah! A title!', 'b':'ANOTHER TITLE?! No way..'}
 const bottom_text:Array[String] = ['Text from an array :)']
 var title_label_settings := LabelSettings.new()
+var _frame_count_template := 'Slow updating counter: %s'
+var _current_fps_template := 'Main-Thread Frames Per Second: %s'
+var _min_fps_template := 'Min-FPS: %s'
+var _max_fps_template := 'Max-FPS: %s'
 
-# Define constantly changing FPS variables.
+# Define constantly changing variables.
+var _frame_count := 0
 var _current_fps := 0.0
 var _min_fps := 999.0
 var _max_fps := 0.0
-var current_fps:String
-var min_fps:String
-var max_fps:String
+var frame_count := _frame_count_template % 0
+var current_fps := _current_fps_template % 0
+var min_fps := _min_fps_template % 0
+var max_fps := _max_fps_template % 0
 
 
 func _ready() -> void:
@@ -23,6 +29,8 @@ func _ready() -> void:
 
 var min_max_update_timer := 0.0 ## Keeps track of time since last min FPS & max FPS reset.
 func _process(delta:float) -> void:
+	_frame_count += 1
+	frame_count = _frame_count_template % _frame_count
 	min_max_update_timer += delta # Add to timer.
 	# If 5 seconds past, then reset min FPS & max FPS.
 	if min_max_update_timer >= 5.0:
@@ -34,6 +42,6 @@ func _process(delta:float) -> void:
 	_current_fps = Engine.get_frames_per_second()
 	if _current_fps > _max_fps: _max_fps = _current_fps
 	if _current_fps < _min_fps: _min_fps = _current_fps
-	current_fps = 'Main-Thread Frames Per Second: %s' % _current_fps
-	min_fps = 'Min-FPS: %s' % _min_fps
-	max_fps = 'Max-FPS: %s' % _max_fps
+	current_fps = _current_fps_template % _current_fps
+	min_fps = _min_fps_template % _min_fps
+	max_fps = _max_fps_template % _max_fps

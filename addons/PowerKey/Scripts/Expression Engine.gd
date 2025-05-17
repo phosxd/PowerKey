@@ -5,7 +5,13 @@ class_name PK_EE extends Node
 enum ExpTypes {ASSIGN,LINK,EXECUTE}
 const ExpType_values:Array[StringName] = ['A','L','E'] ## ExpType values as Strings instead of enum int.
 const Lowercases:Dictionary[StringName,StringName] = {'A':'a','B':'b','C':'c','D':'d','E':'e','F':'f','G':'g','H':'h','I':'i','J':'j','K':'k','L':'l','M':'m','N':'n','O':'o','P':'p','Q':'q','S':'s','T':'t','U':'u','V':'v','W':'w','X':'x','Y':'y','Z':'z'} ## Performs better than using `.to_lower`.
+const Digits:Array[StringName] = ['0','1','2','3','4','5','6','7','8','9']
 enum Parse_stages {TYPE,PARAMS,CONTENT} ## Each stage of parsing.
+var Parameter_counts:Dictionary = { ## The range of parameters each expression type can have.
+	ExpTypes.ASSIGN: [1,1],
+	ExpTypes.LINK: [1,2],
+	ExpTypes.EXECUTE: [0,0],
+}
 const Comment_token:StringName = &'#' ## Used to denote a commented line.
 const Parameter_separator:StringName = &',' ## Used to separate expression parameters.
 const Parameters_denotator:StringName = &':' # Should NEVER be more than one character.
@@ -42,6 +48,8 @@ const Parse_errors:Array[StringName] = [
 	'No expression type defined',
 	'No content defined',
 	'Parameter cannot be empty',
+	'Invalid amount of parameters for this expression type',
+	'Improperly formed float value',
 ]
 const Link_timer_name := '_pk_link_timer'
 var Execute_script:Script = GDScript.new()
@@ -133,6 +141,10 @@ func _parse_type(char:String, ps:Dictionary) -> bool: ## Parses the "type" stage
 		if ps.type == -1:
 			ps.error = 1
 			return true
+		# Throw error if invalid amount of parameters.
+		if 0 not in Parameter_counts[ps.type]:
+			ps.error = 8
+			return true
 		# Next stage.
 		ps.stage = Parse_stages.CONTENT
 		_reset_parse_state_buffers(ps)
@@ -144,6 +156,7 @@ func _parse_type(char:String, ps:Dictionary) -> bool: ## Parses the "type" stage
 
 
 func _parse_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "parameters" stage. Returns true if ready to progress to next stage.
+	# Next parameter if char is a separator.
 	if char == Parameter_separator:
 		if ps.buffers[1] == '':
 			ps.error = 7
@@ -151,17 +164,25 @@ func _parse_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "param
 		ps.parameters.append(StringName(ps.buffers[1]))
 		_reset_parse_state_buffers(ps)
 		return true
-	else:
-		var end:bool = _parse_variable_path(char, ps)
-		# Move to next stage.
-		if end:
-			if ps.buffers[1] == '':
-				ps.error = 7
-				return true
-			ps.parameters.append(StringName(ps.buffers[1]))
-			ps.stage = Parse_stages.CONTENT
-			_reset_parse_state_buffers(ps)
+	# End if space.
+	elif char == ' ':
+		if ps.buffers[1] == '':
+			ps.error = 7
 			return true
+		ps.parameters.append(StringName(ps.buffers[1]))
+		ps.stage = Parse_stages.CONTENT
+		_reset_parse_state_buffers(ps)
+		return true
+	# For "Assign" & "Link" types on the first parameter.
+	elif ps.type in [ExpTypes.ASSIGN,ExpTypes.LINK] && ps.parameters.size() == 0:
+		_parse_variable_path(char, ps)
+	# For "Link" types on the second parameter.
+	elif ps.type == ExpTypes.LINK && ps.parameters.size() == 1:
+		_parse_float(char, ps)
+	# If expecting no more parameters, throw error.
+	else:
+		ps.error = 8
+		return true
 	return false
 
 
@@ -177,9 +198,26 @@ func _parse_content(char:String, ps:Dictionary) -> bool: ## Parses the "content"
 	return false
 
 
+func _parse_float(char:String, ps:Dictionary) -> bool: ## Parses a floating point number.
+	# End parsing if space.
+	if char == ' ':
+		return true
+	# Add char if decimal point.
+	elif char == '.' && ps.buffers[1].length() == 1:
+		ps.buffers[1] += char
+	# Throw error if not a digit.
+	elif char not in Digits:
+		ps.error = 9
+		return true
+	# Add char.
+	else:
+		ps.buffers[1] += char
+	return false
+
+
 func _parse_variable_path(char:String, ps:Dictionary) -> bool: ## Parses a variable path.
 	var lower_char:StringName = Lowercases.get(char,char)
-	# End current stage.
+	# End parsing if space.
 	if char == ' ':
 		return true
 	# Throw error if invalid character.
@@ -194,9 +232,9 @@ func _parse_variable_path(char:String, ps:Dictionary) -> bool: ## Parses a varia
 	elif ps.buffers[0] == 0 && lower_char in Variable_path_starting_characters:
 		ps.buffers[1] += char # Add char.
 		ps.buffers[0] = 1 # Set new expecting flag.
-	# Add to variable path.
+	# Add char.
 	elif ps.buffers[0] == 1 && lower_char in Variable_path_characters:
-		ps.buffers[1] += char # Add char.
+		ps.buffers[1] += char
 	return false
 
 
@@ -222,13 +260,16 @@ func process_pkexp(node:Node, raw:StringName, parsed:Dictionary) -> void: ## Exe
 
 
 func _process_pkexp_assign(node:Node, raw:StringName, parsed:Dictionary) -> void: ## Process "Assign" type PKExpression.
-	if parsed.parameters.size() == 0: return # Return if no parameters.
 	var value = _get_value(''.join(parsed.content).split('.'), node, raw)
 	# Set value, regardless of whether or not the Node property or Resources property exists.
 	_set_value(parsed.parameters[0].split('.'), node, value, raw)
 
 func _process_pkexp_link(node:Node, raw:StringName, parsed:Dictionary) -> void: ## Process "Link" type PKExpression.
-	if parsed.parameters.size() == 0: return # Return if no parameters.
+	var frequency_param:float = 0.000001
+	var param_count:int = parsed.parameters.size()
+	if param_count == 2:
+		var param:float = float(parsed.parameters[1])
+		if param != 0.0: frequency_param = param
 	# Create new timer.
 	var update_timer:Timer
 	# Get timer already on Node, if it exists, use this instead.
@@ -240,7 +281,7 @@ func _process_pkexp_link(node:Node, raw:StringName, parsed:Dictionary) -> void: 
 		update_timer = Timer.new()
 		update_timer.name = Link_timer_name
 		node.add_child(update_timer)
-		update_timer.wait_time = 0.0000001 # Set time to effectively zero.
+		update_timer.wait_time = frequency_param
 		update_timer.start()
 	# Connect function to process every tick.
 	var last_value
