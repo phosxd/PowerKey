@@ -1,6 +1,9 @@
 extends MarginContainer
 var example_scene := preload('res://addons/PowerKey/Example/Example.tscn')
 
+func _ready() -> void:
+	%'PKExp Editor'.init('', Array([],TYPE_DICTIONARY,'',null))
+
 func _on_button_add_scene_pressed() -> void:
 	var new_scene := example_scene.instantiate()
 	%'Scene Host/VBox'.add_child(new_scene)

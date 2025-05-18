@@ -113,10 +113,16 @@ draw_tabs = true
 [node name="Validation" type="PanelContainer" parent="Content/Items"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Content/Items/Validation"]
+[node name="Label" type="RichTextLabel" parent="Content/Items/Validation"]
 layout_mode = 2
+focus_mode = 2
+mouse_default_cursor_shape = 1
 text = "Looks good! No parsing errors found."
+fit_content = true
+scroll_active = false
 autowrap_mode = 2
+selection_enabled = true
+drag_and_drop_selection_enabled = false
 
 [node name="Actions" type="HFlowContainer" parent="Content/Items"]
 layout_mode = 2

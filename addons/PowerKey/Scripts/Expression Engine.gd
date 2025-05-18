@@ -51,6 +51,7 @@ const Parse_errors:Array[StringName] = [
 	'Invalid amount of parameters for this expression type',
 	'Improperly formed float value',
 	'Empty',
+	'Improperly formed integer value',
 ]
 const Link_timer_name := '_pk_link_timer'
 var Execute_script:Script = GDScript.new()
@@ -100,9 +101,9 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 		if ps.error != 0: break # Stop if there was an error during the previous iteration.
 		ps.current_char += 1
 		match ps.stage:
-			Parse_stages.TYPE: _parse_type(char, ps)
-			Parse_stages.PARAMS: _parse_parameters(char, ps)
-			Parse_stages.CONTENT: _parse_content(char, ps)
+			Parse_stages.TYPE: _parse_stage_type(char, ps)
+			Parse_stages.PARAMS: _parse_stage_parameters(char, ps)
+			Parse_stages.CONTENT: _parse_stage_content(char, ps)
 	#print(Time.get_ticks_usec()-start)
 
 	# Clear buffers.
@@ -126,7 +127,7 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 	return ps
 
 
-func _parse_type(char:String, ps:Dictionary) -> bool: ## Parses the "type" stage. Returns true if ready to progress to next stage.
+func _parse_stage_type(char:String, ps:Dictionary) -> bool: ## Parses the "type" stage. Returns true if ready to progress to next stage.
 	# If intending to specify parameters.
 	if char == Parameters_denotator:
 		# Throw error if not a valid expression type.
@@ -158,7 +159,7 @@ func _parse_type(char:String, ps:Dictionary) -> bool: ## Parses the "type" stage
 	return false
 
 
-func _parse_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "parameters" stage. Returns true if ready to progress to next stage.
+func _parse_stage_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "parameters" stage. Returns true if ready to progress to next stage.
 	# Next parameter if char is a separator.
 	if char == Parameter_separator:
 		if ps.buffers[1] == '':
@@ -189,7 +190,7 @@ func _parse_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "param
 	return false
 
 
-func _parse_content(char:String, ps:Dictionary) -> bool: ## Parses the "content" stage. Retruns true if ready to progress to the next stage.
+func _parse_stage_content(char:String, ps:Dictionary) -> bool: ## Parses the "content" stage. Retruns true if ready to progress to the next stage.
 	# If expression type == assign, handle properly.
 	if ps.type in [ExpTypes.ASSIGN, ExpTypes.LINK]:
 		var end:bool = _parse_variable_path(char, ps)
@@ -201,13 +202,32 @@ func _parse_content(char:String, ps:Dictionary) -> bool: ## Parses the "content"
 	return false
 
 
-func _parse_float(char:String, ps:Dictionary) -> bool: ## Parses a floating point number.
-	# End parsing if space.
+func _reset_parse_state_buffers(ps:Dictionary) -> void: ## Resets the parsing state's buffers.
+	ps.buffers[0] = 0 # Expecting flag.
+	ps.buffers[1] = '' # General purpose string.
+
+
+# Basic parsing functions.
+# ------------------------
+func _parse_int(char:String, ps:Dictionary) -> bool: ## Parses a full number.
+	# Stop if char is a space.
 	if char == ' ':
 		return true
-	# Add char if decimal point.
-	elif char == '.' && ps.buffers[1].length() == 1:
+	elif char not in Digits:
+		ps.error = 11
+		return true
+	else:
 		ps.buffers[1] += char
+	return false
+
+func _parse_float(char:String, ps:Dictionary) -> bool: ## Parses a floating point number.
+	# Stop if char is a space.
+	if char == ' ':
+		return true
+	# Add char if decimal point & if not added before.
+	elif char == '.' && ps.buffers[0] == 0:
+		ps.buffers[1] += char
+		ps.buffers[0] = 1
 	# Throw error if not a digit.
 	elif char not in Digits:
 		ps.error = 9
@@ -216,7 +236,6 @@ func _parse_float(char:String, ps:Dictionary) -> bool: ## Parses a floating poin
 	else:
 		ps.buffers[1] += char
 	return false
-
 
 func _parse_variable_path(char:String, ps:Dictionary) -> bool: ## Parses a variable path.
 	var lower_char:StringName = Lowercases.get(char,char)
@@ -239,12 +258,6 @@ func _parse_variable_path(char:String, ps:Dictionary) -> bool: ## Parses a varia
 	elif ps.buffers[0] == 1 && lower_char in Variable_path_characters:
 		ps.buffers[1] += char
 	return false
-
-
-func _reset_parse_state_buffers(ps:Dictionary) -> void: ## Resets the parsing state's buffers.
-	ps.buffers[0] = 0 # Expecting flag.
-	ps.buffers[1] = '' # General purpose string.
-
 
 
 
