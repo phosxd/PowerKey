@@ -18,10 +18,12 @@ const default_config := {
 
 func load_config() -> Dictionary: ## Loads the config file. Returns default config data if config file not found.
 	var config_json
+	var changed := false
 	var file := FileAccess.open(config_file_path, FileAccess.READ) # Open config file.
 	# If file doesn't exist or could not read from file, use default data.
 	if not file:
-		config_json =  default_config
+		config_json = default_config
+		changed = true
 		printerr(Errors.default_config)
 	# If file found, read as text & close file.
 	else:
@@ -31,6 +33,7 @@ func load_config() -> Dictionary: ## Loads the config file. Returns default conf
 	# If parsing JSON failed, use default config.
 	if not config_json:
 		config_json = default_config
+		changed = true
 		printerr(Errors.default_config)
 
 	# Check config_json for any missing values.
@@ -38,9 +41,11 @@ func load_config() -> Dictionary: ## Loads the config file. Returns default conf
 		if key in config_json.keys():
 			if typeof(default_config[key]) == typeof(config_json[key]): continue
 		config_json.set(key, default_config[key])
+		changed = true
 
-	# Update config file.
-	set_config(config_json)
+	# Update config file, if changed.
+	if changed:
+		set_config(config_json)
 
 	# Return.
 	return config_json

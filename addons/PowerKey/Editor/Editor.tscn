@@ -174,63 +174,74 @@ To use PowerKey, you will need to create a GDScript file to hold all your variab
  Copy your Script file's path then paste it into the \"Resource Script Path\" text box.
  All done! Now you can access all variables defined in that script.[/ol]
 
-[font_size=30]Writing an Expression:[/font_size]
-Read through the \"Expressions\" guide page to understand how expressions work and how to implement them. If you still don't understand how everything works, please take a look at some examples located in the PowerKey addon directory."
+[font_size=30]Writing PKExpressions:[/font_size]
+Read through the \"Expressions\" guide page to understand how PKExpressions work and how to implement them. If you still don't understand how everything works, please take a look at the example scene that utilizes PKExpressions. Example scene is located in the PowerKey addon directory under \"Example\"."
 metadata/_tab_index = 0
 
 [node name="PKExpressions" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
 visible = false
 layout_mode = 2
+focus_mode = 2
 bbcode_enabled = true
-text = "When you activated PowerKey in your project, it added a custom \"PKExpressions\" dropdown in the Inspector. Navigate to the \"PKExpressions\" dropdown located under the \"Node\" category. Now expanding the dropdown will show a text field where you can enter all your expressions. A PKExpression line should always start with the type.
+text = "When you activated PowerKey in your project, it added a custom \"PKExpressions\" dropdown in the Inspector. Navigate to the \"PKExpressions\" dropdown located under the \"Node\" category. Expanding the dropdown will show a text field where you can enter all your expressions. You can also use the \"Builder\" button within the dropdown to show a menu in which you can interactively write a PKExpression instead of dealing with raw text.
 
-Each \"Type\" is labled with their performance/memory impacts. Here are the definitions for each label:
-- [color=green]None:[/color] Absolutely no impact.
-- [color=green_yellow]Effectively None:[/color] Close to no impact. Difference only slightly noticable at very high quantities.
-- [color=yellow_green]Low:[/color] Low impact, at very high quantities.
-- [color=yellow]Okay:[/color] A considerate impact, when at high quantities.
-- [color=orange]Moderate:[/color] Harmful impact, when dealing with high quantities.
-By \"very high quantities\" I am talking near the hundred thousand range. Actual impact will greatly vary with your hardware, but I am just trying to convey the relative difference between the labels.
+Each type of PKExpression is explained below.
 
-[font_size=30]Syntactic Structure:[/font_size]
-PKExpressions' syntax & structural rules are simple, and should always follow the schemas below. \"<>\" denotes a required part, \"[]\" denotes an optional part.
-[b]Schemas:[/b]
-[ul] <Type> <Content>
- <Type>:[Parameters] <Content>
+[font_size=30][color=steel_blue]\"Assign\" Type:[/color][/font_size]
+This expression type will set a value (from the Resources script) to a property of the Node once initialized then never again, unless explicitly re-evaluated. You CANNOT call functions or perform any logic within this expression type.
+[font_size=23]Schemas:[/font_size]
+[ul] [color=slate_gray]A:<node_property> <resources_value>[/color].
+[/ul]
+[font_size=23]Meanings:[/font_size]
+[ul] [color=slate_gray]node_property[/color]: The property of the Node to set the value on.
+ [color=slate_gray]resources_value[/color]: The value, provided by the Resources script, to set on the [color=slate_gray]node_property[/color].
+[/ul]
+[font_size=23]Examples:[/font_size]
+Valid?
+[ul] Yes: [color=slate_gray]A:text some_string[/color].
+ Yes: [color=slate_gray]A:text some_array.24[/color].
+ Yes: [color=slate_gray]A:text some_dictionary.some_string[/color].
+ Yes: [color=slate_gray]A:size some_vector2[/color].
+ No: [color=slate_gray]A some_value[/color].
+ No: [color=slate_gray]A:text some string[/color].
+ No: [color=slate_gray]A:text some_dictionary[lb]'some_string'[rb][/color].
+ No: [color=slate_gray]A:text some_array[lb]24[rb][/color].
+ No: [color=slate_gray]A:text some_array.-24[/color].
 [/ul]
 
-[font_size=30]A (Assign) Type:[/font_size]
-[color=cyan]Memory Impact:[/color] [color=green]None[/color]
-[color=cyan]Performance Impact (initial):[/color] [color=green_yellow]Effectively None[/color]
-[color=cyan]Performance Impact (ongoing):[/color] [color=green]None[/color]
-This expression type is very limiting & can only be used to assign a value from the Resources Script to a Node's property. You cannot call functions/methods. You cannot run code of any kind with this, but in return, PowerKey skips over any invalid expression & will only print errors instead of stopping the whole project & crashing it. To access a value in an array, instead of using square brackets, you can just type the number, however you cannot use negative numbers.
-[b]Correct Examples:[/b]
-[ul] A:text some_string
- A:text my_dictionary.this_one
- A:text my_array.23
- A:label_settings some_label_settings_resource
-[/ul][b]Incorrect Examples:[/b]
-[ul] A:text my_dictionary['this_one']
- A:text my_array[23]
- A:text my_array.-1
- A:text get_random_string()
- A some_value[/ul]
+[font_size=30][color=steel_blue]\"Link\" Type:[/color][/font_size]
+This expression type will set a value (from the Resources script) to a property of the Node, much like the \"Assign\" type. However there is one key difference, this expression type will update the Node's property with the Resources script's value every `<frequency>` seconds. If no frequency is defined, it updates every frame.
+[font_size=23]Schemas:[/font_size]
+[ul] [color=slate_gray]L:<node_property> <resources_value>[/color].
+ [color=slate_gray]L:<node_property>,<frequency> <resources_value>[/color].
+[/ul]
+[font_size=23]Meanings:[/font_size]
+[ul] [color=slate_gray]node_property[/color]: The property of the Node to set the value on.
+ [color=slate_gray]frequency[/color]: The number of seconds between each update. If undefined, uses [color=slate_gray]0.0[/color] (every frame).
+ [color=slate_gray]resources_value[/color]: The value, provided by the Resources script, to set on the [color=slate_gray]node_property[/color].
+[/ul]
+[font_size=23]Examples:[/font_size]
+(\"Assign\" expression type examples apply) Valid?
+[ul] Yes: [color=slate_gray]L:text some_string[/color].
+ Yes: [color=slate_gray]L:text,1.5 some_string[/color].
+ Yes: [color=slate_gray]L:text,100 some_string[/color].
+ No: [color=slate_gray]L:text,-1.5 some_string[/color].
+ No: [color=slate_gray]L:text,not_a_number some_string[/color].
+[/ul]
 
-[font_size=30]L (Link) Expression Type:[/font_size]
-[color=cyan]Memory Impact:[/color] [color=yellow]Okay[/color]
-[color=cyan]Performance Impact (initial):[/color] [color=orange]Moderate[/color]
-[color=cyan]Performance Impact (ongoing):[/color] [color=yellow]Okay[/color]
-Much like the Assign expression type, this type applies a value to a Node property. The syntax & rules are nearly identical. The only difference being that with this type any changes made to the variable in the Resources Script are immediately reflected onto the Node property as if they were one in the same. [b]However[/b], this expression is not one-off & runs every frame which may cause performance issues when more than a thousand are running. This should only be used in careful consideration of the impacts it may cause.
-
-[font_size=30]E (Execute) Expression Type:[/font_size]
-[color=cyan]Memory Impact:[/color] [color=green]None[/color]
-[color=cyan]Performance Impact (initial):[/color] [color=yellow]Okay[/color]
-[color=cyan]Performance Impact (ongoing):[/color] [color=green]None[/color]
-This expression type just lets you do whatever you wan't, AT YOUR OWN RISK. Your project WILL crash if you use invalid code or have missing variables. That said, this expression type does give you unlimited freedom to run any GDScript code. With this you can call functions, set values on the Node, & do complex logic if you wanted to. [b]However[/b], to access variables from the Resources Script, you will need to prefix any variable names with \"PK.\". To access the Node, instead of using \"self\", use \"S\".
-[b]Correct Examples:[/b]
-[ul] E print('hello world')
- E S.text = PK.some_string
- E var a := self.some_variable; print(a)"
+[font_size=30][color=steel_blue]\"Execute\" Type:[/color][/font_size]
+This expression type lets you execute any GDScript code on the Node. The code is NOT validated before processing, so use this at your own risk! Use [color=slate_gray]S[/color] instead of [color=slate_gray]self[/color] to access the Node, use [color=slate_gray]PK[/color] to access the Resources script. All [color=slate_gray]GlobalScope[/color] variables/functions are available to use in this expression type.
+[font_size=23]Schemas:[/font_size]
+[ul] [color=slate_gray]E <code>[/color].
+[/ul]
+[font_size=23]Examples:[/font_size]
+Valid?
+[ul] Yes: [color=slate_gray]E print('hello world')[/color].
+ Yes: [color=slate_gray]E PK.some_function()[/color].
+ Yes: [color=slate_gray]E S.text = 'some text'[/color].
+[/ul]"
+selection_enabled = true
+drag_and_drop_selection_enabled = false
 metadata/_tab_index = 1
 
 [node name="Global Translations" type="VBoxContainer" parent="Tabs"]
