@@ -187,7 +187,7 @@ text = "When you activated PowerKey in your project, it added a custom \"PKExpre
 
 Each type of PKExpression is explained below.
 
-[font_size=30][color=steel_blue]\"Assign\" Type:[/color][/font_size]
+[font_size=30][color=cornflower_blue]\"Assign\" Type:[/color][/font_size]
 This expression type will set a value (from the Resources script) to a property of the Node once initialized then never again, unless explicitly re-evaluated. You CANNOT call functions or perform any logic within this expression type.
 [font_size=23]Schemas:[/font_size]
 [ul] [color=slate_gray]A:<node_property> <resources_value>[/color].
@@ -209,7 +209,7 @@ Valid?
  No: [color=slate_gray]A:text some_array.-24[/color].
 [/ul]
 
-[font_size=30][color=steel_blue]\"Link\" Type:[/color][/font_size]
+[font_size=30][color=cornflower_blue]\"Link\" Type:[/color][/font_size]
 This expression type will set a value (from the Resources script) to a property of the Node, much like the \"Assign\" type. However there is one key difference, this expression type will update the Node's property with the Resources script's value every `<frequency>` seconds. If no frequency is defined, it updates every frame.
 [font_size=23]Schemas:[/font_size]
 [ul] [color=slate_gray]L:<node_property> <resources_value>[/color].
@@ -229,7 +229,7 @@ This expression type will set a value (from the Resources script) to a property 
  No: [color=slate_gray]L:text,not_a_number some_string[/color].
 [/ul]
 
-[font_size=30][color=steel_blue]\"Execute\" Type:[/color][/font_size]
+[font_size=30][color=cornflower_blue]\"Execute\" Type:[/color][/font_size]
 This expression type lets you execute any GDScript code on the Node. The code is NOT validated before processing, so use this at your own risk! Use [color=slate_gray]S[/color] instead of [color=slate_gray]self[/color] to access the Node, use [color=slate_gray]PK[/color] to access the Resources script. All [color=slate_gray]GlobalScope[/color] variables/functions are available to use in this expression type.
 [font_size=23]Schemas:[/font_size]
 [ul] [color=slate_gray]E <code>[/color].

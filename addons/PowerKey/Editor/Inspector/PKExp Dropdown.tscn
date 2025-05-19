@@ -1,10 +1,11 @@
-[gd_scene load_steps=12 format=3 uid="uid://cklwwr4htvoa0"]
+[gd_scene load_steps=13 format=3 uid="uid://cklwwr4htvoa0"]
 
 [ext_resource type="Script" uid="uid://cl53u7hsjfh00" path="res://addons/PowerKey/Editor/Inspector/PKExp Dropdown.gd" id="1_hvuxj"]
 [ext_resource type="StyleBox" uid="uid://dmx54n3nof1ea" path="res://addons/PowerKey/Editor/Inspector/dropdown_panel_normal.tres" id="2_es0o0"]
 [ext_resource type="StyleBox" uid="uid://2oldccxcjxrf" path="res://addons/PowerKey/Editor/Inspector/dropdown_panel_hover.tres" id="2_flkrg"]
 [ext_resource type="Texture2D" uid="uid://1um78pocay0q" path="res://addons/PowerKey/Editor/Inspector/collapsed.svg" id="2_m5lue"]
 [ext_resource type="Texture2D" uid="uid://cl7a2s0ob1n1f" path="res://addons/PowerKey/Editor/Inspector/EditAddRemove.svg" id="5_jwi1u"]
+[ext_resource type="Script" uid="uid://d2fl72bvs5lnc" path="res://addons/PowerKey/Editor/Inspector/Syntax Highlighter.gd" id="5_qu6wk"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hvuxj"]
 
@@ -90,7 +91,7 @@ size_flags_vertical = 3
 
 [node name="Indent" type="VSeparator" parent="Content"]
 self_modulate = Color(1, 1, 1, 0)
-custom_minimum_size = Vector2(10, 0)
+custom_minimum_size = Vector2(7, 0)
 layout_mode = 2
 
 [node name="Items" type="VBoxContainer" parent="Content"]
@@ -109,6 +110,9 @@ scroll_smooth = true
 caret_blink = true
 caret_multiple = false
 draw_tabs = true
+
+[node name="Syntax Highlighter" type="Node" parent="Content/Items/Text Editor"]
+script = ExtResource("5_qu6wk")
 
 [node name="Validation" type="PanelContainer" parent="Content/Items"]
 layout_mode = 2

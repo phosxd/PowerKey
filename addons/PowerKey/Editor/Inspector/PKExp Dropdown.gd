@@ -10,8 +10,9 @@ var expanded := false
 var Invalid:bool = false
 var Raw:String
 var Parsed:Array[Dictionary]
+var Stored_parsed:Array[Dictionary]
 
-signal on_update(raw:StringName, parsed:Array[Dictionary], parse_time:float)
+signal on_update(raw:StringName, stored_parsed:Array[Dictionary], parse_time:float)
 
 
 
@@ -25,15 +26,16 @@ func _ready() -> void:
 		%'Button Builder'.remove_theme_constant_override('icon_max_width') # Remove current override.
 		%'Button Builder'.add_theme_constant_override('icon_max_width', base_builder_icon_size*editor_scale) # Add scaled override.
 
-func init(raw:StringName, parsed:Array[Dictionary]) -> void:
+func init(raw:StringName, stored_parsed:Array[Dictionary]) -> void:
 	# Initialize stuff.
 	var config := PK_Config.new().load_config()
 	PKEE.init(config, {})
+	$'%Text Editor/Syntax Highlighter'.init(self)
 	# Set PKExpressions.
 	%'Text Editor'.text = raw
-	%'Button Store Parsed'.button_pressed = true if parsed.size() > 0 else false
+	%'Button Store Parsed'.button_pressed = true if stored_parsed.size() > 0 else false
 	Raw = raw
-	Parsed = parsed
+	Stored_parsed = stored_parsed
 	_on_text_editor_text_changed()
 
 func set_text(text:String) -> void:
@@ -71,7 +73,9 @@ func _on_text_editor_text_changed() -> void:
 	# Reset line color for first line.
 	%'Text Editor'.set_line_background_color(0, Color(0,0,0,0))
 	
-	Parsed.clear() # Remove parsed expressions.
+	# Remove parsed expressions.
+	Parsed.clear()
+	Stored_parsed.clear()
 	var error := 0
 	var current_char := 0
 	var parse_time:float
@@ -86,7 +90,8 @@ func _on_text_editor_text_changed() -> void:
 		var start_time := Time.get_ticks_usec()
 		var parsed = PKEE.parse_pkexp(line)
 		parse_time += Time.get_ticks_usec()-start_time
-		if %'Button Store Parsed'.button_pressed: Parsed.append(parsed)
+		Parsed.append(parsed)
+		if %'Button Store Parsed'.button_pressed: Stored_parsed.append(parsed)
 		# If silent error, dim line & skip.
 		if parsed.error == 999:
 			%'Text Editor'.set_line_background_color(line_index, Color(0.3, 0.3, 0.3)) # Highlight line in Text Editor.
@@ -104,7 +109,7 @@ func _on_text_editor_text_changed() -> void:
 	_update_validation_label(error, current_char)
 	
 	# Send signal.
-	on_update.emit(StringName(Raw), Parsed, parse_time)
+	on_update.emit(StringName(Raw), Stored_parsed, parse_time)
 
 
 
@@ -112,8 +117,8 @@ func _on_button_store_parsed_toggled(toggled_on:bool) -> void:
 	if toggled_on:
 		_on_text_editor_text_changed() # Re-parse the expressions.
 	else:
-		Parsed.clear() # Empty the array of Parsed expressions.
-		on_update.emit(StringName(Raw), Parsed, 0)
+		Stored_parsed.clear() # Empty the array of parsed expressions.
+		on_update.emit(StringName(Raw), Stored_parsed, 0)
 
 
 func _on_button_builder_pressed() -> void:

@@ -34,6 +34,12 @@ const Valid_properties_for_builtin_type = {
 	TYPE_AABB: [&'end',&'posiiton',&'size'],
 	TYPE_COLOR: [&'r',&'r8',&'g',&'g8',&'b',&'b8',&'a',&'a8',&'h',&'s',&'v',&'ok_hsl_h',&'ok_hsl_s',&'ok_hsl_l'],
 }
+enum CharHighlightModes {
+	exp_type,
+	neutral,
+	variable_path,
+	value,
+}
 const Errors:Dictionary[StringName,StringName] = {
 	'pkexp_parse_failed': 'PowerKey PKExpression: (@char %s) Failed to parse expression "%s" for Node "%s" with reason "%s".',
 	'pkexp_accessing_unsupported_builtin_type': 'PowerKey PKExpression: Expression "%s" for Node "%s" tried accessing property from an unsupported built-in type "%s".',
@@ -87,6 +93,7 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 	var ps:Dictionary[StringName,Variant] = { ## The parsing state.
 		'error': 0, # Parse error. 0 = OK.
 		'current_char': 0,
+		'char_highlight_data': PackedInt32Array(), # Represents the highlighting mode for each character in the raw text.
 		'type': -1, # The expression type.
 		'parameters': PackedStringArray(), # The expression parameters.
 		'content': PackedStringArray(), # The expression content.
@@ -130,6 +137,7 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 func _parse_stage_type(char:String, ps:Dictionary) -> bool: ## Parses the "type" stage. Returns true if ready to progress to next stage.
 	# If intending to specify parameters.
 	if char == Parameters_denotator:
+		ps.char_highlight_data.append(CharHighlightModes.neutral)
 		# Throw error if not a valid expression type.
 		ps.type = ExpType_values.find(StringName(ps.buffers[1]))
 		if ps.type == -1:
@@ -155,6 +163,7 @@ func _parse_stage_type(char:String, ps:Dictionary) -> bool: ## Parses the "type"
 		
 	# Add to expression_type.
 	else:
+		ps.char_highlight_data.append(CharHighlightModes.exp_type)
 		ps.buffers[1] += char
 	return false
 
@@ -162,6 +171,7 @@ func _parse_stage_type(char:String, ps:Dictionary) -> bool: ## Parses the "type"
 func _parse_stage_parameters(char:String, ps:Dictionary) -> bool: ## Parses the "parameters" stage. Returns true if ready to progress to next stage.
 	# Next parameter if char is a separator.
 	if char == Parameter_separator:
+		ps.char_highlight_data.append(CharHighlightModes.neutral)
 		if ps.buffers[1] == '':
 			ps.error = 7
 			return true
@@ -191,12 +201,15 @@ func _parse_stage_parameters(char:String, ps:Dictionary) -> bool: ## Parses the 
 
 
 func _parse_stage_content(char:String, ps:Dictionary) -> bool: ## Parses the "content" stage. Retruns true if ready to progress to the next stage.
-	# If expression type == assign, handle properly.
+	# If expression type is assign or link, handle properly.
 	if ps.type in [ExpTypes.ASSIGN, ExpTypes.LINK]:
 		var end:bool = _parse_variable_path(char, ps)
 		if end:
 			ps.error = 3
 			return true
+	# If expression type is execute.
+	elif ps.type == ExpTypes.EXECUTE:
+		ps.char_highlight_data.append(-1)
 	# Add to content.
 	ps.content.append(char)
 	return false
@@ -217,6 +230,7 @@ func _parse_int(char:String, ps:Dictionary) -> bool: ## Parses a full number.
 		ps.error = 11
 		return true
 	else:
+		ps.char_highlight_data.append(CharHighlightModes.value)
 		ps.buffers[1] += char
 	return false
 
@@ -226,6 +240,7 @@ func _parse_float(char:String, ps:Dictionary) -> bool: ## Parses a floating poin
 		return true
 	# Add char if decimal point & if not added before.
 	elif char == '.' && ps.buffers[0] == 0:
+		ps.char_highlight_data.append(CharHighlightModes.value)
 		ps.buffers[1] += char
 		ps.buffers[0] = 1
 	# Throw error if not a digit.
@@ -234,6 +249,7 @@ func _parse_float(char:String, ps:Dictionary) -> bool: ## Parses a floating poin
 		return true
 	# Add char.
 	else:
+		ps.char_highlight_data.append(CharHighlightModes.value)
 		ps.buffers[1] += char
 	return false
 
@@ -252,10 +268,12 @@ func _parse_variable_path(char:String, ps:Dictionary) -> bool: ## Parses a varia
 		return true
 	# If start of variable path, add to, & change expecting flag.
 	elif ps.buffers[0] == 0 && lower_char in Variable_path_starting_characters:
+		ps.char_highlight_data.append(CharHighlightModes.variable_path)
 		ps.buffers[1] += char # Add char.
 		ps.buffers[0] = 1 # Set new expecting flag.
 	# Add char.
 	elif ps.buffers[0] == 1 && lower_char in Variable_path_characters:
+		ps.char_highlight_data.append(CharHighlightModes.variable_path)
 		ps.buffers[1] += char
 	return false
 
