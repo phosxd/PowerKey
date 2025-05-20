@@ -3,8 +3,8 @@ extends VBoxContainer
 var PKEE := PK_EE.new()
 const base_icon_size := Vector2(13,0)
 const base_builder_icon_size := 16
-const collapsed_icon := preload('res://addons/PowerKey/Editor/Inspector/collapsed.svg')
-const expanded_icon := preload('res://addons/PowerKey/Editor/Inspector/expanded.svg')
+const collapsed_icon := preload('res://addons/PowerKey/Icons/collapsed.svg')
+const expanded_icon := preload('res://addons/PowerKey/Icons/expanded.svg')
 
 var expanded := false
 var Invalid:bool = false

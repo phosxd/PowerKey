@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1um78pocay0q"
-path="res://.godot/imported/collapsed.svg-19a32bcf89bc86f1ef69712f53c300ab.ctex"
+uid="uid://1oigsvbvcinq"
+path="res://.godot/imported/MoveDown.svg-ab637f5df07790f944b66dd71a4bf1a1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/PowerKey/Editor/Inspector/collapsed.svg"
-dest_files=["res://.godot/imported/collapsed.svg-19a32bcf89bc86f1ef69712f53c300ab.ctex"]
+source_file="res://addons/PowerKey/Icons/MoveDown.svg"
+dest_files=["res://.godot/imported/MoveDown.svg-ab637f5df07790f944b66dd71a4bf1a1.ctex"]
 
 [params]
 

@@ -1,6 +1,6 @@
 @tool
 extends EditorPlugin
-const Icon := preload('res://addons/PowerKey/icon.svg')
+const Icon := preload('res://addons/PowerKey/Icons/icon.svg')
 const EditorInspectorPlugin_ := preload('res://addons/PowerKey/Scripts/EditorInspectorPlugin.gd')
 var EditorInspectorPlugin_instance:EditorInspectorPlugin
 const PowerKey_editor_tscn := preload('res://addons/PowerKey/Editor/Editor.tscn')

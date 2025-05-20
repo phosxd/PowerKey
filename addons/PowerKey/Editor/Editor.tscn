@@ -1,7 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://dq2ev084rdi4r"]
+[gd_scene load_steps=10 format=3 uid="uid://dq2ev084rdi4r"]
 
 [ext_resource type="Script" uid="uid://dukqioilv2187" path="res://addons/PowerKey/Editor/Editor.gd" id="1_1jgx6"]
-[ext_resource type="Texture2D" uid="uid://cj6hwjccreqr7" path="res://addons/PowerKey/github.svg" id="1_sgcgi"]
+[ext_resource type="Texture2D" uid="uid://cj6hwjccreqr7" path="res://addons/PowerKey/Scripts/github.svg" id="1_sgcgi"]
+[ext_resource type="Texture2D" uid="uid://bdkpq01aevhqb" path="res://addons/PowerKey/Icons/Add.svg" id="3_jbq6b"]
+[ext_resource type="Texture2D" uid="uid://fiiuuyh8hx0d" path="res://addons/PowerKey/Icons/MoveUp.svg" id="4_hwye7"]
+[ext_resource type="Texture2D" uid="uid://djlv2ua6ahdju" path="res://addons/PowerKey/Icons/Remove.svg" id="5_d5uix"]
+[ext_resource type="Texture2D" uid="uid://1oigsvbvcinq" path="res://addons/PowerKey/Icons/MoveDown.svg" id="5_v5l42"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_07ncw"]
 font_size = 26
@@ -33,9 +37,11 @@ layout_mode = 2
 current_tab = 0
 clip_tabs = false
 scrolling_enabled = false
-tab_count = 2
+tab_count = 3
 tab_0/title = "Configure"
-tab_1/title = "Guide"
+tab_1/title = "Translations"
+tab_1/disabled = true
+tab_2/title = "Guide"
 
 [node name="Version" type="Label" parent="Top Bar"]
 layout_mode = 2
@@ -74,7 +80,6 @@ text = "Resources Script Path:"
 [node name="Text Box" type="TextEdit" parent="Tabs/Configure/Resources Path"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "res://addons/PowerKey/Example/PKResources.gd"
 placeholder_text = "Enter path to Script..."
 scroll_fit_content_height = true
 caret_blink = true
@@ -100,7 +105,6 @@ text = "Max Cached PKExpressions:"
 [node name="SpinBox" type="SpinBox" parent="Tabs/Configure/Max Cached PKExpressions"]
 layout_mode = 2
 max_value = 500.0
-value = 3.0
 
 [node name="Debug" type="VBoxContainer" parent="Tabs/Configure"]
 layout_mode = 2
@@ -151,10 +155,87 @@ layout_mode = 2
 text = "Resources Script Path not found."
 label_settings = SubResource("LabelSettings_fjtuu")
 
-[node name="Guide" type="VBoxContainer" parent="Tabs"]
+[node name="Translations" type="VBoxContainer" parent="Tabs"]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
+
+[node name="Label" type="Label" parent="Tabs/Translations"]
+layout_mode = 2
+text = "Unfinished and non-functional at the moment."
+
+[node name="Actions" type="HFlowContainer" parent="Tabs/Translations"]
+layout_mode = 2
+
+[node name="SBox" type="ScrollContainer" parent="Tabs/Translations"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="Tabs/Translations/SBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Item" type="HBoxContainer" parent="Tabs/Translations/SBox/VBox"]
+layout_mode = 2
+
+[node name="Property" type="LineEdit" parent="Tabs/Translations/SBox/VBox/Item"]
+layout_mode = 2
+tooltip_text = "The property name on the Node to set the value on. 
+
+Only shallow property access supported. "
+placeholder_text = "Property"
+max_length = 30
+expand_to_text_length = true
+caret_blink = true
+
+[node name="Sep 1" type="VSeparator" parent="Tabs/Translations/SBox/VBox/Item"]
+layout_mode = 2
+
+[node name="Key" type="LineEdit" parent="Tabs/Translations/SBox/VBox/Item"]
+layout_mode = 2
+tooltip_text = "The variable from the Resources script to use as the key."
+placeholder_text = "Key"
+max_length = 30
+expand_to_text_length = true
+caret_blink = true
+
+[node name="Sep 2" type="VSeparator" parent="Tabs/Translations/SBox/VBox/Item"]
+layout_mode = 2
+
+[node name="Value" type="LineEdit" parent="Tabs/Translations/SBox/VBox/Item"]
+layout_mode = 2
+tooltip_text = "The variable from the Resources script to use as the value to set on the Node's property, if the current Node's property value matches the key."
+placeholder_text = "Value"
+max_length = 30
+expand_to_text_length = true
+caret_blink = true
+
+[node name="Sep 3" type="VSeparator" parent="Tabs/Translations/SBox/VBox/Item"]
+layout_mode = 2
+
+[node name="Button Move Up" type="Button" parent="Tabs/Translations/SBox/VBox/Item"]
+layout_mode = 2
+size_flags_horizontal = 10
+icon = ExtResource("4_hwye7")
+
+[node name="Button Move Down" type="Button" parent="Tabs/Translations/SBox/VBox/Item"]
+layout_mode = 2
+icon = ExtResource("5_v5l42")
+
+[node name="Button Delete" type="Button" parent="Tabs/Translations/SBox/VBox/Item"]
+layout_mode = 2
+icon = ExtResource("5_d5uix")
+
+[node name="Button Add" type="Button" parent="Tabs/Translations/SBox/VBox"]
+layout_mode = 2
+icon = ExtResource("3_jbq6b")
+icon_alignment = 1
+
+[node name="Guide" type="VBoxContainer" parent="Tabs"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
 
 [node name="Tabs" type="TabContainer" parent="Tabs/Guide"]
 layout_mode = 2
@@ -243,11 +324,6 @@ Valid?
 selection_enabled = true
 drag_and_drop_selection_enabled = false
 metadata/_tab_index = 1
-
-[node name="Global Translations" type="VBoxContainer" parent="Tabs"]
-visible = false
-layout_mode = 2
-metadata/_tab_index = 2
 
 [connection signal="tab_changed" from="Top Bar/Tab Bar" to="." method="_on_tab_bar_tab_changed"]
 [connection signal="pressed" from="Top Bar/Button Github" to="." method="_on_button_github_pressed"]

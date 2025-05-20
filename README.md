@@ -1,5 +1,3 @@
-
-
 A simple Godot-4.4 plug-in that implements easy-to-use dynamic translation. Also offers GDScript execution on Nodes, without needing to attach a Script.
 
 ||PowerKey|Standard Translation|
@@ -14,16 +12,19 @@ Refer to the in-editor guide to learn how to use PowerKey & all the features it 
 # How to install:
 If everything installed correctly, you should see a "PowerKey" tab near the upper-center of your Godot project, next to the "2D", "3D", "Script", "Game", & "AssetLib" tabs.
 ### From Asset Library:
- 1. In your Godot project, navigate to the "Asset Library" tab & search for "PowerKey".
- 2. Click "Download", then make sure only the `addons/PowerKey` folder is selected. You dont need any of the other files.
- 2. Install the plugin, then refresh your project.
+ 1. In your Godot project, navigate to the "Asset Library" tab & search for ["PowerKey"](https://godotengine.org/asset-library/asset/3990).
+ 2. Click "Download" & make sure only the `addons/PowerKey` folder is selected, you dont need any of the other files.
+ 3. Click "Install" to merge the selected files with your project.
+ 4. Activate the plugin from `Project -> Project Setings -> Plugins`, then refresh the project.
 
 ### From Github:
- 1. Navigate to the latest release. Typically found on the right-hand side under "Releases".
+ 1. Navigate to the latest [Github](https://github.com/phosxd/PowerKey) release. Typically found on the right-hand side under "Releases".
  2. Download the ZIP file for the latest release.
  3. Unpack the ZIP file to a new folder & delete the ZIP file.
  4. Move the `addons/PowerKey` folder from your new folder to the "addons" folder in your Godot project.
- 5. Activate the plugin from your project settings, then refresh the project.
+ 5. Activate the plugin from `Project -> Project Setings -> Plugins`, then refresh the project.
+
+Alternatively, you can download from the "main" branch which may include new features but can also contain unfinished code or unexpected issues. Bug reports for unreleased versions are not accepted.
 
 [Watch installation tutorial](https://youtu.be/KQRSI6Z-3Io)
 
@@ -39,18 +40,18 @@ The built-in translation system for Godot only lets you define static values tha
 Say for example, you wanted to randomize some text or texture, or any property on a Node. You would need to create a whole new script file for your scene if you did not already have one.
 Instead of doing that, you could simply add a line of text to the PKExpressions field in the Inspector for the Node that needs it.
 
-This CAN be used for randomized translation but it is very much not limited to just translation. You can do anything with it that a GDScript can do, however, it is not meant to serve as a replacement for scripts! Use only for simple tasks.
+This CAN be used for randomized translation but it is very much not limited to just translation. You can do anything with it that a GDScript can do, however, it is not meant to serve as a replacement for scripts! Use only for simple one-off tasks.
 ### Fast & efficient:
-You can rest assured that every system in PowerKey runs as smoothly as possible & has no noticeable effect on performance or RAM usage. The only time you may see issues with performance or memory is when you are using thousands of high impact expressions. And if you aren't using the more advanced features of PowerKey, and just use it for translation, then you have absolutely nothing to worry about as there is effectively ZERO impact when using "Assign" PKExpressions, even at massive quantities.
+You can rest assured that every system in PowerKey runs as smoothly as possible & has no noticeable effect on performance or RAM usage. The only time you may see issues with performance or memory is when you are using thousands of high impact PKExpressions. And if you aren't using the more advanced features of PowerKey, and just use it for translation, then you have absolutely nothing to worry about as there is effectively ZERO impact when using "Assign" PKExpressions, even at massive quantities.
 # TO-DO:
 ### "Eval" ("V") PKExpression type:
-**Milestone:** ???
+**Milestone:** 1.5.0
 
 This PKExpression type will let you safely evaluate GDScript expressions with access to the Node's properties & Resource script's properties.
 This lets you perform calculations without needing to rely on the unsafe & more expensive "Execute" PKExpression type.
 The result is applied to the specified property on the Node. Just like the "Assign" PKExpression type, it is one-off so it only runs on the Node once.
 ### Global Translations:
-**Milestone:** ???
+**Milestone:** 1.5.0
 
 "Translations" field in the Configuration menu in which you can add/modifiy translations.
 

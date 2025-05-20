@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dcjay8l6g55qi" path="res://addons/PowerKey/Editor/PKExp Builder/PKExp Builder.gd" id="1_cpqj3"]
 [ext_resource type="PackedScene" uid="uid://cklwwr4htvoa0" path="res://addons/PowerKey/Editor/Inspector/PKExp Dropdown.tscn" id="2_4wjiw"]
-[ext_resource type="Texture2D" uid="uid://dja7qfpsdq7up" path="res://addons/PowerKey/Editor/Inspector/expanded.svg" id="3_n3e8b"]
+[ext_resource type="Texture2D" uid="uid://dja7qfpsdq7up" path="res://addons/PowerKey/Icons/expanded.svg" id="3_n3e8b"]
 
 [node name="PKExp Builder" type="Window"]
 title = "PKExpression Builder"
