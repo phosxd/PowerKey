@@ -1,5 +1,6 @@
 @tool
 extends VBoxContainer
+const base_icon_size := Vector2(32,0)
 var Config:PK_Config
 var resources_script_path_text_box:Node
 var max_cached_pkexpressions_spin_box:Node
@@ -13,6 +14,9 @@ func init() -> void:
 	max_cached_pkexpressions_spin_box = get_node('Tabs/Configure/Max Cached PKExpressions/SpinBox')
 	warning_tag = get_node('Tabs/Configure/Warning Tag')
 	guide_tabs = get_node('Tabs/Guide/Tabs')
+	# Scale button icons.
+	var editor_scale := EditorInterface.get_editor_scale()
+	%'Button Github'.custom_minimum_size = base_icon_size*editor_scale
 	# Set UI values based on config.
 	var config := Config.load_config()
 	resources_script_path_text_box.text = config.resources_script_path
