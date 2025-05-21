@@ -1,7 +1,7 @@
 [gd_scene load_steps=10 format=3 uid="uid://dq2ev084rdi4r"]
 
 [ext_resource type="Script" uid="uid://dukqioilv2187" path="res://addons/PowerKey/Editor/Editor.gd" id="1_1jgx6"]
-[ext_resource type="Texture2D" uid="uid://cj6hwjccreqr7" path="res://addons/PowerKey/Scripts/github.svg" id="1_sgcgi"]
+[ext_resource type="Texture2D" uid="uid://cj6hwjccreqr7" path="res://addons/PowerKey/Icons/github.svg" id="1_sgcgi"]
 [ext_resource type="Texture2D" uid="uid://bdkpq01aevhqb" path="res://addons/PowerKey/Icons/Add.svg" id="3_jbq6b"]
 [ext_resource type="Texture2D" uid="uid://fiiuuyh8hx0d" path="res://addons/PowerKey/Icons/MoveUp.svg" id="4_hwye7"]
 [ext_resource type="Texture2D" uid="uid://djlv2ua6ahdju" path="res://addons/PowerKey/Icons/Remove.svg" id="5_d5uix"]
