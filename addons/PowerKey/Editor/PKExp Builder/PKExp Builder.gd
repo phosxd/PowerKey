@@ -8,7 +8,6 @@ const Execute_expression_template:String = 'E %s'
 signal finished(raw:String)
 
 func init() -> void:
-	self.theme = EditorInterface.get_editor_theme()
 	%Result.init('',Array([],TYPE_DICTIONARY,'',null))
 
 

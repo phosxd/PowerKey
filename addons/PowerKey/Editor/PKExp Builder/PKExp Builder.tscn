@@ -1,8 +1,16 @@
-[gd_scene load_steps=4 format=3 uid="uid://bmgaspe6uuetm"]
+[gd_scene load_steps=8 format=3 uid="uid://bmgaspe6uuetm"]
 
 [ext_resource type="Script" uid="uid://dcjay8l6g55qi" path="res://addons/PowerKey/Editor/PKExp Builder/PKExp Builder.gd" id="1_cpqj3"]
 [ext_resource type="PackedScene" uid="uid://cklwwr4htvoa0" path="res://addons/PowerKey/Editor/Inspector/PKExp Dropdown.tscn" id="2_4wjiw"]
 [ext_resource type="Texture2D" uid="uid://dja7qfpsdq7up" path="res://addons/PowerKey/Icons/expanded.svg" id="3_n3e8b"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cpqj3"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4wjiw"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_n3e8b"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qe1ma"]
 
 [node name="PKExp Builder" type="Window"]
 title = "PKExpression Builder"
@@ -11,6 +19,13 @@ size = Vector2i(400, 400)
 transient = true
 popup_window = true
 script = ExtResource("1_cpqj3")
+
+[node name="Just using this for background lol" type="RichTextLabel" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="."]
 anchors_preset = 15
@@ -64,7 +79,7 @@ text = "*Property:"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-clear_button_enabled = true
+placeholder_text = "some_property"
 
 [node name="Value" type="HBoxContainer" parent="Panel/VBox/Details/Assign"]
 layout_mode = 2
@@ -79,7 +94,7 @@ text = "*Value:"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-clear_button_enabled = true
+placeholder_text = "some_variable.this_one"
 
 [node name="Link" type="VBoxContainer" parent="Panel/VBox/Details"]
 visible = false
@@ -98,7 +113,7 @@ text = "*Property:"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-clear_button_enabled = true
+placeholder_text = "some_property"
 
 [node name="Frequency" type="HBoxContainer" parent="Panel/VBox/Details/Link"]
 layout_mode = 2
@@ -130,7 +145,7 @@ text = "*Value:"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-clear_button_enabled = true
+placeholder_text = "some_variable.this_one"
 
 [node name="Execute" type="VBoxContainer" parent="Panel/VBox/Details"]
 visible = false
@@ -149,13 +164,20 @@ text = "*Code:"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+placeholder_text = "var something = 'some text'
+print(something)"
 scroll_fit_content_height = true
 
-[node name="Validation Warning" type="Label" parent="Panel/VBox/Details/Execute"]
-self_modulate = Color(1, 1, 0.239216, 1)
+[node name="Description" type="RichTextLabel" parent="Panel/VBox/Details/Execute"]
 layout_mode = 2
-size_flags_vertical = 1
-text = "GDScript code not validated, use at your own risk."
+theme_override_styles/fill = SubResource("StyleBoxEmpty_cpqj3")
+theme_override_styles/background = SubResource("StyleBoxEmpty_4wjiw")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_n3e8b")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_qe1ma")
+bbcode_enabled = true
+text = "[color=gold]GDScript code not validated before run-time, use with caution!"
+fit_content = true
+scroll_active = false
 
 [node name="Result" parent="Panel/VBox" instance=ExtResource("2_4wjiw")]
 unique_name_in_owner = true

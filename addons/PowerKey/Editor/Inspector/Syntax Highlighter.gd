@@ -30,6 +30,7 @@ class Highlighter extends SyntaxHighlighter:
 		if Base.Parsed[line].type == PK_EE.ExpTypes.EXECUTE && Engine.is_editor_hint():
 			virtual_textedit.text = Base.get_node('%Text Editor').get_line(line) # Set the virtual TextEdit's text to match actual PKExp Editor text.
 			hdata = Dictionary(gdscript_highlighter.get_line_syntax_highlighting(0),TYPE_INT,'',null,TYPE_DICTIONARY,'',null) # Get highlighting data from virtual TextEdit.
+			hdata[0] = {'color':HighlightColors[parser_hdata[0]]} # Set proper PKExpression Type highlight color.
 		# Highlight based on parsed highlighting data.
 		else:
 			var index:int = 0
