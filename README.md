@@ -45,7 +45,7 @@ This CAN be used for randomized translation but it is very much not limited to j
 You can rest assured that every system in PowerKey runs as smoothly as possible & has no noticeable effect on performance or RAM usage. The only time you may see issues with performance or memory is when you are using thousands of high impact PKExpressions. And if you aren't using the more advanced features of PowerKey, and just use it for translation, then you have absolutely nothing to worry about as there is effectively ZERO impact when using "Assign" PKExpressions, even at massive quantities.
 # TO-DO:
 ### "Eval" ("V") PKExpression type:
-**Milestone:** 1.5.0
+✅ **Milestone:** 1.5.0
 
 This PKExpression type will let you safely evaluate GDScript expressions with access to the Node's properties & Resource script's properties.
 This lets you perform calculations without needing to rely on the unsafe & more expensive "Execute" PKExpression type.
