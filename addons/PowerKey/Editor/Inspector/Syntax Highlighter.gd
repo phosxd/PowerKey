@@ -27,7 +27,7 @@ class Highlighter extends SyntaxHighlighter:
 		if Base.Parsed[line].error != 0: return hdata # If error in expression, dont highlight.
 		var parser_hdata:PackedInt32Array = Base.Parsed[line].char_highlight_data # Get highlight data from Parsed.
 		# If an execute PKExpression & running in Godot Editor, use GDScript syntax highlighting.
-		if Base.Parsed[line].type == PK_EE.ExpTypes.EXECUTE && Engine.is_editor_hint():
+		if Base.Parsed[line].type in [PK_EE.ExpTypes.EXECUTE,PK_EE.ExpTypes.EVAL] && Engine.is_editor_hint():
 			virtual_textedit.text = Base.get_node('%Text Editor').get_line(line) # Set the virtual TextEdit's text to match actual PKExp Editor text.
 			hdata = Dictionary(gdscript_highlighter.get_line_syntax_highlighting(0),TYPE_INT,'',null,TYPE_DICTIONARY,'',null) # Get highlighting data from virtual TextEdit.
 			hdata[0] = {'color':HighlightColors[parser_hdata[0]]} # Set proper PKExpression Type highlight color.

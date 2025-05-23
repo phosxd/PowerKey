@@ -49,7 +49,8 @@ func _update_validation_label(error:int, current_char=null) -> void:
 	if error == 0:
 		$'Content/Items/Validation/Label'.text = 'Looks good! No parsing errors found.'
 	else:
-		$'Content/Items/Validation/Label'.text = '(@char %s) Error "%s" while parsing expression.' % [current_char, PKEE.Parse_errors[error-1]]
+		var err:String = PK_EE.Parse_errors[error-1]
+		$'Content/Items/Validation/Label'.text = '(@char %s) Error "%s" while parsing expression.' % [current_char, err]
 
 
 
@@ -82,13 +83,14 @@ func _on_text_editor_text_changed() -> void:
 	
 	# Count & parse each line.
 	var line_index := -1
+	var parsed:Dictionary
 	for line in Raw.split('\n'):
 		line_index += 1
 		%'Text Editor'.set_line_background_color(line_index, Color(0,0,0,0)) # Reset line color.
 		#if line.strip_edges() == '': continue # If empty, return.
 		# Parse line & store parsed line in "Parsed".
 		var start_time := Time.get_ticks_usec()
-		var parsed = PKEE.parse_pkexp(line)
+		parsed = PKEE.parse_pkexp(line)
 		parse_time += Time.get_ticks_usec()-start_time
 		Parsed.append(parsed)
 		if %'Button Store Parsed'.button_pressed: Stored_parsed.append(parsed)

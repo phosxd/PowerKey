@@ -58,10 +58,11 @@ expand_icon = true
 [node name="Tabs" type="TabContainer" parent="."]
 layout_mode = 2
 size_flags_vertical = 3
-current_tab = 0
+current_tab = 2
 tabs_visible = false
 
 [node name="Configure" type="VBoxContainer" parent="Tabs"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -235,7 +236,6 @@ icon = ExtResource("6_5aobs")
 icon_alignment = 1
 
 [node name="Guide" type="VBoxContainer" parent="Tabs"]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 2
 
@@ -243,9 +243,10 @@ metadata/_tab_index = 2
 layout_mode = 2
 size_flags_vertical = 3
 tab_alignment = 1
-current_tab = 0
+current_tab = 1
 
 [node name="Getting Started" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
+visible = false
 layout_mode = 2
 bbcode_enabled = true
 text = "For additional help, don't hesitate to ask in the [color=royal_blue][url=https://dsc.gg/sohp]Discord Server[/url][/color]. If you find any issues please report them on the [color=royal_blue][url=https://github.com/phosxd/PowerKey]Github Repo[/url][/color].
@@ -262,7 +263,6 @@ Read through the \"Expressions\" guide page to understand how PKExpressions work
 metadata/_tab_index = 0
 
 [node name="PKExpressions" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
-visible = false
 layout_mode = 2
 focus_mode = 2
 bbcode_enabled = true
@@ -322,7 +322,21 @@ Valid?
 [ul] Yes: [color=slate_gray]E print('hello world')[/color].
  Yes: [color=slate_gray]E PK.some_function()[/color].
  Yes: [color=slate_gray]E S.text = 'some text'[/color].
-[/ul]"
+[/ul]
+
+[font_size=30][color=cornflower_blue]\"Eval\" Type:[/color][/font_size]
+This expression type lets you safely execute a Godot Expression on the Node. The result of the GDExpression is passed onto the specified Node property. The only drawbacks to using this expression type are that the error catching is not good & it is slightly more expensive to both compute & parse (compared to \"Assign\" expression type).
+Use [color=slate_gray]S[/color] instead of [color=slate_gray]self[/color] to access the Node, use [color=slate_gray]PK[/color] to access the Resources script. All [color=slate_gray]GlobalScope[/color] variables/functions are available to use in this expression type.
+[font_size=23]Schemas:[/color]
+[ul] [color=slate_gray]V:<property_name> <gd_expression>[/color].
+[/ul]
+[font_size=23]Examples:[/font_size]
+Valid?
+[ul] Yes: [color=slate_gray]V:text PK.some_string[/color].
+ Yes: [color=slate_gray]V:text PK.some_array_of_strings[0][/color].
+ Yes: [color=slate_gray]V:scale 1+1[/color].
+ Yes: [color=slate_gray]V:text 'some string and %s' % S.text[[/color].
+ Yes: [color=slate_gray]V:text PK.get_some_string()[/color]."
 selection_enabled = true
 drag_and_drop_selection_enabled = false
 metadata/_tab_index = 1

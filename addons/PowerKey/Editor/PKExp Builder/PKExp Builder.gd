@@ -4,6 +4,7 @@ enum ExpTypes {ASSIGN,LINK,EXECUTE}
 const Assign_expression_template:String = 'A:%s %s'
 const Link_expression_template:String = 'L:%s %s'
 const Execute_expression_template:String = 'E %s'
+const Eval_expression_template:String = 'V:%s %s'
 
 signal finished(raw:String)
 
@@ -24,6 +25,10 @@ func _update_link_expression_result(property, frequency, value) -> void:
 func _update_execute_expression_result(code) -> void:
 	if not code: code = %'Execute Code TextEdit'.text
 	%Result.set_text(Execute_expression_template % code)
+func _update_gdexp_expression_result(property, expression) -> void:
+	if not property: property = %'Eval Property LineEdit'.text
+	if not expression: expression = %'GD Expression TextEdit'.text
+	%Result.set_text(Eval_expression_template % [property,expression])
 
 
 
@@ -54,6 +59,10 @@ func _on_link_property_text_changed(new_text: String) -> void:
 func _on_execute_code_text_changed() -> void:
 	var text = %'Execute Code TextEdit'.text.replace('\n',';')
 	_update_execute_expression_result(text)
+func _on_gd_expression_text_changed(new_text:String) -> void:
+	_update_gdexp_expression_result(null, new_text)
+func _on_eval_property_text_changed(new_text:String) -> void:
+	_update_gdexp_expression_result(new_text, null)
 
 
 func _on_button_done_pressed() -> void:

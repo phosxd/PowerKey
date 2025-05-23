@@ -23,7 +23,7 @@ metadata/PKExpressions = &"A:text titles.b\nA:label_settings title_label_setting
 
 [node name="Random Number" type="Label" parent="."]
 layout_mode = 2
-metadata/PKExpressions = &"E S.text = \'Random Number: %s\' % randi_range(10000,99999)\nA:label_settings title_label_settings"
+metadata/PKExpressions = &"V:text PK.random_number_template % randi_range(10000,99999)\nA:label_settings title_label_settings"
 
 [node name="FPS" type="Label" parent="."]
 layout_mode = 2

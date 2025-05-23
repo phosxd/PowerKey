@@ -50,13 +50,15 @@ text = "Expression Type:"
 unique_name_in_owner = true
 layout_mode = 2
 selected = 0
-item_count = 3
+item_count = 4
 popup/item_0/text = "Assign"
 popup/item_0/id = 0
 popup/item_1/text = "Link"
 popup/item_1/id = 1
 popup/item_2/text = "Execute"
 popup/item_2/id = 2
+popup/item_3/text = "Eval"
+popup/item_3/id = 3
 
 [node name="Details" type="PanelContainer" parent="Panel/VBox"]
 unique_name_in_owner = true
@@ -64,6 +66,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Assign" type="VBoxContainer" parent="Panel/VBox/Details"]
+visible = false
 layout_mode = 2
 
 [node name="Property" type="HBoxContainer" parent="Panel/VBox/Details/Assign"]
@@ -179,6 +182,39 @@ text = "[color=gold]GDScript code not validated before run-time, use with cautio
 fit_content = true
 scroll_active = false
 
+[node name="Eval" type="VBoxContainer" parent="Panel/VBox/Details"]
+layout_mode = 2
+
+[node name="Property" type="HBoxContainer" parent="Panel/VBox/Details/Eval"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/Details/Eval/Property"]
+layout_mode = 2
+tooltip_text = "The Node property to set the value on."
+mouse_filter = 1
+text = "*Property:"
+
+[node name="Eval Property LineEdit" type="LineEdit" parent="Panel/VBox/Details/Eval/Property"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "some_property"
+
+[node name="GD Expression" type="HBoxContainer" parent="Panel/VBox/Details/Eval"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/Details/Eval/GD Expression"]
+layout_mode = 2
+tooltip_text = "The GDScript code to execute on the Node. Use \"S\" for \"self\", use \"PK\" for Resources script."
+mouse_filter = 1
+text = "*GD Expression:"
+
+[node name="GD Expression TextEdit" type="LineEdit" parent="Panel/VBox/Details/Eval/GD Expression"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "PK.some_string % 1+1"
+
 [node name="Result" parent="Panel/VBox" instance=ExtResource("2_4wjiw")]
 unique_name_in_owner = true
 layout_mode = 2
@@ -228,6 +264,8 @@ text = "Cancel"
 [connection signal="value_changed" from="Panel/VBox/Details/Link/Frequency/Link Frequency SpinBox" to="." method="_on_link_frequency_value_changed"]
 [connection signal="text_changed" from="Panel/VBox/Details/Link/Value/Link Value LineEdit" to="." method="_on_link_value_text_changed"]
 [connection signal="text_changed" from="Panel/VBox/Details/Execute/Code/Execute Code TextEdit" to="." method="_on_execute_code_text_changed"]
+[connection signal="text_changed" from="Panel/VBox/Details/Eval/Property/Eval Property LineEdit" to="." method="_on_eval_property_text_changed"]
+[connection signal="text_changed" from="Panel/VBox/Details/Eval/GD Expression/GD Expression TextEdit" to="." method="_on_gd_expression_text_changed"]
 [connection signal="pressed" from="Panel/VBox/Actions/Button Done" to="." method="_on_button_done_pressed"]
 [connection signal="pressed" from="Panel/VBox/Actions/Button Cancel" to="." method="_on_button_cancel_pressed"]
 

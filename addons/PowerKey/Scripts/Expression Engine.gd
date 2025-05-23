@@ -2,8 +2,8 @@
 # New instance should be created if used (call `.new`).
 
 class_name PK_EE extends Node
-enum ExpTypes {ASSIGN,LINK,EXECUTE}
-const ExpType_values:Array[StringName] = ['A','L','E'] ## ExpType values as Strings instead of enum int.
+enum ExpTypes {ASSIGN,LINK,EXECUTE,EVAL}
+const ExpType_values:Array[StringName] = ['A','L','E','V'] ## ExpType values as Strings instead of enum int.
 const Lowercases:Dictionary[StringName,StringName] = {'A':'a','B':'b','C':'c','D':'d','E':'e','F':'f','G':'g','H':'h','I':'i','J':'j','K':'k','L':'l','M':'m','N':'n','O':'o','P':'p','Q':'q','S':'s','T':'t','U':'u','V':'v','W':'w','X':'x','Y':'y','Z':'z'} ## Performs better than using `.to_lower`.
 const Digits:Array[StringName] = ['0','1','2','3','4','5','6','7','8','9']
 enum Parse_stages {TYPE,PARAMS,CONTENT} ## Each stage of parsing.
@@ -11,6 +11,7 @@ var Parameter_counts:Dictionary = { ## The range of parameters each expression t
 	ExpTypes.ASSIGN: [1,1],
 	ExpTypes.LINK: [1,2],
 	ExpTypes.EXECUTE: [0,0],
+	ExpTypes.EVAL: [1,1],
 }
 const Comment_token:StringName = &'#' ## Used to denote a commented line.
 const Parameter_separator:StringName = &',' ## Used to separate expression parameters.
@@ -45,6 +46,7 @@ const Errors:Dictionary[StringName,StringName] = {
 	'pkexp_accessing_unsupported_builtin_type': 'PowerKey PKExpression: Expression "%s" for Node "%s" tried accessing property from an unsupported built-in type "%s".',
 	'pkexp_accessing_nonexistent_property_for_builtin_type': 'PowerKey PKExpression: Expression "%s" for Node "%s" tried accessing non-existent property "%s" from a "%s".',
 	'pkexp_setting_to_sublevel_variable': 'PowerKey PKExpression: Expression "%s" for Node "%s" tried setting a value to a sub-level variable. Only top-level setting is currently supported. Use an "Execute" expression to set values to sub-level variables via code.',
+	'pkexp_process_failed': 'PowerKey PKExpression: Failed to process expression "%s" for Node "%s" with reason "%s".',
 }
 const Parse_errors:Array[StringName] = [
 	'Invalid expression type',
@@ -58,6 +60,7 @@ const Parse_errors:Array[StringName] = [
 	'Improperly formed float value',
 	'Empty',
 	'Improperly formed integer value',
+	'Improper GDExpression',
 ]
 const Link_timer_name := '_pk_link_timer'
 var Execute_script:Script = GDScript.new()
@@ -121,6 +124,11 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 		ps.error = 5
 	elif ps.content.size() == 0:
 		ps.error = 6
+	elif ps.type == ExpTypes.EVAL:
+		var expression := Expression.new()
+		var err:int = expression.parse(''.join(ps.content), ['S','PK'])
+		if err != 0:
+			ps.error = 11
 	# Cache expression for reuse.
 	if not Engine.is_editor_hint():
 		if Config.max_cached_pkexpressions > 0:
@@ -187,8 +195,8 @@ func _parse_stage_parameters(char:String, ps:Dictionary) -> bool: ## Parses the 
 		ps.stage = Parse_stages.CONTENT
 		_reset_parse_state_buffers(ps)
 		return true
-	# For "Assign" & "Link" types on the first parameter.
-	elif ps.type in [ExpTypes.ASSIGN,ExpTypes.LINK] && ps.parameters.size() == 0:
+	# For "Assign", "Link", & "Eval" types on the first parameter.
+	elif ps.type in [ExpTypes.ASSIGN,ExpTypes.LINK,ExpTypes.EVAL] && ps.parameters.size() == 0:
 		_parse_variable_path(char, ps)
 	# For "Link" types on the second parameter.
 	elif ps.type == ExpTypes.LINK && ps.parameters.size() == 1:
@@ -207,9 +215,9 @@ func _parse_stage_content(char:String, ps:Dictionary) -> bool: ## Parses the "co
 		if end:
 			ps.error = 3
 			return true
-	# If expression type is execute.
+	# If expression type is "Execute" or "Eval".
 	elif ps.type == ExpTypes.EXECUTE:
-		ps.char_highlight_data.append(-1)
+		ps.char_highlight_data.append(-1) # Use -1 highlight mode (none).
 	# Add to content.
 	ps.content.append(char)
 	return false
@@ -234,6 +242,7 @@ func _parse_int(char:String, ps:Dictionary) -> bool: ## Parses a full number.
 		ps.buffers[1] += char
 	return false
 
+
 func _parse_float(char:String, ps:Dictionary) -> bool: ## Parses a floating point number.
 	# Stop if char is a space.
 	if char == ' ':
@@ -252,6 +261,7 @@ func _parse_float(char:String, ps:Dictionary) -> bool: ## Parses a floating poin
 		ps.char_highlight_data.append(CharHighlightModes.value)
 		ps.buffers[1] += char
 	return false
+
 
 func _parse_variable_path(char:String, ps:Dictionary) -> bool: ## Parses a variable path.
 	var lower_char:StringName = Lowercases.get(char,char)
@@ -291,6 +301,7 @@ func process_pkexp(node:Node, raw:StringName, parsed:Dictionary) -> void: ## Exe
 		ExpTypes.ASSIGN: _process_pkexp_assign(node, raw, parsed)
 		ExpTypes.LINK: _process_pkexp_link(node, raw, parsed)
 		ExpTypes.EXECUTE: _process_pkexp_execute(node, raw, parsed)
+		ExpTypes.EVAL: _process_pkexp_eval(node, raw, parsed)
 
 
 func _process_pkexp_assign(node:Node, raw:StringName, parsed:Dictionary) -> void: ## Process "Assign" type PKExpression.
@@ -341,6 +352,22 @@ func _process_pkexp_execute(node:Node, raw:String, parsed:Dictionary) -> void: #
 		Execute_script.source_code = gd_code
 		Execute_script.reload()
 	Execute_script.call(func_name, node, Resources)
+
+
+func _process_pkexp_eval(node:Node, raw:String, parsed:Dictionary) -> void: ## Process "Eval" type PKExpression.
+	var expression := Expression.new()
+	var err:int = expression.parse(''.join(parsed.content), ['S','PK']) # Parse expression.
+	# If parsing error, throw error
+	if err != 0:
+		printerr(Errors.pkexp_process_failed % [raw, node.name, error_string(err)])
+		return
+	var value = expression.execute([node,Resources], null, false) # Execute and save result
+	# If error while executing, throw error
+	if expression.has_execute_failed():
+		printerr(Errors.pkexp_process_failed % [raw, node.name, expression.get_error_text()])
+		return
+	# Set value, regardless of whether or not the Node property exists.
+	_set_value(parsed.parameters[0].split('.'), node, value, raw)
 
 
 
