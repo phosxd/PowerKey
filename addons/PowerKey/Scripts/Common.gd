@@ -1,5 +1,35 @@
 @tool
 class_name PK_Common extends Node
+const Schemas:Dictionary = {
+	'config': {
+		'latest': {
+			'version': '1',
+			'resources_script_path': '',
+			'max_cached_pkexpressions': 3.0,
+			'translations': [],
+			'debug_print_any_pkexpression_processed': false,
+		},
+	},
+	'translation_entry': {
+		'property': '',
+		'key': '',
+		'value': '',
+	},
+}
+
+
+static func match_schema(object:Dictionary, schema:Dictionary) -> Dictionary[String,Variant]: ## Tests if the object matches the schema. Any mismatched values of the object will be set to the schema's default.
+	var different:bool = false
+	for key in schema:
+		if key in object:
+			if typeof(schema[key]) == typeof(object[key]): continue
+		object.set(key, schema[key])
+		different = true
+
+	return {
+		'different': different,
+		'object': object,
+	}
 
 
 

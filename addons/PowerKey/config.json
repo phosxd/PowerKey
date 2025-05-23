@@ -1,1 +1,1 @@
-{ "resources_script_path": "res://addons/PowerKey/Example/PKResources.gd", "max_cached_pkexpressions": 3.0, "debug_print_any_pkexpression_processed": false }
+{ "resources_script_path": "res://addons/PowerKey/Example/PKResources.gd", "max_cached_pkexpressions": 3.0, "debug_print_any_pkexpression_processed": false, "translations": [{"property":"text","key":"tr_key_1","value":"tr_value_1"}] }

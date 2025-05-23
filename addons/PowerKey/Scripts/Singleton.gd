@@ -32,7 +32,6 @@ func _ready() -> void:
 
 
 
-
 func _process(delta:float) -> void:
 	if Resources_script_has_process:
 		Resources.call('_process', delta)
@@ -44,10 +43,21 @@ func _process(delta:float) -> void:
 # --------------------
 func evaluate_node_tree(node:Node) -> void: ## Recursively evaluate all Nodes under the given Node.
 	_recursive(node, func(_node:Node) -> void:
-		evaluate_node(_node)
+		evaluate_node_pkexps(_node)
+		evaluate_node_tr(_node)
 	)
 
-func evaluate_node(node:Node) -> void: ## Evaluate PKExpressions present on the Node.
+
+func evaluate_node_tr(node:Node) -> void: ## Run translations on the Node.
+	for tr_data:Dictionary in Config.translations:
+		if PK_Common.match_schema(tr_data, PK_Common.Schemas.translation_entry).different: continue
+		var property_value = node.get(tr_data.property)
+		if property_value != Resources.get(tr_data.key): continue # If property value does not match key, pass.
+		var value = PK_Common.get_value(tr_data.value.split('.'), node, '', Resources) # Get the value from Resources.
+		node.set(tr_data.property, value) # Set the value on the Node.
+
+
+func evaluate_node_pkexps(node:Node) -> void: ## Evaluate PKExpressions present on the Node.
 	var pkexps = node.get_meta('PKExpressions', false)
 	var pkexps_parsed = node.get_meta('PKExpressions_parsed', false)
 	if not pkexps: return # Return if no metadata.
@@ -85,10 +95,11 @@ func _hook_onto_nodes() -> void: ## Hook to all nodes in the project.
 	var tree:SceneTree = get_tree()
 	# Hook to every new Node.
 	tree.node_added.connect(func(node:Node) -> void:
-		evaluate_node(node)
+		evaluate_node_pkexps(node)
 	)
 	# Hook to currently initialized Nodes.
 	evaluate_node_tree(tree.root)
+
 
 func _recursive(node:Node, callback:Callable) -> void:
 	for child in node.get_children():

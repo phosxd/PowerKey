@@ -8,11 +8,6 @@ const Errors := {
 	'failed_open_file': 'PowerKey: Unable to open file at "%s".',
 	'default_config': 'PowerKey: Unable to read config file. Using default config.'
 }
-const default_config := {
-	'resources_script_path': '',
-	'max_cached_pkexpressions': 3.0,
-	'debug_print_any_pkexpression_processed': false
-}
 
 
 
@@ -22,7 +17,7 @@ func load_config() -> Dictionary: ## Loads the config file. Returns default conf
 	var file := FileAccess.open(config_file_path, FileAccess.READ) # Open config file.
 	# If file doesn't exist or could not read from file, use default data.
 	if not file:
-		config_json = default_config
+		config_json = PK_Common.Schemas.config.latest
 		changed = true
 		printerr(Errors.default_config)
 	# If file found, read as text & close file.
@@ -32,15 +27,14 @@ func load_config() -> Dictionary: ## Loads the config file. Returns default conf
 
 	# If parsing JSON failed, use default config.
 	if not config_json:
-		config_json = default_config
+		config_json = PK_Common.Schemas.config.latest
 		changed = true
 		printerr(Errors.default_config)
 
 	# Check config_json for any missing values.
-	for key in default_config.keys():
-		if key in config_json.keys():
-			if typeof(default_config[key]) == typeof(config_json[key]): continue
-		config_json.set(key, default_config[key])
+	var config_json_matched := PK_Common.match_schema(config_json, PK_Common.Schemas.config.latest)
+	if config_json_matched.object != config_json:
+		config_json = config_json_matched.object
 		changed = true
 
 	# Update config file, if changed.
