@@ -3,7 +3,7 @@
 
 class_name PK_Config extends Node
 
-const config_file_path := 'res://addons/PowerKey/config.json'
+const Config_file_path := 'res://addons/PowerKey/config.json'
 const Errors := {
 	'failed_open_file': 'PowerKey: Unable to open file at "%s".',
 	'default_config': 'PowerKey: Unable to read config file. Using default config.'
@@ -14,7 +14,7 @@ const Errors := {
 func load_config() -> Dictionary: ## Loads the config file. Returns default config data if config file not found.
 	var config_json
 	var changed := false
-	var file := FileAccess.open(config_file_path, FileAccess.READ) # Open config file.
+	var file := FileAccess.open(Config_file_path, FileAccess.READ) # Open config file.
 	# If file doesn't exist or could not read from file, use default data.
 	if not file:
 		config_json = PK_Common.Schemas.config.latest
@@ -46,12 +46,13 @@ func load_config() -> Dictionary: ## Loads the config file. Returns default conf
 
 
 
-func set_config(config_data:Dictionary) -> void: ## Writes to the config file.
-	var file := FileAccess.open(config_file_path, FileAccess.WRITE)
-	file.store_string(str(config_data))
+func set_config(data:Dictionary) -> void: ## Writes to the config file.
+	var file := FileAccess.open(Config_file_path, FileAccess.WRITE)
+	file.store_string(str(data))
 	file.close()
 
+
 func update_config(key:String, value) -> void: ## Update the config file.
-	var config_data := load_config()
-	config_data[key] = value
-	set_config(config_data)
+	var data := load_config()
+	data[key] = value
+	set_config(data)
