@@ -9,6 +9,13 @@ A simple Godot-4.4 plug-in that implements easy-to-use dynamic translation. Also
 
 Refer to the in-editor guide to learn how to use PowerKey & all the features it has to offer.
 
+# Table of Contents:
+- [Installation](#how-to-install)
+- [Advantages](#what-are-the-advantages)
+- [Features](#features)
+  - [Translations](#translations)
+  - [PKExpressions](#pkexpressions)
+
 # How to install:
 If everything installed correctly, you should see a "PowerKey" tab near the upper-center of your Godot project, next to the "2D", "3D", "Script", "Game", & "AssetLib" tabs.
 ### From Asset Library:
@@ -42,40 +49,19 @@ Instead of doing that, you could simply add a line of text to the PKExpressions 
 
 This CAN be used for randomized translation but it is very much not limited to just translation. You can do anything with it that a GDScript can do, however, it is not meant to serve as a replacement for scripts! Use only for simple one-off tasks.
 ### Fast & efficient:
-You can rest assured that every system in PowerKey runs as smoothly as possible & has no noticeable effect on performance or RAM usage. The only time you may see issues with performance or memory is when you are using thousands of high impact PKExpressions. And if you aren't using the more advanced features of PowerKey, and just use it for translation, then you have absolutely nothing to worry about as there is effectively ZERO impact when using "Assign" PKExpressions, even at massive quantities.
-# TO-DO:
-### "Eval" ("V") PKExpression type:
-✅ **Milestone:** 1.5.0
+I work hard to keep everything running as smoothly as possible, I've spent hours optimizing for every microsecond when parsing & processing PKExpressions. Unless you are processing or parsing thousands of PKExpressions at the same time, you should not notice any performance or memory impact.
+As for Global Translations, you should use them in moderation & instead opt for "Assign" PKExpressions when possible.
+# Features:
+## Global Translations:
+Within the Resources script you can define translations that will run across every Node in your project when the project starts. These translations will check the specified Node property & compare it against a key, if the key matches the current value of the Node property, then the specified translation value gets applied to the Node property.
+This system works much like the built-in translation system in Godot, but built to work with the advantages that PowerKey provides.
 
-This PKExpression type will let you safely evaluate GDScript expressions with access to the Node's properties & Resource script's properties.
-This lets you perform calculations without needing to rely on the unsafe & more expensive "Execute" PKExpression type.
-The result is applied to the specified property on the Node. Just like the "Assign" PKExpression type, it is one-off so it only runs on the Node once.
-### Global Translations:
-**Milestone:** 1.5.0
-
-"Translations" field in the Configuration menu in which you can add/modifiy translations.
-
-Each translation has 3 properties:
-
-1. Property: the property on the Node to translate.
-2. Key: the key to look for in the Node's property before translation.
-3. Value: the property in the Resources Script to assign to the Node's property, if the key matches the Node's property (before translation).
-
-This works more like the translation system built-into Godot, but still provides all the advantages of PowerKey.
-### Visual PKExpression builder:
-✅ **Milestone:** 1.5.0
-
-A "Builder" button in the PKExpressions dropdown for the Inspector dock. Pressing the "Builder" button will show a pop-up window that makes it possible to add a PKexpression without knowing the syntax. It will also be very helpful for getting started learning the syntax.
-### Enhanced property access support:
-✅ **Milestone:** 1.5.0
-
-Currently, in "Link" & "Assign" PKExpressions you can only acess properties from objects of type `Dictionary`, `Object` & `Vector2`. I want to add the ability to access values from `Array`, `Rect2`, `Rect2i`, `Plane`, `Quaternion`, `AABB`, `Transform2D`, `Basis`, `Vector2i`, `Vector3`, `Vector3i`, `Vector4`, `Vector4i`, & `Color` types as well.
-### "Frequency" parameter for "Link" PKExpressions:
-✅ **Milestone:** 1.5.0
-
-A new parameter in Link expressions that allow you to define how frequently the value updates. By default the frequency is 0 (every frame), this parameter option will let users set the frequency to whatever they want, to better suite their need.
-Here is how this new frequency parameter would be used: `L:<property_name>,<frequency> <content>`. The frequency parameter will be optional.
-### Option to store parsed PKExpressions on Node:
-✅ **Milestone:** 1.5.0
-
-A button under the "PKExpressions" dropdown in the Inspector, which would store the parsed PKExpressions onto the Node to be used during runtime instead of parsing it during runtime. The reason this would not be the default is because parsed PKExpression data is larger in size than the raw expression, & parsing times are negligable unless parsing very large quantities at once. But having this as an option will let users sacrifice file size for runtime performance, which could be useful for scenes with thousands of Nodes with PKExpressions as none of them would need to be parsed.
+"Doesn't this make the Assign PKExpression obsolete?" No, the "Assign" PKExpression is meant to serve as a one-off translation for a single or couple of Nodes, while the Translations system is meant to handle repetitive &/or unified translations on many Nodes.
+## PKExpressions:
+PKExpressions are lines of code that can be written directly on a Node. It is meant for simple operations like assigning a value to a property of the Node but is capable of much more. There are currently 4 types of PKExpressions.
+- **Assign**: Simply sets the value of the Node's property to a value from the Resources script.
+- **Link**: Works just like the Assign type, except it runs every specified interval, allowing for dynamic changes.
+- **Execute**: Allows you to run raw GDScript code on the Node, which is not validated or controlled, so it must be used with caution.
+- **Eval**: Runs a GDExpression on the Node & assigns the result to a property on the Node. This allows for mathematical operations, value definitions, & even safe function calls. Unlike the Execute type, this is run in a controlled environment so you don't risk crashing your project during run-time.
+### PKExp Editor:
+The PKExpression Editor is accessible directly within the Godot Editor's Inspector panel under the `Node` category. It contains a text editor field with proper PKExpression & GDScript syntax highlighting. It also contains a PKExpression builder UI for those who are new to the plugin and aren't entirely familiar with the syntax.

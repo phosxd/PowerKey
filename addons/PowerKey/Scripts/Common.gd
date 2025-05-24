@@ -6,15 +6,14 @@ const Schemas:Dictionary = {
 			'version': '1',
 			'resources_script_path': '',
 			'max_cached_pkexpressions': 3.0,
-			'translations': [],
 			'debug_print_any_pkexpression_processed': false,
 		},
 	},
-	'translation_entry': {
-		'property': '',
-		'key': '',
-		'value': '',
-	},
+	'translation_entry': [
+		'',
+		null,
+		null,
+	],
 }
 
 
@@ -22,13 +21,31 @@ static func match_schema(object:Dictionary, schema:Dictionary) -> Dictionary[Str
 	var different:bool = false
 	for key in schema:
 		if key in object:
-			if typeof(schema[key]) == typeof(object[key]): continue
+			if typeof(schema[key]) == typeof(object[key]) || schema[key] == null: continue
 		object.set(key, schema[key])
 		different = true
 
 	return {
 		'different': different,
 		'object': object,
+	}
+
+
+static func match_array_schema(object:Array, schema:Array) -> Dictionary[String,Variant]: ## Tests if the object matches the schema. Any mismatched values of the object will be set to the schema's default.
+	var duped_object := object.duplicate() # Use duplicated array so it doesn't affect the original array.
+	var different:bool = false
+	var object_size:int = duped_object.size()
+	var index:int = -1
+	for item in schema:
+		index += 1
+		if index < object_size:
+			if typeof(item) == typeof(duped_object[index]) || item == null: continue
+		duped_object.append(item)
+		different = true
+
+	return {
+		'different': different,
+		'object': duped_object,
 	}
 
 

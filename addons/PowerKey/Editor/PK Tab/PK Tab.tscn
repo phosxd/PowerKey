@@ -1,11 +1,7 @@
-[gd_scene load_steps=10 format=3 uid="uid://dq2ev084rdi4r"]
+[gd_scene load_steps=7 format=3 uid="uid://dq2ev084rdi4r"]
 
 [ext_resource type="Script" uid="uid://dukqioilv2187" path="res://addons/PowerKey/Editor/PK Tab/PK Tab.gd" id="1_bnfcr"]
 [ext_resource type="Texture2D" uid="uid://cj6hwjccreqr7" path="res://addons/PowerKey/Icons/github.svg" id="2_5g1pf"]
-[ext_resource type="Texture2D" uid="uid://fiiuuyh8hx0d" path="res://addons/PowerKey/Icons/MoveUp.svg" id="3_ydqa3"]
-[ext_resource type="Texture2D" uid="uid://1oigsvbvcinq" path="res://addons/PowerKey/Icons/MoveDown.svg" id="4_5cbgb"]
-[ext_resource type="Texture2D" uid="uid://djlv2ua6ahdju" path="res://addons/PowerKey/Icons/Remove.svg" id="5_p1sc6"]
-[ext_resource type="Texture2D" uid="uid://bdkpq01aevhqb" path="res://addons/PowerKey/Icons/Add.svg" id="6_5aobs"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_07ncw"]
 font_size = 26
@@ -18,6 +14,8 @@ shadow_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_fjtuu"]
 font_color = Color(1, 0, 0, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ppexj"]
 
 [node name="PK Tab" type="VBoxContainer"]
 anchors_preset = 15
@@ -37,11 +35,9 @@ layout_mode = 2
 current_tab = 0
 clip_tabs = false
 scrolling_enabled = false
-tab_count = 3
+tab_count = 2
 tab_0/title = "Configure"
-tab_1/title = "Translations"
-tab_1/disabled = true
-tab_2/title = "Guide"
+tab_1/title = "Guide"
 
 [node name="Version" type="Label" parent="Top Bar"]
 layout_mode = 2
@@ -157,87 +153,10 @@ layout_mode = 2
 text = "Resources Script Path not found."
 label_settings = SubResource("LabelSettings_fjtuu")
 
-[node name="Translations" type="VBoxContainer" parent="Tabs"]
-visible = false
-layout_mode = 2
-metadata/_tab_index = 1
-
-[node name="Label" type="Label" parent="Tabs/Translations"]
-layout_mode = 2
-text = "Unfinished and non-functional at the moment."
-
-[node name="Actions" type="HFlowContainer" parent="Tabs/Translations"]
-layout_mode = 2
-
-[node name="SBox" type="ScrollContainer" parent="Tabs/Translations"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="VBox" type="VBoxContainer" parent="Tabs/Translations/SBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="Item" type="HBoxContainer" parent="Tabs/Translations/SBox/VBox"]
-layout_mode = 2
-
-[node name="Property" type="LineEdit" parent="Tabs/Translations/SBox/VBox/Item"]
-layout_mode = 2
-tooltip_text = "The property name on the Node to set the value on. 
-
-Only shallow property access supported. "
-placeholder_text = "Property"
-max_length = 30
-expand_to_text_length = true
-caret_blink = true
-
-[node name="Sep 1" type="VSeparator" parent="Tabs/Translations/SBox/VBox/Item"]
-layout_mode = 2
-
-[node name="Key" type="LineEdit" parent="Tabs/Translations/SBox/VBox/Item"]
-layout_mode = 2
-tooltip_text = "The variable from the Resources script to use as the key."
-placeholder_text = "Key"
-max_length = 30
-expand_to_text_length = true
-caret_blink = true
-
-[node name="Sep 2" type="VSeparator" parent="Tabs/Translations/SBox/VBox/Item"]
-layout_mode = 2
-
-[node name="Value" type="LineEdit" parent="Tabs/Translations/SBox/VBox/Item"]
-layout_mode = 2
-tooltip_text = "The variable from the Resources script to use as the value to set on the Node's property, if the current Node's property value matches the key."
-placeholder_text = "Value"
-max_length = 30
-expand_to_text_length = true
-caret_blink = true
-
-[node name="Sep 3" type="VSeparator" parent="Tabs/Translations/SBox/VBox/Item"]
-layout_mode = 2
-
-[node name="Button Move Up" type="Button" parent="Tabs/Translations/SBox/VBox/Item"]
-layout_mode = 2
-size_flags_horizontal = 10
-icon = ExtResource("3_ydqa3")
-
-[node name="Button Move Down" type="Button" parent="Tabs/Translations/SBox/VBox/Item"]
-layout_mode = 2
-icon = ExtResource("4_5cbgb")
-
-[node name="Button Delete" type="Button" parent="Tabs/Translations/SBox/VBox/Item"]
-layout_mode = 2
-icon = ExtResource("5_p1sc6")
-
-[node name="Button Add" type="Button" parent="Tabs/Translations/SBox/VBox"]
-layout_mode = 2
-icon = ExtResource("6_5aobs")
-icon_alignment = 1
-
 [node name="Guide" type="VBoxContainer" parent="Tabs"]
 visible = false
 layout_mode = 2
-metadata/_tab_index = 2
+metadata/_tab_index = 1
 
 [node name="Tabs" type="TabContainer" parent="Tabs/Guide"]
 layout_mode = 2
@@ -255,11 +174,53 @@ To use PowerKey, you will need to create a GDScript file to hold all your variab
 [ol] Create a new GDScript file that extends Node.
  In your Script, load any & all resources you plan to use. You can also run any logic needed in the \"_ready\" function, just make sure your variables are defined in the Scripts globals if you wan't to use them.
  Copy your Script file's path then paste it into the \"Resource Script Path\" text box.
- All done! Now you can access all variables defined in that script.[/ol]
-
-[font_size=30]Writing PKExpressions:[/font_size]
-Read through the \"Expressions\" guide page to understand how PKExpressions work and how to implement them. If you still don't understand how everything works, please take a look at the example scene that utilizes PKExpressions. Example scene is located in the PowerKey addon directory under \"Example\"."
+ All done! Now you can access all variables defined in that script.[/ol]"
 metadata/_tab_index = 0
+
+[node name="Global Translations" type="ScrollContainer" parent="Tabs/Guide/Tabs"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="VBox" type="VBoxContainer" parent="Tabs/Guide/Tabs/Global Translations"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="1" type="RichTextLabel" parent="Tabs/Guide/Tabs/Global Translations/VBox"]
+layout_mode = 2
+focus_mode = 2
+bbcode_enabled = true
+text = "In the Resources script you can define a variable with the name [color=slate_gray]TRANSLATIONS[/color] which will be used by PowerKey to translate values across all Nodes.
+
+The [color=slate_gray]TRANSLATIONS[/color] variable should follow the following format."
+fit_content = true
+scroll_active = false
+selection_enabled = true
+drag_and_drop_selection_enabled = false
+
+[node name="guide_gtr_layout_code1" type="TextEdit" parent="Tabs/Guide/Tabs/Global Translations/VBox"]
+unique_name_in_owner = true
+self_modulate = Color(0.74978, 0.74978, 0.74978, 1)
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ppexj")
+text = "@onready var TRANSLATIONS:Array[Array] = [
+	[property_name:String, key:Variant, value:Variant],
+]"
+editable = false
+scroll_fit_content_height = true
+draw_tabs = true
+
+[node name="2" type="RichTextLabel" parent="Tabs/Guide/Tabs/Global Translations/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+bbcode_enabled = true
+text = "The Node's property (specified in [color=slate_gray]property_name[/color]) is set to the [color=slate_gray]value[/color] only if the [color=slate_gray]key[/color] matches the current value of the Node's property."
+scroll_active = false
+selection_enabled = true
+drag_and_drop_selection_enabled = false
 
 [node name="PKExpressions" type="RichTextLabel" parent="Tabs/Guide/Tabs"]
 visible = false
@@ -346,7 +307,7 @@ Valid?
  No: [color=slate_gray]V 1+1[/color]."
 selection_enabled = true
 drag_and_drop_selection_enabled = false
-metadata/_tab_index = 1
+metadata/_tab_index = 2
 
 [connection signal="tab_changed" from="Top Bar/Tab Bar" to="." method="_on_tab_bar_tab_changed"]
 [connection signal="pressed" from="Top Bar/Button Github" to="." method="_on_button_github_pressed"]

@@ -1,4 +1,8 @@
 extends Node
+# Define translation table. Can use any variables defined in the script.
+@onready var TRANSLATIONS:Array[Array] = [
+	['text', 'example_key', 'Example Text :)'], # Node property (String), Key to match to the property (Variant), Value to set the property to if Key matches (Variant).
+]
 # Define some variables to use.
 const explanation := 'In this example we are setting every single label\'s text & label settings using PowerKey PKExpressions. There is even a real-time FPS counter running! All while there are 0 script files attached to the scene or any of it\'s Nodes.'
 const titles := {'a':'Whoah! A title!', 'b':'ANOTHER TITLE?! No way..'}

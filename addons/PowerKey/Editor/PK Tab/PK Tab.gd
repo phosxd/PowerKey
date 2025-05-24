@@ -14,6 +14,7 @@ func init() -> void:
 	max_cached_pkexpressions_spin_box = get_node('Tabs/Configure/Max Cached PKExpressions/SpinBox')
 	warning_tag = get_node('Tabs/Configure/Warning Tag')
 	guide_tabs = get_node('Tabs/Guide/Tabs')
+	%'guide_gtr_layout_code1'.syntax_highlighter = GDScriptSyntaxHighlighter.new()
 	# Scale button icons.
 	var editor_scale := EditorInterface.get_editor_scale()
 	%'Button Github'.custom_minimum_size = base_icon_size*editor_scale
