@@ -2,8 +2,7 @@
 
 extends Node
 var PKEE := PK_EE.new()
-var PKConfig := PK_Config.new()
-var Config := PKConfig.load_config()
+var Config := PK_Config.load_config()
 @onready var Resources_script = load(Config.resources_script_path) if FileAccess.file_exists(Config.resources_script_path) else null
 var Resources
 var Resources_translations:Array

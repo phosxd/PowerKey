@@ -1,8 +1,5 @@
-# This script loads & manages the configuration, from a config text file.
-# New instance should be created if used (call `.new`).
-
+# This script loads & manages persistent plugin data, from a config json file.
 class_name PK_Config extends Node
-
 const Config_file_path := 'res://addons/PowerKey/config.json'
 const Errors := {
 	'failed_open_file': 'PowerKey: Unable to open file at "%s".',
@@ -10,8 +7,7 @@ const Errors := {
 }
 
 
-
-func load_config() -> Dictionary: ## Loads the config file. Returns default config data if config file not found.
+static func load_config() -> Dictionary: ## Loads the config file. Returns default config data if config file not found.
 	var config_json
 	var changed := false
 	var file := FileAccess.open(Config_file_path, FileAccess.READ) # Open config file.
@@ -46,13 +42,13 @@ func load_config() -> Dictionary: ## Loads the config file. Returns default conf
 
 
 
-func set_config(data:Dictionary) -> void: ## Writes to the config file.
+static func set_config(data:Dictionary) -> void: ## Writes to the config file.
 	var file := FileAccess.open(Config_file_path, FileAccess.WRITE)
 	file.store_string(str(data))
 	file.close()
 
 
-func update_config(key:String, value) -> void: ## Update the config file.
+static func update_config(key:String, value) -> void: ## Update the config file.
 	var data := load_config()
 	data[key] = value
 	set_config(data)

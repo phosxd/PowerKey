@@ -1,7 +1,7 @@
 @tool
 extends VBoxContainer
 const base_icon_size := Vector2(32,0)
-var Config:PK_Config
+var plugin_cfg := ConfigFile.new()
 var resources_script_path_text_box:Node
 var max_cached_pkexpressions_spin_box:Node
 var warning_tag:Node
@@ -9,17 +9,18 @@ var guide_tabs:Node
 
 func init() -> void:
 	# Initialize values.
-	Config = PK_Config.new()
 	resources_script_path_text_box = get_node('Tabs/Configure/Resources Path/Text Box')
 	max_cached_pkexpressions_spin_box = get_node('Tabs/Configure/Max Cached PKExpressions/SpinBox')
 	warning_tag = get_node('Tabs/Configure/Warning Tag')
 	guide_tabs = get_node('Tabs/Guide/Tabs')
+	plugin_cfg.load('res://addons/PowerKey/plugin.cfg')
+	%'Version Label'.text = plugin_cfg.get_value('plugin','version')
 	%'guide_gtr_layout_code1'.syntax_highlighter = GDScriptSyntaxHighlighter.new()
 	# Scale button icons.
 	var editor_scale := EditorInterface.get_editor_scale()
 	%'Button Github'.custom_minimum_size = base_icon_size*editor_scale
 	# Set UI values based on config.
-	var config := Config.load_config()
+	var config := PK_Config.load_config()
 	resources_script_path_text_box.text = config.resources_script_path
 	max_cached_pkexpressions_spin_box.value = config.max_cached_pkexpressions
 	check_resources_script_path()
@@ -61,13 +62,13 @@ func _on_resources_script_path_text_changed() -> void:
 	# Remove new lines if added.
 	text = text.replace('\n','')
 	# Update config, then verify path.
-	Config.update_config('resources_script_path', text)
+	PK_Config.update_config('resources_script_path', text)
 	check_resources_script_path()
 	# Update Text Box text if different.
 	if text != $'Tabs/Configure/Resources Path/Text Box'.text: $'Tabs/Configure/Resources Path/Text Box'.text = text
 
 func _on_max_cached_pkexpressions_value_changed(value:float) -> void:
-	Config.update_config('max_cached_pkexpressions', int(value))
+	PK_Config.update_config('max_cached_pkexpressions', int(value))
 
 func _on_debug_option_1_toggled(toggled_on:bool) -> void:
-	Config.update_config('debug_print_any_pkexpression_processed', toggled_on)
+	PK_Config.update_config('debug_print_any_pkexpression_processed', toggled_on)

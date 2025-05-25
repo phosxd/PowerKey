@@ -28,7 +28,7 @@ func _ready() -> void:
 
 func init(raw:StringName, stored_parsed:Array[Dictionary]) -> void:
 	# Initialize stuff.
-	var config := PK_Config.new().load_config()
+	var config := PK_Config.load_config()
 	PKEE.init(config, {})
 	$'%Text Editor/Syntax Highlighter'.init(self)
 	# Set PKExpressions.

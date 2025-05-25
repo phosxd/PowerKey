@@ -1,4 +1,4 @@
-A simple Godot-4.4 plug-in that implements easy-to-use dynamic translation. Also offers GDScript execution on Nodes, without needing to attach a Script.
+Godot-4.4 plug-in that implements easy-to-use advanced & dynamic translation. Also offers GDScript execution on Nodes, without needing to attach a Script.
 
 ||PowerKey|Standard Translation|
 |--|--|--
@@ -13,7 +13,7 @@ Refer to the in-editor guide to learn how to use PowerKey & all the features it 
 - [Installation](#how-to-install)
 - [Advantages](#what-are-the-advantages)
 - [Features](#features)
-  - [Translations](#translations)
+  - [Translations](#global-translations)
   - [PKExpressions](#pkexpressions)
 
 # How to install:
@@ -65,3 +65,17 @@ PKExpressions are lines of code that can be written directly on a Node. It is me
 - **Eval**: Runs a GDExpression on the Node & assigns the result to a property on the Node. This allows for mathematical operations, value definitions, & even safe function calls. Unlike the Execute type, this is run in a controlled environment so you don't risk crashing your project during run-time.
 ### PKExp Editor:
 The PKExpression Editor is accessible directly within the Godot Editor's Inspector panel under the `Node` category. It contains a text editor field with proper PKExpression & GDScript syntax highlighting. It also contains a PKExpression builder UI for those who are new to the plugin and aren't entirely familiar with the syntax.
+
+# To-Do:
+## Revamp Config System:
+**Milestone:** v2
+Don't store the plugin's configuration data in `config.json`, handling it with `PK_Config` class. Instead integrate with the `plugin.cfg` file & use the `ConfigFile` class already provided by Godot.
+## Combine `Singleton.gd` & `plugin.gd`:
+**Milestone:** v2
+Combining these 2 scripts will make it easier to work with in-code & make the whole plugin accessible to code anywhere in the project.
+## Hard-Code PKExp Syntax Highlighting:
+**Milestone:** v2
+Currently, the PKExpression Engine has to generate the highlighting data during parsing, slowing down the parser. Instead we can try to use a hard-coded syntax highlighter that doesn't rely on the parser.
+## Recursive value setting in PKExps:
+**Milestone:** v2
+With PKExpressions, you can only set values to top-level Node properties. E.g. `<Node>.size` or `<Node>.position`. Currently something like `<Node>.size.x` is impossible, which is something I need to fix. It doesn't seem Godot provides a convenient way to do this which is why this wasn't implemented in the first place.

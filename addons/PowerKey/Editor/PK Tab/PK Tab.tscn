@@ -39,10 +39,10 @@ tab_count = 2
 tab_0/title = "Configure"
 tab_1/title = "Guide"
 
-[node name="Version" type="Label" parent="Top Bar"]
+[node name="Version Label" type="Label" parent="Top Bar"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 10
-text = "v1.5.0"
 
 [node name="Button Github" type="Button" parent="Top Bar"]
 unique_name_in_owner = true
