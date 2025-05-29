@@ -57,7 +57,7 @@ func evaluate_node_tree(node:Node) -> void: ## Recursively evaluate all Nodes un
 
 
 func evaluate_node_tr(node:Node) -> void: ## Run translations on the Node.
-	for tr_data:Array in Resources.TRANSLATIONS:
+	for tr_data:Array in Resources_translations:
 		if PK_Common.match_array_schema(tr_data, PK_Common.Schemas.translation_entry).different:
 			printerr('PowerKey GTR: Invalid translation entry: %s' % str(tr_data))
 			continue
