@@ -26,6 +26,7 @@ func _ready() -> void:
 		%'Button Builder'.remove_theme_constant_override('icon_max_width') # Remove current override.
 		%'Button Builder'.add_theme_constant_override('icon_max_width', base_builder_icon_size*editor_scale) # Add scaled override.
 
+
 func init(raw:StringName, stored_parsed:Array[Dictionary]) -> void:
 	# Initialize stuff.
 	var config := PK_Config.load_config()
@@ -37,6 +38,7 @@ func init(raw:StringName, stored_parsed:Array[Dictionary]) -> void:
 	Raw = raw
 	Stored_parsed = stored_parsed
 	_on_text_editor_text_changed()
+
 
 func set_text(text:String) -> void:
 	%'Text Editor'.text = text

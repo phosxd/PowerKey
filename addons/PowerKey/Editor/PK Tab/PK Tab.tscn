@@ -202,7 +202,6 @@ drag_and_drop_selection_enabled = false
 
 [node name="guide_gtr_layout_code1" type="TextEdit" parent="Tabs/Guide/Tabs/Global Translations/VBox"]
 unique_name_in_owner = true
-self_modulate = Color(0.74978, 0.74978, 0.74978, 1)
 layout_mode = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_ppexj")
 text = "@onready var TRANSLATIONS:Array[Array] = [
