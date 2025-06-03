@@ -1,4 +1,4 @@
-class_name PK_Config extends Node
+class_name PK_Config
 ## Handles loading & saving plugin configuration in `config.json`.
 
 const Config_file_path := 'res://addons/PowerKey/config.json'

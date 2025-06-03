@@ -48,6 +48,7 @@ size_flags_horizontal = 10
 unique_name_in_owner = true
 custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
+tooltip_text = "https://github.com/phosxd/PowerKey"
 icon = ExtResource("2_5g1pf")
 expand_icon = true
 

@@ -1,11 +1,14 @@
 @tool
-class_name PK_Common extends Node
+class_name PK_Common
+## Holds functions and constants, that are used across various scripts.
+
+## Dictionary or Array schemas. A `null` value represents something that can be anything.
 const Schemas:Dictionary = {
 	'config': {
 		'latest': {
 			'version': '1',
 			'resources_script_path': '',
-			'max_cached_pkexpressions': 3.0,
+			'max_cached_pkexpressions': 3,
 			'debug_print_any_pkexpression_processed': false,
 		},
 	},

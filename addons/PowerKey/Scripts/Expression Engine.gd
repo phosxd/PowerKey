@@ -1,7 +1,4 @@
-# This script handles all proccessing & parsing of PKExpressions.
-# New instance should be created if used (call `.new`).
-
-class_name PK_EE extends Node
+class_name PK_EE
 ## Class for parsing, caching, and finally executing PowerKey Expressions.
 ## Cache is stored per-instance. Everything should be done on a single instance to avoid unnecessary RAM usage.
 
@@ -69,8 +66,8 @@ const Link_timer_name := '_pk_link_timer'
 var Execute_script:Script = GDScript.new()
 const Execute_script_code_template:StringName = 'static func %s(S, PK) -> void:\n	S=S; PK=PK;\n%s'
 
-var cached_pkexps:Dictionary[StringName,Dictionary] = {}
-var cached_pkexps_order:Array[StringName] = []
+var cached_pkexps:Dictionary[int,Dictionary] = {}
+var cached_pkexps_order:Array[int] = []
 
 var Config
 var Resources
@@ -91,25 +88,25 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 		return {'error':999}
 	if text.strip_edges() == '':
 		return {'error':10,'current_char':0}
-	# Check cache, return cached result is available.
+	# If during run-time, check cache then return cached result is available.
+	var hashed_text:int = hash(text) # Hash the text.
 	if not Engine.is_editor_hint():
-		if cached_pkexps.has(text):
-			return cached_pkexps[text]
+		if cached_pkexps.has(hashed_text):
+			return cached_pkexps[hashed_text]
 	# Define the parsing state & it's data.
 	var ps:Dictionary[StringName,Variant] = { ## The parsing state.
-		'error': 0, # Parse error. 0 = OK.
-		'current_char': 0,
-		'char_highlight_data': PackedInt32Array(), # Represents the highlighting mode for each character in the raw text.
-		'type': -1, # The expression type.
-		'parameters': PackedStringArray(), # The expression parameters.
-		'content': PackedStringArray(), # The expression content.
-		'stage': Parse_stages.TYPE, # The parsing stage.
-		'buffers': [null,null], # The current stage's temporary data.
+		&'error': 0, # Parse error. 0 = OK.
+		&'current_char': 0,
+		&'char_highlight_data': PackedInt32Array(), # Represents the highlighting mode for each character in the raw text.
+		&'type': -1, # The expression type.
+		&'parameters': PackedStringArray(), # The expression parameters.
+		&'content': PackedStringArray(), # The expression content.
+		&'stage': Parse_stages.TYPE, # The parsing stage.
+		&'buffers': [null,null], # The current stage's temporary data.
 	}
 	# Set buffers.
 	_reset_parse_state_buffers(ps)
 
-	#var start := Time.get_ticks_usec()
 	for char in String(text):
 		if ps.error != 0: break # Stop if there was an error during the previous iteration.
 		ps.current_char += 1
@@ -117,30 +114,25 @@ func parse_pkexp(text:StringName): ## Parses a PowerKey expression. Returns expr
 			Parse_stages.TYPE: _parse_stage_type(char, ps)
 			Parse_stages.PARAMS: _parse_stage_parameters(char, ps)
 			Parse_stages.CONTENT: _parse_stage_content(char, ps)
-	#print(Time.get_ticks_usec()-start)
 
 	# Clear buffers.
-	ps.buffers.clear()
+	ps.erase(&'buffers')
 	# Error checks.
 	if ps.error != 0: pass
-	elif ps.type == -1:
-		ps.error = 5
-	elif ps.content.size() == 0:
-		ps.error = 6
+	elif ps.type == -1: ps.error = 5
+	elif ps.content.size() == 0: ps.error = 6
 	elif ps.type == ExpTypes.EVAL:
 		var expression := Expression.new()
 		var err:int = expression.parse(''.join(ps.content), ['S','PK'])
-		if err != 0:
-			ps.error = 11
-	# Cache expression for reuse.
+		if err != 0: ps.error = 11
+	# Cache expression for reuse, only during run-time.
 	if not Engine.is_editor_hint():
 		if Config.max_cached_pkexpressions > 0:
-			cached_pkexps[text] = ps
-			cached_pkexps_order.append(text)
+			cached_pkexps[hashed_text] = ps
+			cached_pkexps_order.append(hashed_text)
 			# If over the max, delete oldest cache entry.
 			if cached_pkexps_order.size() > Config.max_cached_pkexpressions:
-				var oldest_key:StringName = cached_pkexps_order.pop_front()
-				cached_pkexps.erase(oldest_key)
+				cached_pkexps.erase(cached_pkexps_order.pop_front())
 	# Return the results.
 	return ps
 
@@ -171,7 +163,7 @@ func _parse_stage_type(char:String, ps:Dictionary) -> bool: ## Parses the "type"
 		# Next stage.
 		ps.stage = Parse_stages.CONTENT
 		_reset_parse_state_buffers(ps)
-		
+
 	# Add to expression_type.
 	else:
 		ps.char_highlight_data.append(CharHighlightModes.exp_type)
@@ -427,7 +419,7 @@ func __set_value(split_varpath:PackedStringArray, node:Node, value, raw_expressi
 		else:
 			PK_Common._get_value_error_helper_1(variable, node, raw_expression)
 			return
-	
+
 	# Update variable type.
 	variable_type = typeof(variable)
 
