@@ -1,6 +1,6 @@
 # This script is the core of the whole plugin during run-time, it can also be accessed by any other scripts in the project as the `PowerKey` singleton.
-
 extends Node
+
 var PKEE := PK_EE.new()
 var Config := PK_Config.load_config()
 @onready var Resources_script = load(Config.resources_script_path) if FileAccess.file_exists(Config.resources_script_path) else null

@@ -2,6 +2,9 @@
 # New instance should be created if used (call `.new`).
 
 class_name PK_EE extends Node
+## Class for parsing, caching, and finally executing PowerKey Expressions.
+## Cache is stored per-instance. Everything should be done on a single instance to avoid unnecessary RAM usage.
+
 enum ExpTypes {ASSIGN,LINK,EXECUTE,EVAL}
 const ExpType_values:Array[StringName] = ['A','L','E','V'] ## ExpType values as Strings instead of enum int.
 const Lowercases:Dictionary[StringName,StringName] = {'A':'a','B':'b','C':'c','D':'d','E':'e','F':'f','G':'g','H':'h','I':'i','J':'j','K':'k','L':'l','M':'m','N':'n','O':'o','P':'p','Q':'q','S':'s','T':'t','U':'u','V':'v','W':'w','X':'x','Y':'y','Z':'z'} ## Performs better than using `.to_lower`.

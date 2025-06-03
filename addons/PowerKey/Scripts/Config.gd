@@ -1,5 +1,6 @@
-# This script loads & manages persistent plugin data, from a config json file.
 class_name PK_Config extends Node
+## Handles loading & saving plugin configuration in `config.json`.
+
 const Config_file_path := 'res://addons/PowerKey/config.json'
 const Errors := {
 	'failed_open_file': 'PowerKey: Unable to open file at "%s".',
