@@ -71,10 +71,6 @@ The PKExpression Editor is accessible directly within the Godot Editor's Inspect
 **Milestone:** v2
 
 Don't store the plugin's configuration data in `config.json`, handling it with `PK_Config` class. Instead integrate with the `plugin.cfg` file & use the `ConfigFile` class already provided by Godot.
-## Combine `Singleton.gd` & `plugin.gd`:
-**Milestone:** v2
-
-Combining these 2 scripts will make it easier to work with in-code & make the whole plugin accessible to code anywhere in the project.
 ## Recursive value setting in PKExps:
 **Milestone:** v2
 
