@@ -37,11 +37,14 @@ func _make_visible(visible:bool) -> void:
 	if PowerKey_tab_instance:
 		PowerKey_tab_instance.visible = visible
 
+
 func _has_main_screen() -> bool:
 	return true
 
+
 func _get_plugin_name():
 	return 'PowerKey'
+
 
 func _get_plugin_icon() -> Texture2D: ## Return scaled plugin icon.
 	var image := Icon.get_image() # Get base image from Icon.
